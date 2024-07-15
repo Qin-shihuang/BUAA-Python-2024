@@ -156,8 +156,9 @@ class LoginRegisterWindowUI(QWidget):
 
 # MARK: - Logic
 class LoginRegisterWindow(LoginRegisterWindowUI):
-    def __init__(self):
+    def __init__(self, login_callback=None):
         super().__init__()
+        self.login_callback = login_callback
         self.login_button.clicked.connect(self.login_button_clicked)
         self.register_button.clicked.connect(self.register_button_clicked)
         self.register_password_input.textChanged.connect(self.update_password_requirements)
@@ -175,8 +176,9 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
         else:
             success, message = try_login(self.login_username_input.text(), self.login_password_input.text())
             if success:
-                # TODO： Open main window
-                print("Login successful")
+                if self.login_callback:
+                    self.login_callback()
+                    self.close()
                 return
             else:
                 error_text = message
@@ -235,7 +237,6 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
         self.password_requirements_label.setText(style)
 
 def try_login(username, password):
-    # TODO: Connect to backend
     return AccountManager().login(username, password)
 
 def try_register(username, password):
