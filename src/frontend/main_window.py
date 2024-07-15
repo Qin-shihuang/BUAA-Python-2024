@@ -12,6 +12,6 @@ class MainWindowUI(QMainWindow):
     def __init__(self):
         super().__init__()
         
-    def show(self):
-        super().show()
-        
+class MainWindow(MainWindowUI):
+    def __init__(self):
+        super().__init__()

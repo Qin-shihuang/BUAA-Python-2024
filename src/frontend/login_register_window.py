@@ -2,14 +2,12 @@
 Author: Iz0
 Date: 2024-07-12
 License: MIT License
-Description: Just a test file, NOT FOR PRODUCTION
+Description: Login window module
 """
 
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QStackedWidget, QFormLayout
-from PyQt5.QtGui import QIcon, QFont
-from PyQt5.QtCore import Qt, QPropertyAnimation, QRect
-
-from backend.account import AccountManager
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel, QStackedWidget
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt
 
 # MARK: - UI
 class LoginRegisterWindowUI(QWidget):
@@ -156,16 +154,14 @@ class LoginRegisterWindowUI(QWidget):
 
 # MARK: - Logic
 class LoginRegisterWindow(LoginRegisterWindowUI):
-    def __init__(self, login_callback=None):
+    def __init__(self, accountManager=None, loginCallback=None):
         super().__init__()
-        self.login_callback = login_callback
+        self.account_manager = accountManager
+        self.login_callback = loginCallback
         self.login_button.clicked.connect(self.login_button_clicked)
         self.register_button.clicked.connect(self.register_button_clicked)
         self.register_password_input.textChanged.connect(self.update_password_requirements)
         self.register_password_repeat_input.focusOutEvent = self.register_password_repeat_lost_focus
-            
-    def show(self):
-        super().show()
     
     def login_button_clicked(self):
         error_text = ""
@@ -174,16 +170,19 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
         elif self.login_password_input.text() == "":
             error_text = "Password cannot be empty."
         else:
-            success, message = try_login(self.login_username_input.text(), self.login_password_input.text())
-            if success:
-                if self.login_callback:
-                    self.login_callback()
-                    self.close()
-                return
+            if self.account_manager:
+                success, message = self.account_manager.login(self.login_username_input.text(), self.login_password_input.text())
+                if success:
+                    if self.login_callback:
+                        self.login_callback()
+                        self.close()
+                    return
+                else:
+                    error_text = message
             else:
-                error_text = message
+                error_text = "AccountManager not registered!"
         self.login_error_label.setStyleSheet("color: red")
-        self.login_error_label.setText(message)
+        self.login_error_label.setText(error_text)
 
             
         
@@ -200,14 +199,17 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
         elif self.register_password_input.text() != self.register_password_repeat_input.text():
             error_text = "Passwords do not match."
         else:
-            success, message = try_register(self.register_username_input.text(), self.register_password_input.text())
-            if success:
-                self.stacked_widget.setCurrentIndex(0)
-                self.login_error_label.setStyleSheet("color: green")
-                self.login_error_label.setText(f"Registered successfully! Please login.")
-                self.login_username_input.setText(self.register_username_input.text())
+            if self.account_manager:
+                success, message = self.account_manager.register(self.register_username_input.text(), self.register_password_input.text())
+                if success:
+                    self.stacked_widget.setCurrentIndex(0)
+                    self.login_error_label.setStyleSheet("color: green")
+                    self.login_error_label.setText(f"Registered successfully! Please login.")
+                    self.login_username_input.setText(self.register_username_input.text())
+                else:
+                    error_text = message
             else:
-                error_text = message
+                error_text = "AccountManager not registered!"
         self.register_error_label.setStyleSheet("color: red")
         self.register_error_label.setText(error_text)
 
@@ -235,12 +237,6 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
             style += f'<p style="color:{color}; line-height: 1.0; margin: 0 0 2px 0">{indicator} {req}</p>'
 
         self.password_requirements_label.setText(style)
-
-def try_login(username, password):
-    return AccountManager().login(username, password)
-
-def try_register(username, password):
-    return AccountManager().register(username, password)
 
 def check_password_validity(password):
     if len(password) < 8:
