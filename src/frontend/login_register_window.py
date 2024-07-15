@@ -67,7 +67,6 @@ class LoginRegisterWindowUI(QWidget):
         
         self.login_error_label = QLabel()
         self.login_error_label.setObjectName("error_label")
-        self.login_error_label.setStyleSheet("color: red")
         login_layout.addWidget(self.login_error_label)
         
         self.login_button = QPushButton("Login")
@@ -127,25 +126,6 @@ class LoginRegisterWindowUI(QWidget):
         layout.addWidget(self.stacked_widget)
         self.setLayout(layout)
         
-        
-        # self.response_label = QLabel()
-        # self.response_label.setStyleSheet("color: red")
-
-        # form_layout = QFormLayout()
-        # self.username_input = QLineEdit()
-        # self.password_input = QLineEdit()
-        # self.password_input.setEchoMode(QLineEdit.Password)
-
-
-        # self.login_button = QPushButton("Login")
-        # form_layout.addRow("Username", self.username_input)
-        # form_layout.addRow("Password", self.password_input)
-        # self.layout.addLayout(form_layout)
-        # self.layout.addWidget(self.response_label)
-        # self.layout.addWidget(self.login_button)
-        # # TODO: register
-        # self.setLayout(self.layout)
-        
     def center(self):
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
@@ -166,22 +146,31 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
         super().__init__()
         self.login_button.clicked.connect(self.login_button_clicked)
         self.register_button.clicked.connect(self.register_button_clicked)
-        
+        self.register_password_repeat_input.focusOutEvent = self.register_password_repeat_lost_focus
+            
     def show(self):
         super().show()
     
     def login_button_clicked(self):
         self.login_error_label.setText(f"Logging in as {self.login_username_input.text()}...")
         
-    def register_button_clicked(self):
-        self.register_error_label.setText(f"Registering as {self.register_username_input.text()}...")
+    def register_button_clicked(self):  
+        self.login_error_label.setStyleSheet("color: red")
+        # self.register_error_label.setText(f"Registering as {self.register_username_input.text()}...")
 
+    def register_password_repeat_lost_focus(self, event):
+        if self.register_password_input.text() != self.register_password_repeat_input.text():
+            self.register_error_label.setText("Passwords do not match")
+        else:
+            self.register_error_label.setText("")
 
 
 def try_login(username, password):
     # TODO: Connect to backend
-    return True
+    return (True, "Success")
 
+def try_register(username, password):
+    return (True, "Success")
 # For debugging
 if __name__ == "__main__":
     app = QApplication([])
