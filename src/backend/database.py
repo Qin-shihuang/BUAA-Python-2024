@@ -22,11 +22,16 @@ class Database:
         self.conn.close()
         
     def create(self, table_name, columns):
+        # check if the table already exists
+        query = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'"
+        if self.query(query):
+            return
         columns = ", ".join(columns)
         self.cursor.execute(f"CREATE TABLE {table_name} ({columns})")
         self.conn.commit()
         
     def query(self, query):
         self.cursor.execute(query)
+        self.conn.commit()
         return self.cursor.fetchall()
     

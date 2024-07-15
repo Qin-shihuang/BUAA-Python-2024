@@ -8,6 +8,9 @@ Description: Just a test file, NOT FOR PRODUCTION
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QLabel, QStackedWidget, QFormLayout
 from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import Qt, QPropertyAnimation, QRect
+
+from backend.account import AccountManager
+
 # MARK: - UI
 class LoginRegisterWindowUI(QWidget):
     def __init__(self):
@@ -173,6 +176,7 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
             success, message = try_login(self.login_username_input.text(), self.login_password_input.text())
             if success:
                 # TODO： Open main window
+                print("Login successful")
                 return
             else:
                 error_text = message
@@ -185,6 +189,8 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
         error_text = ""
         if self.register_username_input == "":
             error_text = "Username cannot be empty."
+        elif not self.register_username_input.text().isalnum():
+            error_text = "Username can only contain letters and numbers."
         elif self.register_password_input == "":
             error_text = "Password cannot be empty."
         elif not check_password_validity(self.register_password_input.text()):
@@ -201,7 +207,7 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
             else:
                 error_text = message
         self.register_error_label.setStyleSheet("color: red")
-        self.register_error_label.setText(message)
+        self.register_error_label.setText(error_text)
 
     def register_password_repeat_lost_focus(self, event):
         if self.register_password_input.text() != self.register_password_repeat_input.text():
@@ -230,10 +236,10 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
 
 def try_login(username, password):
     # TODO: Connect to backend
-    return (True, "Success")
+    return AccountManager().login(username, password)
 
 def try_register(username, password):
-    return (True, "Success")
+    return AccountManager().register(username, password)
 
 def check_password_validity(password):
     if len(password) < 8:
