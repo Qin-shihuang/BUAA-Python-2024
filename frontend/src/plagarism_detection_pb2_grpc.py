@@ -39,6 +39,11 @@ class PlagarismDetectionServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.Ping = channel.unary_unary(
+                '/plagarism_detection.PlagarismDetectionService/Ping',
+                request_serializer=plagarism__detection__pb2.PingRequest.SerializeToString,
+                response_deserializer=plagarism__detection__pb2.PingResponse.FromString,
+                _registered_method=True)
         self.Login = channel.unary_unary(
                 '/plagarism_detection.PlagarismDetectionService/Login',
                 request_serializer=plagarism__detection__pb2.LoginRequest.SerializeToString,
@@ -63,6 +68,12 @@ class PlagarismDetectionServiceStub(object):
 
 class PlagarismDetectionServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
+
+    def Ping(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def Login(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -91,6 +102,11 @@ class PlagarismDetectionServiceServicer(object):
 
 def add_PlagarismDetectionServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'Ping': grpc.unary_unary_rpc_method_handler(
+                    servicer.Ping,
+                    request_deserializer=plagarism__detection__pb2.PingRequest.FromString,
+                    response_serializer=plagarism__detection__pb2.PingResponse.SerializeToString,
+            ),
             'Login': grpc.unary_unary_rpc_method_handler(
                     servicer.Login,
                     request_deserializer=plagarism__detection__pb2.LoginRequest.FromString,
@@ -121,6 +137,33 @@ def add_PlagarismDetectionServiceServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class PlagarismDetectionService(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def Ping(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/plagarism_detection.PlagarismDetectionService/Ping',
+            plagarism__detection__pb2.PingRequest.SerializeToString,
+            plagarism__detection__pb2.PingResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def Login(request,

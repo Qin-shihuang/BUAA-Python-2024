@@ -3,10 +3,19 @@ syntax = "proto3";
 package plagarism_detection;
 
 service PlagarismDetectionService {
+    rpc Ping(PingRequest) returns (PingResponse) {}
     rpc Login(LoginRequest) returns (LoginResponse) {}
     rpc Register(RegisterRequest) returns (RegisterResponse) {}
     rpc UploadFile(UploadFileRequest) returns (UploadFileResponse) {}
     rpc CheckTwoFiles(CheckTwoFilesRequest) returns (CheckTwoFilesResponse) {}
+}
+
+message PingRequest {
+    int32 value = 1;
+}
+
+message PingResponse {
+    PingStatus status = 1;
 }
 
 message LoginRequest {
@@ -26,7 +35,7 @@ message RegisterRequest {
 
 message RegisterResponse {
     RegisterStatus status = 1;
-    string token = 2;
+    optional string token = 2;
 }
 
 message UploadFileRequest {

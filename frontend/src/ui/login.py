@@ -11,6 +11,8 @@ from PyQt5.QtCore import Qt
 
 from controllers.login_controller import LoginController
 from utils.error_codes import LoginStatus, RegisterStatus
+from utils.health_checker import ServerHealthChecker
+
 
 class LoginWindow(QWidget):
     def __init__(self, loginCallback):
@@ -136,6 +138,13 @@ class LoginWindow(QWidget):
         self.stacked_widget.addWidget(register_widget)
         
         layout.addWidget(self.stacked_widget)
+        
+        self.server_status_label = QLabel("")
+        self.server_status_label.setAlignment(Qt.AlignRight)
+        layout.addWidget(self.server_status_label)
+        health_checker = ServerHealthChecker()
+        health_checker.server_status_changed.connect(self.on_server_status_changed)
+        health_checker.start()
         self.setLayout(layout)
         
         self.login_button.clicked.connect(self.login_button_clicked)
@@ -209,3 +218,6 @@ class LoginWindow(QWidget):
             style += f'<p style="color:{color}; line-height: 1.0; margin: 0 0 2px 0">{indicator} {req}</p>'
             
         self.password_requirements_label.setText(style)
+    
+    def on_server_status_changed(self, status):
+        self.server_status_label.setText(f"Server status: {'Online ' if status else 'Offline'}")
