@@ -12,7 +12,7 @@ class LoginStatus(Enum):
     @classmethod
     def get_error_message(cls, code):
         for error in cls:
-            if error.value[0] == code:
+            if error.value[0] == code.value[0]:
                 return error.value[1]
         return cls.UNKOWN_ERROR.value[1]
     

@@ -38,11 +38,7 @@ class ApiClient:
         try:
             response = self.stub.Ping(plagarism_detection_pb2.PingRequest(), timeout=5)
             return response.status == 1
-        except grpc.RpcError as e:
-            if isinstance(e, grpc.FutureTimeoutError):
-                print(f"Timeout error: {e.code()}")
-            else:
-                print(f"Unknown error: {e.code()}")
+        except grpc.RpcError:
             return False
     
     def login(self, username, password) -> LoginStatus:

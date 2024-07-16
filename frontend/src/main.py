@@ -5,7 +5,6 @@ License: MIT License
 Description: Entry point of the application
 """
 
-import os
 import sys
 
 import PyQt5.QtWidgets
