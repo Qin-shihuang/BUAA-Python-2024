@@ -218,6 +218,7 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
             self.register_error_label.setText("Passwords do not match")
         else:
             self.register_error_label.setText("")
+        QLineEdit.focusOutEvent(self.register_password_repeat_input, event)
 
     def update_password_requirements(self):
         pw = self.register_password_input.text()
