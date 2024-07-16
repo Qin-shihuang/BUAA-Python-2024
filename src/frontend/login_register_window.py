@@ -14,6 +14,7 @@ class LoginRegisterWindowUI(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Login/Register")
+        self.setFixedSize(400,500)
         self.center()
         
         self.setStyleSheet("""
@@ -162,6 +163,7 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
         self.register_button.clicked.connect(self.register_button_clicked)
         self.register_password_input.textChanged.connect(self.update_password_requirements)
         self.register_password_repeat_input.focusOutEvent = self.register_password_repeat_lost_focus
+        self.update_password_requirements()
     
     def login_button_clicked(self):
         error_text = ""
