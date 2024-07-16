@@ -1,6 +1,8 @@
 from enum import Enum
 
 class LoginStatus(Enum):
+
+    
     LOGIN_SUCCESS = (0, "")
     # Frontend (and backend) errors
     USERNAME_EMPTY = (1, "Username cannot be empty.")
@@ -8,7 +10,14 @@ class LoginStatus(Enum):
     # Backend errors
     INVALID_CREDENTIALS = (3, "Invalid username or password.")
     UNKOWN_ERROR = (4, "An unknown error occurred.")
-    
+
+    @classmethod
+    def from_value(cls, value):
+        for status in LoginStatus:
+            if status.value[0] == value:
+                return status
+        return LoginStatus.UNKOWN_ERROR
+        
     @classmethod
     def get_error_message(cls, code):
         for error in cls:
@@ -28,6 +37,12 @@ class RegisterStatus(Enum):
     USERNAME_TAKEN = (6, "Username is already taken.")
     UNKOWN_ERROR = (7, "An unknown error occurred.")
     
+    @classmethod
+    def from_value(cls, value):
+        for status in RegisterStatus:
+            if status.value[0] == value:
+                return status
+        return RegisterStatus.UNKOWN_ERROR
     @classmethod
     def get_error_message(cls, code):
         for error in cls:

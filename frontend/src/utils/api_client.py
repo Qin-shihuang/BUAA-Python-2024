@@ -44,18 +44,18 @@ class ApiClient:
     def login(self, username, password) -> LoginStatus:
         try:
             response = self.stub.Login(plagarism_detection_pb2.LoginRequest(username=username, password=hash_password(password)))
-            if response.status == plagarism_detection_pb2.LoginResponse.LoginStatus.LOGIN_SUCCESS:
+            if response.status == plagarism_detection_pb2.LOGIN_SUCCESS:
                 self.token = response.token
                 return LoginStatus.LOGIN_SUCCESS
             else:
-                return LoginStatus(response.status)
+                return LoginStatus.from_value(response.status)
         except grpc.RpcError as e:
             return LoginStatus.UNKOWN_ERROR
     
     def register(self, username, password) -> RegisterStatus:
         try:
             response = self.stub.Register(plagarism_detection_pb2.RegisterRequest(username=username, password=hash_password(password)))
-            return RegisterStatus(response.status)
+            return RegisterStatus.from_value(response.status)
         except grpc.RpcError as e:
             return RegisterStatus.UNKOWN_ERROR
     
