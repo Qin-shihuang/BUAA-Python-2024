@@ -1,18 +1,23 @@
 """
 Author: Iz0
-Date: 2024-07-12
+Date: 2024-07-16
 License: MIT License
-Description: Login window module
+Description: Login window UI
 """
 
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel, QStackedWidget
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
-# MARK: - UI
-class LoginRegisterWindowUI(QWidget):
-    def __init__(self):
+from controllers.login_controller import LoginController
+from utils.error_codes import LoginStatus, RegisterStatus
+
+class LoginWindow(QWidget):
+    def __init__(self, loginCallback):
         super().__init__()
+        self.login_controller = LoginController()
+        self.login_callback = loginCallback
+        
         self.setWindowTitle("Login/Register")
         self.setFixedSize(400,500)
         self.center()
@@ -133,6 +138,12 @@ class LoginRegisterWindowUI(QWidget):
         layout.addWidget(self.stacked_widget)
         self.setLayout(layout)
         
+        self.login_button.clicked.connect(self.login_button_clicked)
+        self.register_button.clicked.connect(self.register_button_clicked)
+        self.register_password_input.textChanged.connect(self.update_password_requirements)
+        self.register_password_repeat_input.focusOutEvent = self.register_password_repeat_lost_focus
+        self.update_password_requirements()
+        
     def center(self):
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
@@ -140,6 +151,7 @@ class LoginRegisterWindowUI(QWidget):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
         
+    # MARK: Event Handlers
     def switch_to_register(self):
         self.register_error_label.setText("")
         self.register_username_input.setText("")
@@ -152,85 +164,42 @@ class LoginRegisterWindowUI(QWidget):
         self.login_username_input.setText("")
         self.login_password_input.setText("")
         self.stacked_widget.setCurrentIndex(0)
-
-# MARK: - Logic
-class LoginRegisterWindow(LoginRegisterWindowUI):
-    def __init__(self, accountManager=None, loginCallback=None):
-        super().__init__()
-        self.account_manager = accountManager
-        self.login_callback = loginCallback
-        self.login_button.clicked.connect(self.login_button_clicked)
-        self.register_button.clicked.connect(self.register_button_clicked)
-        self.register_password_input.textChanged.connect(self.update_password_requirements)
-        self.register_password_repeat_input.focusOutEvent = self.register_password_repeat_lost_focus
-        self.update_password_requirements()
-    
-    def login_button_clicked(self):
-        error_text = ""
-        if self.login_username_input.text() == "":
-            error_text = "Username cannot be empty."
-        elif self.login_password_input.text() == "":
-            error_text = "Password cannot be empty."
-        else:
-            if self.account_manager:
-                success, message = self.account_manager.login(self.login_username_input.text(), self.login_password_input.text())
-                if success:
-                    if self.login_callback:
-                        self.login_callback()
-                        self.close()
-                    return
-                else:
-                    error_text = message
-            else:
-                error_text = "AccountManager not registered!"
-        self.login_error_label.setStyleSheet("color: red")
-        self.login_error_label.setText(error_text)
-
-            
         
-    def register_button_clicked(self):  
-        error_text = ""
-        if self.register_username_input == "":
-            error_text = "Username cannot be empty."
-        elif not self.register_username_input.text().isalnum():
-            error_text = "Username can only contain letters and numbers."
-        elif self.register_password_input == "":
-            error_text = "Password cannot be empty."
-        elif not check_password_validity(self.register_password_input.text()):
-            error_text = "Password does not satisfy requirements."
-        elif self.register_password_input.text() != self.register_password_repeat_input.text():
-            error_text = "Passwords do not match."
-        else:
-            if self.account_manager:
-                success, message = self.account_manager.register(self.register_username_input.text(), self.register_password_input.text())
-                if success:
-                    self.stacked_widget.setCurrentIndex(0)
-                    self.login_error_label.setStyleSheet("color: green")
-                    self.login_error_label.setText(f"Registered successfully! Please login.")
-                    self.login_username_input.setText(self.register_username_input.text())
-                else:
-                    error_text = message
+        
+    def login_button_clicked(self):
+        resp = self.login_controller.try_login(self.login_username_input.text(), self.login_password_input.text())
+        if resp == LoginStatus.LOGIN_SUCCESS:
+            if self.login_callback:
+                self.login_callback()
+                self.close()
             else:
-                error_text = "AccountManager not registered!"
-        self.register_error_label.setStyleSheet("color: red")
-        self.register_error_label.setText(error_text)
-
+                self.login_error_label.setStyleSheet("color: green")
+                self.login_error_label.setText("Logged in successfully!")
+        else:
+            self.login_error_label.setStyleSheet("color: red")
+            self.login_error_label.setText(LoginStatus.get_error_message(resp))
+            
+    def register_button_clicked(self):
+        resp = self.login_controller.try_register(self.register_username_input.text(), self.register_password_input.text(), self.register_password_repeat_input.text())
+        if resp == RegisterStatus.REGISTER_SUCCESS:
+            self.stacked_widget.setCurrentIndex(0)
+            self.login_error_label.setStyleSheet("color: green")
+            self.login_error_label.setText(f"Registered successfully! Please login.")
+            self.login_username_input.setText(self.register_username_input.text())
+        else:
+            self.register_error_label.setStyleSheet("color: red")
+            self.register_error_label.setText(RegisterStatus.get_error_message(resp))
+            
     def register_password_repeat_lost_focus(self, event):
         if self.register_password_input.text() != self.register_password_repeat_input.text():
             self.register_error_label.setText("Passwords do not match")
         else:
             self.register_error_label.setText("")
         QLineEdit.focusOutEvent(self.register_password_repeat_input, event)
-
+        
     def update_password_requirements(self):
-        pw = self.register_password_input.text()
-        requirements = [
-            (len(pw) >= 8, "At least 8 characters"),
-            (any(char.isdigit() for char in pw), "At least one number"),
-            (any(char.isupper() for char in pw), "At least one uppercase letter"),
-            (any(char.islower() for char in pw), "At least one lowercase letter"),
-            (all(char.isalnum() or char in "!@#$%^&*()-_=+[]{};:,.<>?/" for char in pw), "Only letters, numbers and special characters")
-        ]
+        password = self.register_password_input.text()
+        requirements = self.login_controller.check_password_requirements(password)
         style = "<p style='line-height: 1.0; margin: 0 0 5px 0'>Password requirements:</p>"
 
         for status, req in requirements:
@@ -238,25 +207,5 @@ class LoginRegisterWindow(LoginRegisterWindowUI):
             indicator = "✓" if status else "✗"
 
             style += f'<p style="color:{color}; line-height: 1.0; margin: 0 0 2px 0">{indicator} {req}</p>'
-
+            
         self.password_requirements_label.setText(style)
-
-def check_password_validity(password):
-    if len(password) < 8:
-        return False 
-    if not any(char.isdigit() for char in password):
-        return False
-    if not any(char.isupper() for char in password):
-        return False
-    if not any(char.islower() for char in password):
-        return False
-    if not all(char.isalnum() or char in "!@#$%^&*()-_=+[]{};:,.<>?/" for char in password):
-        return False
-    return True
-    
-# For debugging
-if __name__ == "__main__":
-    app = QApplication([])
-    loginwindow = LoginRegisterWindow()
-    loginwindow.show()
-    exit(app.exec_())

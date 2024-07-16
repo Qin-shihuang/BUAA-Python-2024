@@ -12,16 +12,12 @@ import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
 
-from backend.account import SimpleAccountManager
-from frontend.login_register_window import LoginRegisterWindow
-from frontend.main_window import MainWindowUI
+from ui.login import LoginWindow
 
 if __name__ == "__main__":
     PyQt5.QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True) 
     app = QApplication(sys.argv)
-    account_manager = SimpleAccountManager()
-    main_window = MainWindowUI()
-    login_register_window = LoginRegisterWindow(account_manager, main_window.show)
-    login_register_window.show()
+    login_window = LoginWindow(None)
+    login_window.show()
     
     exit(app.exec_())
