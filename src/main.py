@@ -5,9 +5,13 @@ License: MIT License
 Description: Entry point of the application
 """
 
-import frontend.main_window
+from PyQt5.QtWidgets import QApplication
+
+from frontend.login_register_window import LoginRegisterWindow
 
 if __name__ == "__main__":
-    print("Hello, World!")
-    frontend.main_window.main()
-
+    app = QApplication([])
+    loginwindow = LoginRegisterWindow()
+    loginwindow.show()
+    
+    exit(app.exec_())
