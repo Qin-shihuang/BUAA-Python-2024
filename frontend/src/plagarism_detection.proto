@@ -11,11 +11,10 @@ service PlagarismDetectionService {
 }
 
 message PingRequest {
-    int32 value = 1;
 }
 
 message PingResponse {
-    PingStatus status = 1;
+    int32 status = 1;
 }
 
 message LoginRequest {

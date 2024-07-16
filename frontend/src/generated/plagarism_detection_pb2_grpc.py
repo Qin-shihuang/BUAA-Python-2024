@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import plagarism_detection_pb2 as plagarism__detection__pb2
+import generated.plagarism_detection_pb2 as plagarism__detection__pb2
 
 GRPC_GENERATED_VERSION = '1.64.1'
 GRPC_VERSION = grpc.__version__

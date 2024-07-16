@@ -6,4 +6,4 @@ Description: Configuration file
 """
 
 
-grpc_server_address = "localhost:50051"
+grpc_server_address = "localhost:11451"

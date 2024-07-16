@@ -8,8 +8,8 @@ Description:
 import hashlib
 import grpc
 
-import plagarism_detection_pb2
-import plagarism_detection_pb2_grpc
+import generated.plagarism_detection_pb2 as plagarism_detection_pb2
+import generated.plagarism_detection_pb2_grpc as plagarism_detection_pb2_grpc
 
 from utils.error_codes import LoginStatus, RegisterStatus
 from config import grpc_server_address
@@ -30,15 +30,19 @@ class ApiClient:
         super().__init__()
         self._initiated = True
         
-        channel = grpc.insecure_channel('localhost:50051')
+        channel = grpc.insecure_channel(grpc_server_address)
         self.stub = plagarism_detection_pb2_grpc.PlagarismDetectionServiceStub(channel)
         self.token = None
         
     def ping(self):
         try:
-            response = self.stub.Ping(plagarism_detection_pb2.PingRequest())
-            return response.status == 0
+            response = self.stub.Ping(plagarism_detection_pb2.PingRequest(), timeout=5)
+            return response.status == 1
         except grpc.RpcError as e:
+            if isinstance(e, grpc.FutureTimeoutError):
+                print(f"Timeout error: {e.code()}")
+            else:
+                print(f"Unknown error: {e.code()}")
             return False
     
     def login(self, username, password) -> LoginStatus:
