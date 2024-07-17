@@ -11,7 +11,8 @@ import grpc
 import generated.plagiarism_detection_pb2 as plagiarism_detection_pb2
 import generated.plagiarism_detection_pb2_grpc as plagiarism_detection_pb2_grpc
 
-from utils.error_codes import LoginStatus, RegisterStatus
+from utils.file_handler import read_file
+from utils.error_codes import LoginStatus, RegisterStatus, UploadFileStatus
 from config import grpc_server_address
 
 
@@ -62,6 +63,25 @@ class ApiClient:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
                 return RegisterStatus.NETWORK_ERROR
             return RegisterStatus.UNKNOWN_ERROR
+        
+    def upload_file(self, token, file_path):
+        filename = file_path.split('/')[-1]
+        content = read_file(file_path)
+        def chunk_iterator():
+            CHUNK_SIZE = 4096
+            for i in range(0, len(content), CHUNK_SIZE):
+                yield plagiarism_detection_pb2.FileChunk(
+                    token=token,
+                    filename=filename,
+                    content=content[i:i + CHUNK_SIZE]
+                )
+        try:
+            response = self.stub.UploadFile(chunk_iterator())
+            return UploadFileStatus.from_value(response.status)
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                return UploadFileStatus.NETWORK_ERROR
+            return UploadFileStatus.UNKNOWN_ERROR
     
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
