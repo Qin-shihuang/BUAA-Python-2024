@@ -5,8 +5,6 @@ License: MIT License
 Description: Login controller
 """
 
-import hashlib
-
 from PyQt5.QtCore import QObject
 
 from utils.error_codes import LoginStatus, RegisterStatus

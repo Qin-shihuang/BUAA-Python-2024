@@ -26,25 +26,28 @@ class LoginStatus(Enum):
                 return error.value[1]
         return cls.UNKNOWN_ERROR.value[1]
     
+    
 class RegisterStatus(Enum):
     REGISTER_SUCCESS = (0, "")
     # Frontend errors
     USERNAME_EMPTY = (1, "Username cannot be empty.")
     USERNAME_INVALID = (2, "Username can only contain letters and numbers.")
-    PASSWORD_EMPTY = (3, "Password cannot be empty.")
-    PASSWORD_INVALID = (4, "Password does not satisfy requirements.")
-    PASSWORDS_MISMATCH = (5, "Passwords do not match.")
+    USERNAME_TOO_LONG = (3, "Username is too long.")
+    PASSWORD_EMPTY = (4, "Password cannot be empty.")
+    PASSWORD_INVALID = (5, "Password does not satisfy requirements.")
+    PASSWORDS_MISMATCH = (6, "Passwords do not match.")
     # Backend errors
-    USERNAME_TAKEN = (6, "Username is already taken.")
-    UNKNOWN_ERROR = (7, "An unknown error occurred.")
-    NETWORK_ERROR = (8, "Network error.")
-    
+    USERNAME_TAKEN = (7, "Username is already taken.")
+    UNKNOWN_ERROR = (8, "An unknown error occurred.")
+    NETWORK_ERROR = (9, "Network error.")
+
     @classmethod
     def from_value(cls, value):
         for status in RegisterStatus:
             if status.value[0] == value:
                 return status
         return RegisterStatus.UNKNOWN_ERROR
+
     @classmethod
     def get_error_message(cls, code):
         for error in cls:

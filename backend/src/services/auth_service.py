@@ -18,29 +18,55 @@ class AuthService:
         username = username.lower()
         if not username.isalnum():
             return RegisterStatus.USERNAME_INVALID
-        query = f"SELECT * FROM account WHERE username = '{username}'"
-        if self.db_service.query(query):
+        query = "SELECT * FROM users WHERE username = ?"
+        args = (username,)
+        if self.db_service.query(query, args):
             return RegisterStatus.USERNAME_TAKEN
         # check if password is valid sha256 hash
         if len(password) != 64 or not all(c in "0123456789abcdef" for c in password):
             return RegisterStatus.PASSWORD_INVALID
         hashed_password = bcrypt.hashpw(password.encode(), config.SALT)
-        query = f"INSERT INTO account (username, password) VALUES ('{username}', '{hashed_password.decode()}')"
-        self.db_service.query(query)
+        query = "INSERT INTO users (username, password) VALUES (?, ?)"
+        args = (username, hashed_password.decode())
+        self.db_service.query(query, args)
         return RegisterStatus.REGISTER_SUCCESS
 
     def login(self, username, password):
         username = username.lower()
-        query = f"SELECT * FROM account WHERE username = '{username}'"
-        result = self.db_service.query(query)
-        if not result or not bcrypt.checkpw(password.encode(), result[0][1].encode()):
+        query = "SELECT * FROM users WHERE username = ?"
+        args = (username,)
+        result = self.db_service.query(query, args)
+        if not result or not bcrypt.checkpw(password.encode(), result[0][2].encode()):
+            self.log_login_attempt(username, False)
             return LoginStatus.INVALID_CREDENTIALS, ''
-        return LoginStatus.LOGIN_SUCCESS, create_token(result[0][0])
+        else:
+            self.log_login_attempt(username, True)        
+            return LoginStatus.LOGIN_SUCCESS, create_token(result[0][0], result[0][1])
+    
+    def get_userid_from_username(self, username):
+        query = "SELECT id FROM users WHERE username = ?"
+        args = (username,)
+        result = self.db_service.query(query, args)
+        if not result:
+            return -1
+        else:
+            return result[0][0]
 
+    def log_login_attempt(self, username, status):
+        user_id = self.get_userid_from_username(username)
+        query = "INSERT INTO user_logins (user_id, success) VALUES (?, ?)"
+        args = (user_id, status)
+        self.db_service.query(query, args)
+    
 
-def create_token(username):
+def get_userid_from_token(token):
+    _, payload = verify_token(token)
+    return payload["user_id"]
+
+def create_token(user_id, username):
     exp = datetime.datetime.utcnow() + datetime.timedelta(hours=12)
     payload = {
+        "user_id": user_id,
         "username": username,
         "exp": exp
     }
