@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package plagarism_detection;
+package plagiarism_detection;
 
-service PlagarismDetectionService {
+service PlagiarismDetectionService {
     rpc Ping(PingRequest) returns (PingResponse) {}
     rpc Login(LoginRequest) returns (LoginResponse) {}
     rpc Register(RegisterRequest) returns (RegisterResponse) {}
@@ -34,7 +34,6 @@ message RegisterRequest {
 
 message RegisterResponse {
     RegisterStatus status = 1;
-    optional string token = 2;
 }
 
 message UploadFileRequest {

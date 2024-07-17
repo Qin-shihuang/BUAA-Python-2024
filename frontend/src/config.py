@@ -5,5 +5,4 @@ License: MIT License
 Description: Configuration file
 """
 
-
 grpc_server_address = "localhost:11451"
