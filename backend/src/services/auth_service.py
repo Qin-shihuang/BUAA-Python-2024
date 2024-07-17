@@ -18,6 +18,8 @@ class AuthService:
         username = username.lower()
         if not username.isalnum():
             return RegisterStatus.USERNAME_INVALID
+        if len(username > 20):
+            return RegisterStatus.USERNAME_TOO_LONG
         query = "SELECT * FROM users WHERE username = ?"
         args = (username,)
         if self.db_service.query(query, args):
