@@ -23,7 +23,7 @@ message LoginRequest {
 }
 
 message LoginResponse {
-    LoginStatus status = 1;
+    int32 status = 1;
     string token = 2;
 }
 
@@ -33,7 +33,7 @@ message RegisterRequest {
 }
 
 message RegisterResponse {
-    RegisterStatus status = 1;
+    int32 status = 1;
 }
 
 message UploadFileRequest {
@@ -55,23 +55,3 @@ message CheckTwoFilesRequest {
 message CheckTwoFilesResponse {
     repeated int32 line_numbers = 1;
 }
-
-enum LoginStatus {
-    LOGIN_SUCCESS = 0;
-    LOGIN_USERNAME_EMPTY = 1;
-    LOGIN_PASSWORD_EMPTY = 2;
-    LOGIN_INVALID_CREDENTIALS = 3;
-    LOGIN_UNKNOWN_ERROR = 4;
-}
-
-enum RegisterStatus {
-    REGISTER_SUCCESS = 0;
-    REGISTER_USERNAME_EMPTY = 1;
-    REGISTER_USERNAME_INVALID = 2;
-    REGISTER_PASSWORD_EMPTY = 3;
-    REGISTER_PASSWORD_INVALID = 4;
-    REGISTER_PASSWORDS_MISMATCH = 5;
-    REGISTER_USERNAME_TAKEN = 6;
-    REGISTER_UNKNOWN_ERROR = 7;
-}
-

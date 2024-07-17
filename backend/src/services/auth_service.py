@@ -10,6 +10,9 @@ from utils.error_codes import RegisterStatus, LoginStatus
 class AuthService:
     def __init__(self):
         self.db_service = DatabaseService('account')
+        
+    def __del__(self):
+        self.db_service.close()
 
     def register(self, username, password):
         username = username.lower()
@@ -31,7 +34,7 @@ class AuthService:
         query = f"SELECT * FROM account WHERE username = '{username}'"
         result = self.db_service.query(query)
         if not result or not bcrypt.checkpw(password.encode(), result[0][1].encode()):
-            return LoginStatus.INVALID_CREDENTIALS, None
+            return LoginStatus.INVALID_CREDENTIALS, ''
         return LoginStatus.LOGIN_SUCCESS, create_token(result[0][0])
 
 
@@ -43,6 +46,7 @@ def create_token(username):
     }
     token = jwt.encode(payload, config.JWT_SECRET, algorithm="HS256")
     return token
+
 
 def verify_token(token):
     try:
