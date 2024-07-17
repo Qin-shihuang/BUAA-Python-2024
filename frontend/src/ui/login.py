@@ -142,9 +142,9 @@ class LoginWindow(QWidget):
         self.server_status_label = QLabel("")
         self.server_status_label.setAlignment(Qt.AlignRight)
         layout.addWidget(self.server_status_label)
-        health_checker = ServerHealthChecker()
-        health_checker.server_status_changed.connect(self.on_server_status_changed)
-        health_checker.start()
+        self.health_checker = ServerHealthChecker()
+        self.health_checker.server_status_changed.connect(self.on_server_status_changed)
+        self.health_checker.start()
         self.setLayout(layout)
         
         self.login_button.clicked.connect(self.login_button_clicked)
@@ -179,6 +179,7 @@ class LoginWindow(QWidget):
         if status == LoginStatus.LOGIN_SUCCESS:
             if self.login_callback:
                 self.login_callback()
+                self.health_checker.stop()
                 self.close()
             else:
                 self.login_error_label.setStyleSheet("color: green")
