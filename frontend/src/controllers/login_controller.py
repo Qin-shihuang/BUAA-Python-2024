@@ -5,8 +5,6 @@ License: MIT License
 Description: Login controller
 """
 
-import hashlib
-
 from PyQt5.QtCore import QObject
 
 from utils.error_codes import LoginStatus, RegisterStatus
@@ -26,6 +24,8 @@ class LoginController(QObject):
     def try_register(self, username, password, confirmPassword) -> RegisterStatus:
         if username == "":
             return RegisterStatus.USERNAME_EMPTY
+        if len(username) > 20:
+            return RegisterStatus.USERNAME_TOO_LONG
         if password == "":
             return RegisterStatus.PASSWORD_EMPTY
         if any(not requirement for requirement, _ in self.check_password_requirements(password)):

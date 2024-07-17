@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import generated.plagarism_detection_pb2 as plagarism__detection__pb2
+import generated.plagiarism_detection_pb2 as plagiarism__detection__pb2
 
 GRPC_GENERATED_VERSION = '1.64.1'
 GRPC_VERSION = grpc.__version__
@@ -20,7 +20,7 @@ except ImportError:
 if _version_not_supported:
     warnings.warn(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in plagarism_detection_pb2_grpc.py depends on'
+        + f' but the generated code in plagiarism_detection_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -30,7 +30,7 @@ if _version_not_supported:
     )
 
 
-class PlagarismDetectionServiceStub(object):
+class PlagiarismDetectionServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -40,33 +40,33 @@ class PlagarismDetectionServiceStub(object):
             channel: A grpc.Channel.
         """
         self.Ping = channel.unary_unary(
-                '/plagarism_detection.PlagarismDetectionService/Ping',
-                request_serializer=plagarism__detection__pb2.PingRequest.SerializeToString,
-                response_deserializer=plagarism__detection__pb2.PingResponse.FromString,
+                '/plagiarism_detection.PlagiarismDetectionService/Ping',
+                request_serializer=plagiarism__detection__pb2.PingRequest.SerializeToString,
+                response_deserializer=plagiarism__detection__pb2.PingResponse.FromString,
                 _registered_method=True)
         self.Login = channel.unary_unary(
-                '/plagarism_detection.PlagarismDetectionService/Login',
-                request_serializer=plagarism__detection__pb2.LoginRequest.SerializeToString,
-                response_deserializer=plagarism__detection__pb2.LoginResponse.FromString,
+                '/plagiarism_detection.PlagiarismDetectionService/Login',
+                request_serializer=plagiarism__detection__pb2.LoginRequest.SerializeToString,
+                response_deserializer=plagiarism__detection__pb2.LoginResponse.FromString,
                 _registered_method=True)
         self.Register = channel.unary_unary(
-                '/plagarism_detection.PlagarismDetectionService/Register',
-                request_serializer=plagarism__detection__pb2.RegisterRequest.SerializeToString,
-                response_deserializer=plagarism__detection__pb2.RegisterResponse.FromString,
+                '/plagiarism_detection.PlagiarismDetectionService/Register',
+                request_serializer=plagiarism__detection__pb2.RegisterRequest.SerializeToString,
+                response_deserializer=plagiarism__detection__pb2.RegisterResponse.FromString,
                 _registered_method=True)
         self.UploadFile = channel.unary_unary(
-                '/plagarism_detection.PlagarismDetectionService/UploadFile',
-                request_serializer=plagarism__detection__pb2.UploadFileRequest.SerializeToString,
-                response_deserializer=plagarism__detection__pb2.UploadFileResponse.FromString,
+                '/plagiarism_detection.PlagiarismDetectionService/UploadFile',
+                request_serializer=plagiarism__detection__pb2.UploadFileRequest.SerializeToString,
+                response_deserializer=plagiarism__detection__pb2.UploadFileResponse.FromString,
                 _registered_method=True)
         self.CheckTwoFiles = channel.unary_unary(
-                '/plagarism_detection.PlagarismDetectionService/CheckTwoFiles',
-                request_serializer=plagarism__detection__pb2.CheckTwoFilesRequest.SerializeToString,
-                response_deserializer=plagarism__detection__pb2.CheckTwoFilesResponse.FromString,
+                '/plagiarism_detection.PlagiarismDetectionService/CheckTwoFiles',
+                request_serializer=plagiarism__detection__pb2.CheckTwoFilesRequest.SerializeToString,
+                response_deserializer=plagiarism__detection__pb2.CheckTwoFilesResponse.FromString,
                 _registered_method=True)
 
 
-class PlagarismDetectionServiceServicer(object):
+class PlagiarismDetectionServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def Ping(self, request, context):
@@ -100,42 +100,42 @@ class PlagarismDetectionServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_PlagarismDetectionServiceServicer_to_server(servicer, server):
+def add_PlagiarismDetectionServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Ping': grpc.unary_unary_rpc_method_handler(
                     servicer.Ping,
-                    request_deserializer=plagarism__detection__pb2.PingRequest.FromString,
-                    response_serializer=plagarism__detection__pb2.PingResponse.SerializeToString,
+                    request_deserializer=plagiarism__detection__pb2.PingRequest.FromString,
+                    response_serializer=plagiarism__detection__pb2.PingResponse.SerializeToString,
             ),
             'Login': grpc.unary_unary_rpc_method_handler(
                     servicer.Login,
-                    request_deserializer=plagarism__detection__pb2.LoginRequest.FromString,
-                    response_serializer=plagarism__detection__pb2.LoginResponse.SerializeToString,
+                    request_deserializer=plagiarism__detection__pb2.LoginRequest.FromString,
+                    response_serializer=plagiarism__detection__pb2.LoginResponse.SerializeToString,
             ),
             'Register': grpc.unary_unary_rpc_method_handler(
                     servicer.Register,
-                    request_deserializer=plagarism__detection__pb2.RegisterRequest.FromString,
-                    response_serializer=plagarism__detection__pb2.RegisterResponse.SerializeToString,
+                    request_deserializer=plagiarism__detection__pb2.RegisterRequest.FromString,
+                    response_serializer=plagiarism__detection__pb2.RegisterResponse.SerializeToString,
             ),
             'UploadFile': grpc.unary_unary_rpc_method_handler(
                     servicer.UploadFile,
-                    request_deserializer=plagarism__detection__pb2.UploadFileRequest.FromString,
-                    response_serializer=plagarism__detection__pb2.UploadFileResponse.SerializeToString,
+                    request_deserializer=plagiarism__detection__pb2.UploadFileRequest.FromString,
+                    response_serializer=plagiarism__detection__pb2.UploadFileResponse.SerializeToString,
             ),
             'CheckTwoFiles': grpc.unary_unary_rpc_method_handler(
                     servicer.CheckTwoFiles,
-                    request_deserializer=plagarism__detection__pb2.CheckTwoFilesRequest.FromString,
-                    response_serializer=plagarism__detection__pb2.CheckTwoFilesResponse.SerializeToString,
+                    request_deserializer=plagiarism__detection__pb2.CheckTwoFilesRequest.FromString,
+                    response_serializer=plagiarism__detection__pb2.CheckTwoFilesResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'plagarism_detection.PlagarismDetectionService', rpc_method_handlers)
+            'plagiarism_detection.PlagiarismDetectionService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('plagarism_detection.PlagarismDetectionService', rpc_method_handlers)
+    server.add_registered_method_handlers('plagiarism_detection.PlagiarismDetectionService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class PlagarismDetectionService(object):
+class PlagiarismDetectionService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -152,9 +152,9 @@ class PlagarismDetectionService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/plagarism_detection.PlagarismDetectionService/Ping',
-            plagarism__detection__pb2.PingRequest.SerializeToString,
-            plagarism__detection__pb2.PingResponse.FromString,
+            '/plagiarism_detection.PlagiarismDetectionService/Ping',
+            plagiarism__detection__pb2.PingRequest.SerializeToString,
+            plagiarism__detection__pb2.PingResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -179,9 +179,9 @@ class PlagarismDetectionService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/plagarism_detection.PlagarismDetectionService/Login',
-            plagarism__detection__pb2.LoginRequest.SerializeToString,
-            plagarism__detection__pb2.LoginResponse.FromString,
+            '/plagiarism_detection.PlagiarismDetectionService/Login',
+            plagiarism__detection__pb2.LoginRequest.SerializeToString,
+            plagiarism__detection__pb2.LoginResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -206,9 +206,9 @@ class PlagarismDetectionService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/plagarism_detection.PlagarismDetectionService/Register',
-            plagarism__detection__pb2.RegisterRequest.SerializeToString,
-            plagarism__detection__pb2.RegisterResponse.FromString,
+            '/plagiarism_detection.PlagiarismDetectionService/Register',
+            plagiarism__detection__pb2.RegisterRequest.SerializeToString,
+            plagiarism__detection__pb2.RegisterResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -233,9 +233,9 @@ class PlagarismDetectionService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/plagarism_detection.PlagarismDetectionService/UploadFile',
-            plagarism__detection__pb2.UploadFileRequest.SerializeToString,
-            plagarism__detection__pb2.UploadFileResponse.FromString,
+            '/plagiarism_detection.PlagiarismDetectionService/UploadFile',
+            plagiarism__detection__pb2.UploadFileRequest.SerializeToString,
+            plagiarism__detection__pb2.UploadFileResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -260,9 +260,9 @@ class PlagarismDetectionService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/plagarism_detection.PlagarismDetectionService/CheckTwoFiles',
-            plagarism__detection__pb2.CheckTwoFilesRequest.SerializeToString,
-            plagarism__detection__pb2.CheckTwoFilesResponse.FromString,
+            '/plagiarism_detection.PlagiarismDetectionService/CheckTwoFiles',
+            plagiarism__detection__pb2.CheckTwoFilesRequest.SerializeToString,
+            plagiarism__detection__pb2.CheckTwoFilesResponse.FromString,
             options,
             channel_credentials,
             insecure,
