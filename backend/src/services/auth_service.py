@@ -42,6 +42,7 @@ def create_token(username):
         "exp": exp
     }
     token = jwt.encode(payload, config.JWT_SECRET, algorithm="HS256")
+    return token
 
 def verify_token(token):
     try:

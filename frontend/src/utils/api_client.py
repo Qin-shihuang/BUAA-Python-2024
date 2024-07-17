@@ -41,23 +41,27 @@ class ApiClient:
         except grpc.RpcError:
             return False
     
-    def login(self, username, password) -> LoginStatus:
+    def login(self, username, password):
         try:
             response = self.stub.Login(plagarism_detection_pb2.LoginRequest(username=username, password=hash_password(password)))
             if response.status == plagarism_detection_pb2.LOGIN_SUCCESS:
                 self.token = response.token
-                return LoginStatus.LOGIN_SUCCESS
+                return LoginStatus.LOGIN_SUCCESS, response.token
             else:
-                return LoginStatus.from_value(response.status)
+                return LoginStatus.from_value(response.status), ""
         except grpc.RpcError as e:
-            return LoginStatus.UNKOWN_ERROR
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                return LoginStatus.NETWORK_ERROR
+            return LoginStatus.UNKNOWN_ERROR
     
     def register(self, username, password) -> RegisterStatus:
         try:
             response = self.stub.Register(plagarism_detection_pb2.RegisterRequest(username=username, password=hash_password(password)))
             return RegisterStatus.from_value(response.status)
         except grpc.RpcError as e:
-            return RegisterStatus.UNKOWN_ERROR
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                return RegisterStatus.NETWORK_ERROR
+            return RegisterStatus.UNKNOWN_ERROR
     
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()

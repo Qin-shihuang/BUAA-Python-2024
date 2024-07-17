@@ -16,7 +16,7 @@ class LoginController(QObject):
     def __init__(self):
         self.api_client = ApiClient()
         
-    def try_login(self, username, password) -> LoginStatus:
+    def try_login(self, username, password):
         if username == "":
             return LoginStatus.USERNAME_EMPTY
         if password == "":

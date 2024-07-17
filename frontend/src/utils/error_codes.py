@@ -9,21 +9,22 @@ class LoginStatus(Enum):
     PASSWORD_EMPTY = (2, "Password cannot be empty.")
     # Backend errors
     INVALID_CREDENTIALS = (3, "Invalid username or password.")
-    UNKOWN_ERROR = (4, "An unknown error occurred.")
+    UNKNOWN_ERROR = (4, "An unknown error occurred.")
+    NETWORK_ERROR = (5, "Network error.")
 
     @classmethod
     def from_value(cls, value):
         for status in LoginStatus:
             if status.value[0] == value:
                 return status
-        return LoginStatus.UNKOWN_ERROR
+        return LoginStatus.UNKNOWN_ERROR
         
     @classmethod
     def get_error_message(cls, code):
         for error in cls:
             if error.value[0] == code.value[0]:
                 return error.value[1]
-        return cls.UNKOWN_ERROR.value[1]
+        return cls.UNKNOWN_ERROR.value[1]
     
 class RegisterStatus(Enum):
     REGISTER_SUCCESS = (0, "")
@@ -35,17 +36,18 @@ class RegisterStatus(Enum):
     PASSWORDS_MISMATCH = (5, "Passwords do not match.")
     # Backend errors
     USERNAME_TAKEN = (6, "Username is already taken.")
-    UNKOWN_ERROR = (7, "An unknown error occurred.")
+    UNKNOWN_ERROR = (7, "An unknown error occurred.")
+    NETWORK_ERROR = (8, "Network error.")
     
     @classmethod
     def from_value(cls, value):
         for status in RegisterStatus:
             if status.value[0] == value:
                 return status
-        return RegisterStatus.UNKOWN_ERROR
+        return RegisterStatus.UNKNOWN_ERROR
     @classmethod
     def get_error_message(cls, code):
         for error in cls:
             if error.value[0] == code.value[0]:
                 return error.value[1]
-        return cls.UNKOWN_ERROR.value[1]
+        return cls.UNKNOWN_ERROR.value[1]

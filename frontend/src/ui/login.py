@@ -175,17 +175,17 @@ class LoginWindow(QWidget):
         self.stacked_widget.setCurrentIndex(0)
         
     def login_button_clicked(self):
-        resp = self.login_controller.try_login(self.login_username_input.text(), self.login_password_input.text())
-        if resp == LoginStatus.LOGIN_SUCCESS:
+        status, token = self.login_controller.try_login(self.login_username_input.text(), self.login_password_input.text())
+        if status == LoginStatus.LOGIN_SUCCESS:
             if self.login_callback:
                 self.login_callback()
                 self.close()
             else:
                 self.login_error_label.setStyleSheet("color: green")
-                self.login_error_label.setText("Logged in successfully!")
+                self.login_error_label.setText("Logged in successfully, token: " + token)
         else:
             self.login_error_label.setStyleSheet("color: red")
-            self.login_error_label.setText(LoginStatus.get_error_message(resp))
+            self.login_error_label.setText(LoginStatus.get_error_message(status))
             
     def register_button_clicked(self):
         resp = self.login_controller.try_register(self.register_username_input.text(), self.register_password_input.text(), self.register_password_repeat_input.text())
