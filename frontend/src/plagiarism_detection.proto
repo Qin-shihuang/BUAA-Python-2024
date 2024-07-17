@@ -6,8 +6,7 @@ service PlagiarismDetectionService {
     rpc Ping(PingRequest) returns (PingResponse) {}
     rpc Login(LoginRequest) returns (LoginResponse) {}
     rpc Register(RegisterRequest) returns (RegisterResponse) {}
-    rpc UploadFile(UploadFileRequest) returns (UploadFileResponse) {}
-    rpc CheckTwoFiles(CheckTwoFilesRequest) returns (CheckTwoFilesResponse) {}
+    rpc UploadFile(stream UploadFileChunk) returns (UploadFileResponse) {}
 }
 
 message PingRequest {
@@ -36,22 +35,13 @@ message RegisterResponse {
     int32 status = 1;
 }
 
-message UploadFileRequest {
+message UploadFileChunk {
     string token = 1;
-    string file = 2;
+    string filename = 2;
+    bytes data = 3;
 }
 
 message UploadFileResponse {
-    string token = 1;
-    string file_id = 2;
-}
-
-message CheckTwoFilesRequest {
-    string token = 1;
-    string file_id_1 = 2;
-    string file_id_2 = 3;
-}
-
-message CheckTwoFilesResponse {
-    repeated int32 line_numbers = 1;
+    int32 status = 1;
+    optional string file_id = 2;
 }

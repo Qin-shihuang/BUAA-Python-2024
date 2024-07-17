@@ -59,11 +59,6 @@ class AuthService:
         query = "INSERT INTO user_logins (user_id, success) VALUES (?, ?)"
         args = (user_id, status)
         self.db_service.query(query, args)
-    
-
-def get_userid_from_token(token):
-    _, payload = verify_token(token)
-    return payload["user_id"]
 
 def create_token(user_id, username):
     exp = datetime.datetime.utcnow() + datetime.timedelta(hours=12)
@@ -79,7 +74,7 @@ def create_token(user_id, username):
 def verify_token(token):
     try:
         payload = jwt.decode(token, config.JWT_SECRET, algorithms=["HS256"])
-        return True, payload
+        return True, payload["user_id"]
     except jwt.ExpiredSignatureError:
         return False, "Token has expired"
     except jwt.InvalidTokenError:

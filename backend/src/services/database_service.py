@@ -4,7 +4,17 @@ import sqlite3
 
 
 class DatabaseService:
-    def __init__(self, db_name):
+    _instances = {}
+    _lock = threading.Lock()
+    
+    def __new__(cls, db_name):
+        if db_name not in cls._instances:
+            with cls._lock:
+                if db_name not in cls._instances:
+                    cls._instances[db_name] = super(DatabaseService, cls).__new__(cls)
+                    cls._instances[db_name]._init(db_name)
+    
+    def _init(self, db_name):
         self.db_path = f"data/{db_name}.db"
         self.queue = queue.Queue()
         self.thread = threading.Thread(target=self.worker, daemon=True)

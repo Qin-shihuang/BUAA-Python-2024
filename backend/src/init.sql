@@ -12,3 +12,14 @@ CREATE TABLE IF NOT EXISTS user_logins (
     success BOOLEAN NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS uploaded_files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    storage_name VARCHAR(255) NOT NULL,
+    original_name VARCHAR(255) NOT NULL,
+    uploader_id INTEGER NOT NULL,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (uploader_id) REFERENCES users(id)
+)
+
+CREATE TABLE IF NOT EXISTS 

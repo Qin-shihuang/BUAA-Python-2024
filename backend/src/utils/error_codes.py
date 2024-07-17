@@ -25,7 +25,6 @@ class LoginStatus(Enum):
                 return error.value[1]
         return cls.UNKNOWN_ERROR.value[1]
 
-
 class RegisterStatus(Enum):
     REGISTER_SUCCESS = (0, "")
     # Frontend errors
@@ -46,6 +45,32 @@ class RegisterStatus(Enum):
             if status.value[0] == value:
                 return status
         return RegisterStatus.UNKNOWN_ERROR
+
+    @classmethod
+    def get_error_message(cls, code):
+        for error in cls:
+            if error.value[0] == code.value[0]:
+                return error.value[1]
+        return cls.UNKNOWN_ERROR.value[1]
+    
+class UploadFileStatus(Enum):
+    UPLOAD_SUCCESS = (0, "")
+    # Frontend errors
+    FILENAME_EMPTY = (1, "Filename cannot be empty.")
+    FILENAME_INVALID = (2, "Filename is invalid.")
+    FILENAME_TOO_LONG = (3, "Filename is too long.")
+    FILE_TOO_LARGE = (4, "File is too large.")
+    # Backend errors
+    UNAUTHORIZED = (5, "Unauthorized.")
+    UNKNOWN_ERROR = (6, "An unknown error occurred.")
+    NETWORK_ERROR = (7, "Network error.")
+
+    @classmethod
+    def from_value(cls, value):
+        for status in UploadFileStatus:
+            if status.value[0] == value:
+                return status
+        return UploadFileStatus.UNKNOWN_ERROR
 
     @classmethod
     def get_error_message(cls, code):

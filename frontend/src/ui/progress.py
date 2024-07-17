@@ -17,6 +17,7 @@ class ProgressWindow(QWidget):
         info_area = QHBoxLayout()
         desp_label = QLabel(desp)
         self.progress_label = QLabel(f"0/{total}")
+        self.progress_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         info_area.addWidget(desp_label)
         info_area.addWidget(self.progress_label)
         layout.addLayout(info_area)

@@ -6,8 +6,7 @@ service PlagiarismDetectionService {
     rpc Ping(PingRequest) returns (PingResponse) {}
     rpc Login(LoginRequest) returns (LoginResponse) {}
     rpc Register(RegisterRequest) returns (RegisterResponse) {}
-    rpc UploadFile(UploadFileRequest) returns (UploadFileResponse) {}
-    rpc CheckTwoFiles(CheckTwoFilesRequest) returns (CheckTwoFilesResponse) {}
+    rpc UploadFile(stream UploadFileChunk) returns (UploadFileResponse) {}
 }
 
 message PingRequest {
@@ -36,22 +35,59 @@ message RegisterResponse {
     int32 status = 1;
 }
 
-message UploadFileRequest {
+message UploadFileChunk {
     string token = 1;
-    string file = 2;
+    string filename = 2;
+    bytes data = 3;
 }
 
 message UploadFileResponse {
-    string token = 1;
-    string file_id = 2;
+    int32 status = 1;
+    optional int32 file_id = 2;
+}syntax = "proto3";
+
+package plagiarism_detection;
+
+service PlagiarismDetectionService {
+    rpc Ping(PingRequest) returns (PingResponse) {}
+    rpc Login(LoginRequest) returns (LoginResponse) {}
+    rpc Register(RegisterRequest) returns (RegisterResponse) {}
+    rpc UploadFile(stream UploadFileChunk) returns (UploadFileResponse) {}
 }
 
-message CheckTwoFilesRequest {
-    string token = 1;
-    string file_id_1 = 2;
-    string file_id_2 = 3;
+message PingRequest {
 }
 
-message CheckTwoFilesResponse {
-    repeated int32 line_numbers = 1;
+message PingResponse {
+    int32 status = 1;
+}
+
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    int32 status = 1;
+    string token = 2;
+}
+
+message RegisterRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message RegisterResponse {
+    int32 status = 1;
+}
+
+message UploadFileChunk {
+    string token = 1;
+    string filename = 2;
+    bytes data = 3;
+}
+
+message UploadFileResponse {
+    int32 status = 1;
+    optional int32 file_id = 2;
 }
