@@ -18,9 +18,9 @@ class LoginController(QObject):
         
     def try_login(self, username, password):
         if username == "":
-            return LoginStatus.USERNAME_EMPTY
+            return LoginStatus.USERNAME_EMPTY, ''
         if password == "":
-            return LoginStatus.PASSWORD_EMPTY
+            return LoginStatus.PASSWORD_EMPTY, ''
         return self.api_client.login(username, password)
     
     def try_register(self, username, password, confirmPassword) -> RegisterStatus:
