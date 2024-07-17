@@ -8,8 +8,8 @@ Description:
 import hashlib
 import grpc
 
-import generated.plagarism_detection_pb2 as plagarism_detection_pb2
-import generated.plagarism_detection_pb2_grpc as plagarism_detection_pb2_grpc
+import generated.plagiarism_detection_pb2 as plagiarism_detection_pb2
+import generated.plagiarism_detection_pb2_grpc as plagiarism_detection_pb2_grpc
 
 from utils.error_codes import LoginStatus, RegisterStatus
 from config import grpc_server_address
@@ -31,32 +31,32 @@ class ApiClient:
         self._initiated = True
         
         channel = grpc.insecure_channel(grpc_server_address)
-        self.stub = plagarism_detection_pb2_grpc.PlagarismDetectionServiceStub(channel)
+        self.stub = plagiarism_detection_pb2_grpc.PlagiarismDetectionServiceStub(channel)
         self.token = None
         
     def ping(self):
         try:
-            response = self.stub.Ping(plagarism_detection_pb2.PingRequest(), timeout=5)
+            response = self.stub.Ping(plagiarism_detection_pb2.PingRequest(), timeout=5)
             return response.status == 1
         except grpc.RpcError:
             return False
     
     def login(self, username, password):
         try:
-            response = self.stub.Login(plagarism_detection_pb2.LoginRequest(username=username, password=hash_password(password)))
-            if response.status == plagarism_detection_pb2.LOGIN_SUCCESS:
+            response = self.stub.Login(plagiarism_detection_pb2.LoginRequest(username=username, password=hash_password(password)))
+            if response.status == LoginStatus.LOGIN_SUCCESS.value[0]:
                 self.token = response.token
                 return LoginStatus.LOGIN_SUCCESS, response.token
             else:
-                return LoginStatus.from_value(response.status), ""
+                return LoginStatus.from_value(response.status), ''
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
-                return LoginStatus.NETWORK_ERROR
-            return LoginStatus.UNKNOWN_ERROR
+                return LoginStatus.NETWORK_ERROR, ''
+            return LoginStatus.UNKNOWN_ERROR, ''
     
     def register(self, username, password) -> RegisterStatus:
         try:
-            response = self.stub.Register(plagarism_detection_pb2.RegisterRequest(username=username, password=hash_password(password)))
+            response = self.stub.Register(plagiarism_detection_pb2.RegisterRequest(username=username, password=hash_password(password)))
             return RegisterStatus.from_value(response.status)
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
