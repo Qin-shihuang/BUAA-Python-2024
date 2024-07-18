@@ -12,11 +12,13 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
 
 from ui.login import LoginWindow
+from ui.file_picker import FileUploadWidget
 
 if __name__ == "__main__":
     PyQt5.QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True) 
     app = QApplication(sys.argv)
-    login_window = LoginWindow(None)
+    file_upload_widget = FileUploadWidget()
+    login_window = LoginWindow(file_upload_widget.show)
     login_window.show()
     
     exit(app.exec_())

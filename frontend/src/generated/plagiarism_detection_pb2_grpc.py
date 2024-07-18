@@ -30,7 +30,7 @@ if _version_not_supported:
     )
 
 
-class PlagiarismDetectionServiceStub(object):
+class PingServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -40,33 +40,13 @@ class PlagiarismDetectionServiceStub(object):
             channel: A grpc.Channel.
         """
         self.Ping = channel.unary_unary(
-                '/plagiarism_detection.PlagiarismDetectionService/Ping',
+                '/plagiarism_detection.PingService/Ping',
                 request_serializer=plagiarism__detection__pb2.PingRequest.SerializeToString,
                 response_deserializer=plagiarism__detection__pb2.PingResponse.FromString,
                 _registered_method=True)
-        self.Login = channel.unary_unary(
-                '/plagiarism_detection.PlagiarismDetectionService/Login',
-                request_serializer=plagiarism__detection__pb2.LoginRequest.SerializeToString,
-                response_deserializer=plagiarism__detection__pb2.LoginResponse.FromString,
-                _registered_method=True)
-        self.Register = channel.unary_unary(
-                '/plagiarism_detection.PlagiarismDetectionService/Register',
-                request_serializer=plagiarism__detection__pb2.RegisterRequest.SerializeToString,
-                response_deserializer=plagiarism__detection__pb2.RegisterResponse.FromString,
-                _registered_method=True)
-        self.UploadFile = channel.unary_unary(
-                '/plagiarism_detection.PlagiarismDetectionService/UploadFile',
-                request_serializer=plagiarism__detection__pb2.UploadFileRequest.SerializeToString,
-                response_deserializer=plagiarism__detection__pb2.UploadFileResponse.FromString,
-                _registered_method=True)
-        self.CheckTwoFiles = channel.unary_unary(
-                '/plagiarism_detection.PlagiarismDetectionService/CheckTwoFiles',
-                request_serializer=plagiarism__detection__pb2.CheckTwoFilesRequest.SerializeToString,
-                response_deserializer=plagiarism__detection__pb2.CheckTwoFilesResponse.FromString,
-                _registered_method=True)
 
 
-class PlagiarismDetectionServiceServicer(object):
+class PingServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def Ping(self, request, context):
@@ -75,67 +55,23 @@ class PlagiarismDetectionServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Login(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
 
-    def Register(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def UploadFile(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def CheckTwoFiles(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-
-def add_PlagiarismDetectionServiceServicer_to_server(servicer, server):
+def add_PingServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Ping': grpc.unary_unary_rpc_method_handler(
                     servicer.Ping,
                     request_deserializer=plagiarism__detection__pb2.PingRequest.FromString,
                     response_serializer=plagiarism__detection__pb2.PingResponse.SerializeToString,
             ),
-            'Login': grpc.unary_unary_rpc_method_handler(
-                    servicer.Login,
-                    request_deserializer=plagiarism__detection__pb2.LoginRequest.FromString,
-                    response_serializer=plagiarism__detection__pb2.LoginResponse.SerializeToString,
-            ),
-            'Register': grpc.unary_unary_rpc_method_handler(
-                    servicer.Register,
-                    request_deserializer=plagiarism__detection__pb2.RegisterRequest.FromString,
-                    response_serializer=plagiarism__detection__pb2.RegisterResponse.SerializeToString,
-            ),
-            'UploadFile': grpc.unary_unary_rpc_method_handler(
-                    servicer.UploadFile,
-                    request_deserializer=plagiarism__detection__pb2.UploadFileRequest.FromString,
-                    response_serializer=plagiarism__detection__pb2.UploadFileResponse.SerializeToString,
-            ),
-            'CheckTwoFiles': grpc.unary_unary_rpc_method_handler(
-                    servicer.CheckTwoFiles,
-                    request_deserializer=plagiarism__detection__pb2.CheckTwoFilesRequest.FromString,
-                    response_serializer=plagiarism__detection__pb2.CheckTwoFilesResponse.SerializeToString,
-            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'plagiarism_detection.PlagiarismDetectionService', rpc_method_handlers)
+            'plagiarism_detection.PingService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('plagiarism_detection.PlagiarismDetectionService', rpc_method_handlers)
+    server.add_registered_method_handlers('plagiarism_detection.PingService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class PlagiarismDetectionService(object):
+class PingService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -152,7 +88,7 @@ class PlagiarismDetectionService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/plagiarism_detection.PlagiarismDetectionService/Ping',
+            '/plagiarism_detection.PingService/Ping',
             plagiarism__detection__pb2.PingRequest.SerializeToString,
             plagiarism__detection__pb2.PingResponse.FromString,
             options,
@@ -164,6 +100,67 @@ class PlagiarismDetectionService(object):
             timeout,
             metadata,
             _registered_method=True)
+
+
+class AuthServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.Login = channel.unary_unary(
+                '/plagiarism_detection.AuthService/Login',
+                request_serializer=plagiarism__detection__pb2.LoginRequest.SerializeToString,
+                response_deserializer=plagiarism__detection__pb2.LoginResponse.FromString,
+                _registered_method=True)
+        self.Register = channel.unary_unary(
+                '/plagiarism_detection.AuthService/Register',
+                request_serializer=plagiarism__detection__pb2.RegisterRequest.SerializeToString,
+                response_deserializer=plagiarism__detection__pb2.RegisterResponse.FromString,
+                _registered_method=True)
+
+
+class AuthServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def Login(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Register(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_AuthServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'Login': grpc.unary_unary_rpc_method_handler(
+                    servicer.Login,
+                    request_deserializer=plagiarism__detection__pb2.LoginRequest.FromString,
+                    response_serializer=plagiarism__detection__pb2.LoginResponse.SerializeToString,
+            ),
+            'Register': grpc.unary_unary_rpc_method_handler(
+                    servicer.Register,
+                    request_deserializer=plagiarism__detection__pb2.RegisterRequest.FromString,
+                    response_serializer=plagiarism__detection__pb2.RegisterResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'plagiarism_detection.AuthService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('plagiarism_detection.AuthService', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class AuthService(object):
+    """Missing associated documentation comment in .proto file."""
 
     @staticmethod
     def Login(request,
@@ -179,7 +176,7 @@ class PlagiarismDetectionService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/plagiarism_detection.PlagiarismDetectionService/Login',
+            '/plagiarism_detection.AuthService/Login',
             plagiarism__detection__pb2.LoginRequest.SerializeToString,
             plagiarism__detection__pb2.LoginResponse.FromString,
             options,
@@ -206,7 +203,7 @@ class PlagiarismDetectionService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/plagiarism_detection.PlagiarismDetectionService/Register',
+            '/plagiarism_detection.AuthService/Register',
             plagiarism__detection__pb2.RegisterRequest.SerializeToString,
             plagiarism__detection__pb2.RegisterResponse.FromString,
             options,
@@ -218,6 +215,51 @@ class PlagiarismDetectionService(object):
             timeout,
             metadata,
             _registered_method=True)
+
+
+class FileServiceStub(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.UploadFile = channel.unary_unary(
+                '/plagiarism_detection.FileService/UploadFile',
+                request_serializer=plagiarism__detection__pb2.UploadFileRequest.SerializeToString,
+                response_deserializer=plagiarism__detection__pb2.UploadFileResponse.FromString,
+                _registered_method=True)
+
+
+class FileServiceServicer(object):
+    """Missing associated documentation comment in .proto file."""
+
+    def UploadFile(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_FileServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'UploadFile': grpc.unary_unary_rpc_method_handler(
+                    servicer.UploadFile,
+                    request_deserializer=plagiarism__detection__pb2.UploadFileRequest.FromString,
+                    response_serializer=plagiarism__detection__pb2.UploadFileResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'plagiarism_detection.FileService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('plagiarism_detection.FileService', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class FileService(object):
+    """Missing associated documentation comment in .proto file."""
 
     @staticmethod
     def UploadFile(request,
@@ -233,36 +275,9 @@ class PlagiarismDetectionService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/plagiarism_detection.PlagiarismDetectionService/UploadFile',
+            '/plagiarism_detection.FileService/UploadFile',
             plagiarism__detection__pb2.UploadFileRequest.SerializeToString,
             plagiarism__detection__pb2.UploadFileResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def CheckTwoFiles(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/plagiarism_detection.PlagiarismDetectionService/CheckTwoFiles',
-            plagiarism__detection__pb2.CheckTwoFilesRequest.SerializeToString,
-            plagiarism__detection__pb2.CheckTwoFilesResponse.FromString,
             options,
             channel_credentials,
             insecure,

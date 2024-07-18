@@ -4,14 +4,19 @@ import time
 import signal
 import sys
 
-from generated import plagiarism_detection_pb2_grpc
+from generated import plagiarism_detection_pb2_grpc as pb_grpc
 from config import SERVER_PORT
-from services.main_service import MainService
+
+from apis.ping import PingServiceServicer
+from apis.auth import AuthServiceServicer
+from apis.file import FileServiceServicer
 
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    plagiarism_detection_pb2_grpc.add_PlagiarismDetectionServiceServicer_to_server(MainService(), server)
+    pb_grpc.add_PingServiceServicer_to_server(PingServiceServicer(), server)
+    pb_grpc.add_AuthServiceServicer_to_server(AuthServiceServicer(), server)
+    pb_grpc.add_FileServiceServicer_to_server(FileServiceServicer(), server)
     server.add_insecure_port(f'[::]:{SERVER_PORT}')
     server.start()
     print(f"Server started on port {SERVER_PORT}")
