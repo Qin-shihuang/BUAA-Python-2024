@@ -6,8 +6,9 @@ Description: Configuration file
 """
 
 SERVER_PORT = 11451
-ACCOUNT_DB_NAME = "account"
+DATABASE_NAME = "account"
 
 SALT = b'$2b$12$K8lipoVF6qbTU9LKIiD11e'
 JWT_SECRET = "not_secret"
 
+UPLOAD_FOLDER = "uploads"

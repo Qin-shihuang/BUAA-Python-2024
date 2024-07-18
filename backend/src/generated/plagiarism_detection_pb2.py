@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1aplagiarism_detection.proto\x12\x14plagiarism_detection\"\r\n\x0bPingRequest\"\x1e\n\x0cPingResponse\x12\x0e\n\x06status\x18\x01 \x01(\x05\"2\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\".\n\rLoginResponse\x12\x0e\n\x06status\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t\"5\n\x0fRegisterRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"\"\n\x10RegisterResponse\x12\x0e\n\x06status\x18\x01 \x01(\x05\"0\n\x11UploadFileRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x0c\n\x04\x66ile\x18\x02 \x01(\t\"4\n\x12UploadFileResponse\x12\r\n\x05token\x18\x01 \x01(\t\x12\x0f\n\x07\x66ile_id\x18\x02 \x01(\t\"K\n\x14\x43heckTwoFilesRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x11\n\tfile_id_1\x18\x02 \x01(\t\x12\x11\n\tfile_id_2\x18\x03 \x01(\t\"-\n\x15\x43heckTwoFilesResponse\x12\x14\n\x0cline_numbers\x18\x01 \x03(\x05\x32\xed\x03\n\x1aPlagiarismDetectionService\x12O\n\x04Ping\x12!.plagiarism_detection.PingRequest\x1a\".plagiarism_detection.PingResponse\"\x00\x12R\n\x05Login\x12\".plagiarism_detection.LoginRequest\x1a#.plagiarism_detection.LoginResponse\"\x00\x12[\n\x08Register\x12%.plagiarism_detection.RegisterRequest\x1a&.plagiarism_detection.RegisterResponse\"\x00\x12\x61\n\nUploadFile\x12\'.plagiarism_detection.UploadFileRequest\x1a(.plagiarism_detection.UploadFileResponse\"\x00\x12j\n\rCheckTwoFiles\x12*.plagiarism_detection.CheckTwoFilesRequest\x1a+.plagiarism_detection.CheckTwoFilesResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1aplagiarism_detection.proto\x12\x14plagiarism_detection\"\r\n\x0bPingRequest\"\x1e\n\x0cPingResponse\x12\x0e\n\x06status\x18\x01 \x01(\x05\"2\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\".\n\rLoginResponse\x12\x0e\n\x06status\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t\"5\n\x0fRegisterRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"\"\n\x10RegisterResponse\x12\x0e\n\x06status\x18\x01 \x01(\x05\"\x85\x01\n\x11UploadFileRequest\x12\x36\n\x08metadata\x18\x01 \x01(\x0b\x32\".plagiarism_detection.FileMetadataH\x00\x12\x30\n\x05\x63hunk\x18\x02 \x01(\x0b\x32\x1f.plagiarism_detection.FileChunkH\x00\x42\x06\n\x04\x64\x61ta\"=\n\x0c\x46ileMetadata\x12\r\n\x05token\x18\x01 \x01(\t\x12\x10\n\x08\x66ilename\x18\x02 \x01(\t\x12\x0c\n\x04size\x18\x03 \x01(\x05\"\x19\n\tFileChunk\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\"F\n\x12UploadFileResponse\x12\x0e\n\x06status\x18\x01 \x01(\x05\x12\x14\n\x07\x66ile_id\x18\x02 \x01(\x05H\x00\x88\x01\x01\x42\n\n\x08_file_id2^\n\x0bPingService\x12O\n\x04Ping\x12!.plagiarism_detection.PingRequest\x1a\".plagiarism_detection.PingResponse\"\x00\x32\xbe\x01\n\x0b\x41uthService\x12R\n\x05Login\x12\".plagiarism_detection.LoginRequest\x1a#.plagiarism_detection.LoginResponse\"\x00\x12[\n\x08Register\x12%.plagiarism_detection.RegisterRequest\x1a&.plagiarism_detection.RegisterResponse\"\x00\x32r\n\x0b\x46ileService\x12\x63\n\nUploadFile\x12\'.plagiarism_detection.UploadFileRequest\x1a(.plagiarism_detection.UploadFileResponse\"\x00(\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,14 +33,18 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_REGISTERREQUEST']._serialized_end=252
   _globals['_REGISTERRESPONSE']._serialized_start=254
   _globals['_REGISTERRESPONSE']._serialized_end=288
-  _globals['_UPLOADFILEREQUEST']._serialized_start=290
-  _globals['_UPLOADFILEREQUEST']._serialized_end=338
-  _globals['_UPLOADFILERESPONSE']._serialized_start=340
-  _globals['_UPLOADFILERESPONSE']._serialized_end=392
-  _globals['_CHECKTWOFILESREQUEST']._serialized_start=394
-  _globals['_CHECKTWOFILESREQUEST']._serialized_end=469
-  _globals['_CHECKTWOFILESRESPONSE']._serialized_start=471
-  _globals['_CHECKTWOFILESRESPONSE']._serialized_end=516
-  _globals['_PLAGIARISMDETECTIONSERVICE']._serialized_start=519
-  _globals['_PLAGIARISMDETECTIONSERVICE']._serialized_end=1012
+  _globals['_UPLOADFILEREQUEST']._serialized_start=291
+  _globals['_UPLOADFILEREQUEST']._serialized_end=424
+  _globals['_FILEMETADATA']._serialized_start=426
+  _globals['_FILEMETADATA']._serialized_end=487
+  _globals['_FILECHUNK']._serialized_start=489
+  _globals['_FILECHUNK']._serialized_end=514
+  _globals['_UPLOADFILERESPONSE']._serialized_start=516
+  _globals['_UPLOADFILERESPONSE']._serialized_end=586
+  _globals['_PINGSERVICE']._serialized_start=588
+  _globals['_PINGSERVICE']._serialized_end=682
+  _globals['_AUTHSERVICE']._serialized_start=685
+  _globals['_AUTHSERVICE']._serialized_end=875
+  _globals['_FILESERVICE']._serialized_start=877
+  _globals['_FILESERVICE']._serialized_end=991
 # @@protoc_insertion_point(module_scope)

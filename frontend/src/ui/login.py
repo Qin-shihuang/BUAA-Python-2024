@@ -20,6 +20,7 @@ class LoginWindow(QWidget):
         self.login_controller = LoginController()
         self.login_callback = loginCallback
         
+        self.setAttribute(Qt.WA_QuitOnClose, False)
         self.setWindowTitle("Login/Register")
         self.setFixedSize(400,500)
         self.center()
@@ -153,6 +154,9 @@ class LoginWindow(QWidget):
         self.register_password_repeat_input.focusOutEvent = self.register_password_repeat_lost_focus
         self.update_password_requirements()
         
+        self.login_username_input.setText("a123")
+        self.login_password_input.setText("Aa123456")
+        
     def center(self):
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
@@ -178,7 +182,7 @@ class LoginWindow(QWidget):
         status, token = self.login_controller.try_login(self.login_username_input.text(), self.login_password_input.text())
         if status == LoginStatus.LOGIN_SUCCESS:
             if self.login_callback:
-                self.login_callback()
+                self.login_callback(token)
                 self.health_checker.stop()
                 self.close()
             else:
