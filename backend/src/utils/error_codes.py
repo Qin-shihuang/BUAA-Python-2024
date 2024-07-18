@@ -62,8 +62,9 @@ class UploadFileStatus(Enum):
     FILE_TOO_LARGE = (4, "File is too large.")
     # Backend errors
     UNAUTHORIZED = (5, "Unauthorized.")
-    UNKNOWN_ERROR = (6, "An unknown error occurred.")
-    NETWORK_ERROR = (7, "Network error.")
+    BAD_REQUEST = (6, "Bad request.")
+    UNKNOWN_ERROR = (7, "An unknown error occurred.")
+    NETWORK_ERROR = (8, "Network error.")
 
     @classmethod
     def from_value(cls, value):

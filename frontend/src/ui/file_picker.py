@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import QFileDialog, QPushButton, QVBoxLayout, QWidget
 from PyQt5.QtCore import Qt
 
 from utils.api_client import ApiClient
+from utils.error_codes import UploadFileStatus
+
 class FileUploadWidget(QWidget):
     def __init__(self):
         super().__init__()
@@ -28,5 +30,8 @@ class FileUploadWidget(QWidget):
             
     def startUpload(self, files):
         for file in files:
-            self.api_client.upload_file(self.token, file)    
-    
+            status, file_id = self.api_client.upload_file(self.token, file)    
+            if status == UploadFileStatus.UPLOAD_SUCCESS:
+                print(f"File {file} uploaded successfully with id {file_id}")
+            else:
+                print(f"Failed to upload file {file}", status.value[1])

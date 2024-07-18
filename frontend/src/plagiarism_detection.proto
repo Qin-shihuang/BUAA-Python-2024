@@ -12,7 +12,7 @@ service AuthService {
 }
 
 service FileService {
-    rpc UploadFile(UploadFileRequest) returns (UploadFileResponse) {}
+    rpc UploadFile(stream UploadFileRequest) returns (UploadFileResponse) {}
 }
 
 message PingRequest {

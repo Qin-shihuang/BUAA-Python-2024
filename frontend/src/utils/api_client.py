@@ -70,6 +70,29 @@ class ApiClient:
         filename = file_path.split('/')[-1]
         content = read_file(file_path)
         
+        def request_generator():
+            try:
+                CHUNK_SIZE = 4096
+                metadata = pb.FileMetadata(token=token, filename=filename, size=len(content))
+                yield pb.UploadFileRequest(metadata=metadata)
+                for i in range(0, len(content), CHUNK_SIZE):
+                    file_chunk = pb.FileChunk(data=content[i:i+CHUNK_SIZE])
+                    yield pb.UploadFileRequest(chunk=file_chunk)
+            except Exception as e:
+                print(e)
+        
+        try:
+            response = self.file_stub.UploadFile(request_generator())
+            status = response.status
+            if status == UploadFileStatus.UPLOAD_SUCCESS.value[0]:
+                return UploadFileStatus.UPLOAD_SUCCESS, response.file_id
+            else:
+                return UploadFileStatus.from_value(status), -1
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                return UploadFileStatus.NETWORK_ERROR, -1
+            return UploadFileStatus.UNKNOWN_ERROR, -1         
+        
 
     
 def hash_password(password):

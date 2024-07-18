@@ -226,7 +226,7 @@ class FileServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.UploadFile = channel.unary_unary(
+        self.UploadFile = channel.stream_unary(
                 '/plagiarism_detection.FileService/UploadFile',
                 request_serializer=plagiarism__detection__pb2.UploadFileRequest.SerializeToString,
                 response_deserializer=plagiarism__detection__pb2.UploadFileResponse.FromString,
@@ -236,7 +236,7 @@ class FileServiceStub(object):
 class FileServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def UploadFile(self, request, context):
+    def UploadFile(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -245,7 +245,7 @@ class FileServiceServicer(object):
 
 def add_FileServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'UploadFile': grpc.unary_unary_rpc_method_handler(
+            'UploadFile': grpc.stream_unary_rpc_method_handler(
                     servicer.UploadFile,
                     request_deserializer=plagiarism__detection__pb2.UploadFileRequest.FromString,
                     response_serializer=plagiarism__detection__pb2.UploadFileResponse.SerializeToString,
@@ -262,7 +262,7 @@ class FileService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def UploadFile(request,
+    def UploadFile(request_iterator,
             target,
             options=(),
             channel_credentials=None,
@@ -272,8 +272,8 @@ class FileService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
+        return grpc.experimental.stream_unary(
+            request_iterator,
             target,
             '/plagiarism_detection.FileService/UploadFile',
             plagiarism__detection__pb2.UploadFileRequest.SerializeToString,
