@@ -1,6 +1,6 @@
 import os
 import sys
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDateTime
 from PyQt5.QtGui import QFont
 import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
@@ -72,9 +72,13 @@ class WelcomePage(QWidget):
         self.task_name_input = QLineEdit()
         self.task_name_input.focusOutEvent = self.task_name_lost_focus
         self.task_name_input.setPlaceholderText('请输入本次查重任务名称')
+        self.task_name_input.setText(self.get_default_name())
+        reset_task_name_button = QPushButton('重置任务名')
+        reset_task_name_button.clicked.connect(lambda: self.task_name_input.setText(self.get_default_name()))
         task_name_layout = QHBoxLayout()
         task_name_layout.addWidget(self.task_name_label)
         task_name_layout.addWidget(self.task_name_input)
+        task_name_layout.addWidget(reset_task_name_button)
 
         self.file_label = QLabel('上传待查文件')
         self.files = []
@@ -163,6 +167,14 @@ class WelcomePage(QWidget):
         # self.login_window = LoginWindow(self.switch_to_login_window)
         # self.login_window.show()
         self.close()
+
+    def get_default_name(self):
+        datetime = QDateTime.currentDateTime()
+        time = list(datetime.toString().split())[3]
+        year = datetime.date().year()
+        month = datetime.date().month()
+        day = datetime.date().day()
+        return 'Task_' + str(year) + '-' + str(month) + '-' + str(day) + '_' + time
 
     def task_name_lost_focus(self, event):
         if self.task_name_input.text() != '':
