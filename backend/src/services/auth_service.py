@@ -31,7 +31,7 @@ class AuthService:
         query = "INSERT INTO users (username, password) VALUES (?, ?)"
         args = (username, hashed_password.decode())
         self.db_service.query(query, args)
-        return RegisterStatus.REGISTER_SUCCESS
+        return RegisterStatus.SUCCESS
 
     def login(self, username, password):
         username = username.lower()
@@ -43,7 +43,7 @@ class AuthService:
             return LoginStatus.INVALID_CREDENTIALS, ''
         else:
             self.log_login_attempt(username, True)        
-            return LoginStatus.LOGIN_SUCCESS, create_token(result[0][0], result[0][1])
+            return LoginStatus.SUCCESS, create_token(result[0][0], result[0][1])
     
     def get_userid_from_username(self, username):
         query = "SELECT id FROM users WHERE username = ?"

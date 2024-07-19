@@ -12,3 +12,5 @@ SALT = b'$2b$12$K8lipoVF6qbTU9LKIiD11e'
 JWT_SECRET = "not_secret"
 
 UPLOAD_FOLDER = "uploads"
+
+CHUNK_SIZE = 4096

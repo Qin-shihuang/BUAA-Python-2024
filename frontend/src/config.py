@@ -6,3 +6,5 @@ Description: Configuration file
 """
 
 grpc_server_address = "192.168.100.225:11451"
+
+DOWNLOAD_DIR = "download"

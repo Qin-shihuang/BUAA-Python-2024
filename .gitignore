@@ -3,6 +3,7 @@ venv/
 # all __pycache__ directories
 __pycache__/
 
+frontend/download/
 backend/data/
 backend/uploads/
 

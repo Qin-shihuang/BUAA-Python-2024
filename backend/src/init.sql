@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS user_logins (
 CREATE TABLE IF NOT EXISTS uploaded_files (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     storage_name VARCHAR(255) NOT NULL,
-    original_name VARCHAR(255) NOT NULL,
+    original_path VARCHAR(255) NOT NULL,
+    size INTEGER NOT NULL,
+    hash VARCHAR(255) NOT NULL,
     uploader_id INTEGER NOT NULL,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (uploader_id) REFERENCES users(id)

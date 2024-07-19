@@ -1,6 +1,9 @@
+import io
 import os
+import json
 import time
 import hashlib
+import zipfile
 
 from config import UPLOAD_FOLDER
 from services.database_service import DatabaseService
@@ -8,30 +11,100 @@ from services.database_service import DatabaseService
 class StorageService:
     def __init__(self):
         self.db_service = DatabaseService('storage')
+        if not os.path.exists(UPLOAD_FOLDER):
+            os.makedirs(UPLOAD_FOLDER)
         
     def __del__(self):
         self.db_service.close()
         
-    def save_file(self, userId, originalFilename, content):
-        storage_name = generate_filename(userId, originalFilename, content)
-        storage_path = os.path.join(UPLOAD_FOLDER, storage_name)
-        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    def save_file(self, userId, filePath, content):
         try:
-            with open(storage_path, 'wb') as f:
-                f.write(content)
-            query = "INSERT INTO uploaded_files (storage_name, original_name, uploader_id) VALUES (?, ?, ?)"
-            args = (storage_name, originalFilename, userId)
-            self.db_service.query(query, args)
-            query = "SELECT id FROM uploaded_files WHERE storage_name = ?"
-            args = (storage_name,)
+            filePath = filePath[:255]
+            hash_sha256 = hashlib.sha256(content).hexdigest()
+            # check if file already exists
+            query = "SELECT (storage_name) FROM uploaded_files WHERE hash = ?"
+            args = (hash_sha256,)
             result = self.db_service.query(query, args)
+            if result:
+                storage_name = result[0][0]
+            else:
+                storage_name = generate_filename(userId, filePath, content)
+                storage_path = os.path.join(UPLOAD_FOLDER, storage_name)
+                with open(storage_path, 'wb') as f:
+                    f.write(content)
+            query = "INSERT INTO uploaded_files (storage_name, original_path, size, hash, uploader_id) VALUES (?, ?, ?, ?, ?)"
+            args = (storage_name, filePath, len(content), hash_sha256, userId)
+            self.db_service.query(query, args)
+            query = "SELECT id FROM uploaded_files WHERE storage_name = ? ORDER BY id DESC LIMIT 1"
+            args = (storage_name,)
+            result = self.db_service.query(query, args) 
             return True, result[0][0]
         except Exception as e:
             print(e)
             return False, -1
+    
+    def get_file_owner(self, fileId):
+        query = "SELECT (uploader_id) FROM uploaded_files WHERE id = ?"
+        args = (fileId,)
+        result = self.db_service.query(query, args)
+        if not result:
+            return False, None
+        return True, result[0][0]
+        
+    def get_file(self, fileId):
+        query = "SELECT (storage_name) FROM uploaded_files WHERE id = ?"
+        args = (fileId,)
+        result = self.db_service.query(query, args)
+        if not result:
+            return False, None
+        storage_name = result[0][0]
+        file_path = os.path.join(UPLOAD_FOLDER, storage_name)
+        if not os.path.exists(file_path):
+            raise FileNotFoundError
+        with open(file_path, 'rb') as f:
+            content = f.read()
+        return True, content
+    
+    def delete_file(self, fileId):
+        try:
+            query = "SELECT (storage_name) FROM uploaded_files WHERE id = ?"
+            args = (fileId,)
+            result = self.db_service.query(query, args)
+            query = "SELECT COUNT(*) FROM uploaded_files WHERE storage_name = ?"
+            args = (result[0][0],)
+            count = self.db_service.query(query, args)[0][0]
+            if count == 1:
+                file_path = os.path.join(UPLOAD_FOLDER, result[0][0])
+                os.remove(file_path)
+            query = "DELETE FROM uploaded_files WHERE id = ?"
+            args = (fileId,)
+            self.db_service.query(query, args)
+            return True
+        except Exception as e:
+            print(e)
+            return False
         
         
-def generate_filename(user_id, filename, content):
-    original_extension = filename.split('.')[-1]
-    hash_input = f"{user_id}_{filename}_{len(content)}_{time.time()}"
+    def get_file_list(self, userId):
+        query = "SELECT id, original_path, size, uploaded_at FROM uploaded_files WHERE uploader_id = ?"
+        args = (userId,)
+        return self.db_service.query(query, args)
+        
+    def get_multiple_files_zip(self, fileIds):
+        placeholders = ','.join(['?'] * len(fileIds))
+        query = f"SELECT id, storage_name, original_path FROM uploaded_files WHERE id IN ({placeholders})"
+        args = fileIds
+        result = self.db_service.query(query, args)
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w') as z:
+            for id, storage_name, original_path in result:
+                file_path = os.path.join(UPLOAD_FOLDER, storage_name)
+                original_name = original_path.split('/')[-1]
+                z.write(file_path, f"{id}_{original_name}")
+        zip_buffer.seek(0)
+        return zip_buffer.read()
+    
+def generate_filename(user_id, file_path, content):
+    original_extension = file_path.split('.')[-1]
+    hash_input = f"{user_id}_{file_path}_{len(content)}_{time.time()}"
     return hashlib.sha256(hash_input.encode()).hexdigest() + f".{original_extension}"

@@ -13,6 +13,24 @@ service AuthService {
 
 service FileService {
     rpc UploadFile(stream UploadFileRequest) returns (UploadFileResponse) {}
+    rpc GetUploadedFileList(GetUploadedFileListRequest) returns (GetUploadedFileListResponse) {}
+    rpc DownloadFile(DownloadFileRequest) returns (stream DownloadFileResponse) {}
+    rpc DownloadMultipleFiles(DownloadMultipleFilesRequest) returns (stream DownloadMultipleFilesResponse) {}
+    rpc DeleteFile(DeleteFileRequest) returns (DeleteFileResponse) {}
+}
+
+service CheckService {
+    rpc OneToOneCheck(OneToOneCheckRequest) returns (OneToOneCheckResponse) {}
+    rpc OneToManyCheck(OneToManyCheckRequest) returns (stream OneToManyCheckResponse) {}
+    rpc ManyToManyCheck(ManyToManyCheckRequest) returns (stream ManyToManyCheckResponse) {}
+}
+
+service ReportService {
+    rpc GetCheckList(GetCheckListRequest) returns (GetCheckListResponse) {}
+    rpc GetCheck(GetCheckRequest) returns (GetCheckResponse) {}
+    rpc GetAllReportList(GetAllReportListRequest) returns (GetAllReportListResponse) {}
+    rpc GetReport(GetReportRequest) returns (GetReportResponse) {}
+    rpc UpdateReport(UpdateReportRequest) returns (UpdateReportResponse) {}
 }
 
 message PingRequest {
@@ -50,7 +68,7 @@ message UploadFileRequest {
 
 message FileMetadata {
     string token = 1;
-    string filename = 2;
+    string file_path = 2;
     int32 size = 3;
 }
 
@@ -61,4 +79,150 @@ message FileChunk {
 message UploadFileResponse {
     int32 status = 1;
     optional int32 file_id = 2;
+}
+
+message GetUploadedFileListRequest {
+    string token = 1;
+}
+
+message GetUploadedFileListResponse {
+    int32 status = 1;
+    repeated FileInfo files = 3;
+}
+
+message FileInfo {
+    int32 id = 1;
+    string file_path = 2;
+    int32 size = 3;
+    string uploaded_at = 4;
+}
+
+message DownloadFileRequest {
+    string token = 1;
+    int32 file_id = 2;
+}
+
+message DownloadFileResponse {
+    oneof data {
+        int32 status = 1;
+        FileChunk chunk = 2;
+    }
+}
+
+message DownloadMultipleFilesRequest {
+    string token = 1;
+    repeated int32 file_ids = 2;
+}
+
+message DownloadMultipleFilesResponse {
+    oneof data {
+        int32 status = 1;
+        FileChunk chunk = 2;
+    }
+}
+
+message DeleteFileRequest {
+    string token = 1;
+    int32 file_id = 2;
+}
+
+message DeleteFileResponse {
+    int32 status = 1;
+}
+
+message OneToOneCheckRequest {
+    string token = 1;
+    int32 file1_id = 2;
+    int32 file2_id = 3;
+}
+
+message OneToOneCheckResponse {
+    int32 status = 1;
+    int32 check_id = 2;
+    ReportInfo report = 3;
+}
+
+message OneToManyCheckRequest {
+    string token = 1;
+    int32 one_file_id = 2;
+    repeated int32 many_file_ids = 3;
+}
+
+message OneToManyCheckResponse {
+    oneof data {
+        ManyCheckMetadata metadata = 1;
+        ReportInfo reports = 2;
+    }
+}
+
+message ManyToManyCheckRequest {
+    ManyCheckMetadata metadata = 1;
+    repeated int32 file_ids = 2;
+}
+
+message ManyToManyCheckResponse {
+    oneof data {
+        int32 status = 1;
+        ReportInfo reports = 2;
+    }
+}
+
+message GetCheckListRequest {
+    string token = 1;
+}
+
+message GetCheckListResponse {
+    int32 status = 1;
+    repeated int32 check_ids = 2;
+}
+
+message GetCheckRequest {
+    string token = 1;
+    int32 check_id = 2;
+}
+
+message GetCheckResponse {
+    int32 status = 1;
+    repeated ReportInfo reports = 2;
+}
+
+message GetAllReportListRequest {
+    string token = 1;
+}
+
+message GetAllReportListResponse {
+    int32 status = 1;
+    repeated ReportInfo reports = 2;
+}
+
+message GetReportRequest {
+    string token = 1;
+    int32 report_id = 2;
+}
+
+message GetReportResponse {
+    int32 status = 1;
+    string report = 2;
+}
+
+message UpdateReportRequest {
+    string token = 1;
+    int32 report_id = 2;
+    string report = 3;
+}
+
+message UpdateReportResponse {
+    int32 status = 1;
+}
+
+message ManyCheckMetadata {
+    int32 status = 1;
+    int32 check_id = 2;
+}
+
+message ReportInfo {
+    int32 report_id = 1;
+    // file1_id ALWAYS SMALLER THAN file2_id IN SQL QUERY
+    int32 file1_id = 2;
+    int32 file2_id = 3;
 }

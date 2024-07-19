@@ -1,8 +1,9 @@
 from enum import Enum
 
+#TODO: Refactor this
 
 class LoginStatus(Enum):
-    LOGIN_SUCCESS = (0, "")
+    SUCCESS = (0, "")
     # Frontend (and backend) errors
     USERNAME_EMPTY = (1, "Username cannot be empty.")
     PASSWORD_EMPTY = (2, "Password cannot be empty.")
@@ -26,7 +27,7 @@ class LoginStatus(Enum):
         return cls.UNKNOWN_ERROR.value[1]
 
 class RegisterStatus(Enum):
-    REGISTER_SUCCESS = (0, "")
+    SUCCESS = (0, "")
     # Frontend errors
     USERNAME_EMPTY = (1, "Username cannot be empty.")
     USERNAME_INVALID = (2, "Username can only contain letters and numbers.")
@@ -54,7 +55,7 @@ class RegisterStatus(Enum):
         return cls.UNKNOWN_ERROR.value[1]
     
 class UploadFileStatus(Enum):
-    UPLOAD_SUCCESS = (0, "")
+    SUCCESS = (0, "")
     # Frontend errors
     FILENAME_EMPTY = (1, "Filename cannot be empty.")
     FILENAME_INVALID = (2, "Filename is invalid.")
@@ -79,3 +80,66 @@ class UploadFileStatus(Enum):
             if error.value[0] == code.value[0]:
                 return error.value[1]
         return cls.UNKNOWN_ERROR.value[1]
+    
+class GetUploadedFileListStatus(Enum):
+    SUCCESS = (0, "")
+    UNAUTHORIZED = (1, "Unauthorized.")
+    UNKNOWN_ERROR = (2, "An unknown error occurred.")
+    NETWORK_ERROR = (3, "Network error.")
+
+    @classmethod
+    def from_value(cls, value):
+        for status in GetUploadedFileListStatus:
+            if status.value[0] == value:
+                return status
+        return GetUploadedFileListStatus.UNKNOWN_ERROR
+
+    @classmethod
+    def get_error_message(cls, code):
+        for error in cls:
+            if error.value[0] == code.value[0]:
+                return error.value[1]
+        return cls.UNKNOWN_ERROR.value[1]
+    
+class DownloadFileStatus(Enum):
+    SUCCESS = (0, "")
+    UNAUTHORIZED = (1, "Unauthorized.")
+    FILE_NOT_FOUND = (2, "File not found.")
+    UNKNOWN_ERROR = (3, "An unknown error occurred.")
+    NETWORK_ERROR = (4, "Network error.")
+
+    @classmethod
+    def from_value(cls, value):
+        for status in DownloadFileStatus:
+            if status.value[0] == value:
+                return status
+        return DownloadFileStatus.UNKNOWN_ERROR
+
+    @classmethod
+    def get_error_message(cls, code):
+        for error in cls:
+            if error.value[0] == code.value[0]:
+                return error.value[1]
+        return cls.UNKNOWN_ERROR.value[1]
+    
+class DeleteFileStatus(Enum):
+    SUCCESS = (0, "")
+    UNAUTHORIZED = (1, "Unauthorized.")
+    FILE_NOT_FOUND = (2, "File not found.")
+    UNKNOWN_ERROR = (3, "An unknown error occurred.")
+    NETWORK_ERROR = (4, "Network error.")
+
+    @classmethod
+    def from_value(cls, value):
+        for status in DeleteFileStatus:
+            if status.value[0] == value:
+                return status
+        return DeleteFileStatus.UNKNOWN_ERROR
+
+    @classmethod
+    def get_error_message(cls, code):
+        for error in cls:
+            if error.value[0] == code.value[0]:
+                return error.value[1]
+        return cls.UNKNOWN_ERROR.value[1]
+    

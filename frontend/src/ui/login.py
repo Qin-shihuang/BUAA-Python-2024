@@ -180,7 +180,7 @@ class LoginWindow(QWidget):
         
     def login_button_clicked(self):
         status, token = self.login_controller.try_login(self.login_username_input.text(), self.login_password_input.text())
-        if status == LoginStatus.LOGIN_SUCCESS:
+        if status == LoginStatus.SUCCESS:
             if self.login_callback:
                 self.login_callback(token)
                 self.health_checker.stop()
@@ -194,7 +194,7 @@ class LoginWindow(QWidget):
             
     def register_button_clicked(self):
         resp = self.login_controller.try_register(self.register_username_input.text(), self.register_password_input.text(), self.register_password_repeat_input.text())
-        if resp == RegisterStatus.REGISTER_SUCCESS:
+        if resp == RegisterStatus.SUCCESS:
             self.stacked_widget.setCurrentIndex(0)
             self.login_error_label.setStyleSheet("color: green")
             self.login_error_label.setText(f"Registered successfully! Please login.")
