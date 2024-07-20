@@ -2,7 +2,7 @@ import queue
 import threading
 import sqlite3
 
-
+from config import DATABASE_PATH
 class DatabaseService:
     _instances = {}
     _lock = threading.Lock()
@@ -16,7 +16,7 @@ class DatabaseService:
                     
     
     def _init(self, db_name):
-        self.db_path = f"data/{db_name}.db"
+        self.db_path = f"{DATABASE_PATH}/{db_name}.db"
         self.queue = queue.Queue()
         self.thread = threading.Thread(target=self.worker, daemon=True)
         self.thread.start()

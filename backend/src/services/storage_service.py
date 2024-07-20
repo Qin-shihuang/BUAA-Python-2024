@@ -5,12 +5,12 @@ import time
 import hashlib
 import zipfile
 
-from config import UPLOAD_FOLDER
+from config import STORAGE_DB_NAME, UPLOAD_FOLDER
 from services.database_service import DatabaseService
 
 class StorageService:
     def __init__(self):
-        self.db_service = DatabaseService('storage')
+        self.db_service = DatabaseService(STORAGE_DB_NAME)
         if not os.path.exists(UPLOAD_FOLDER):
             os.makedirs(UPLOAD_FOLDER)
         

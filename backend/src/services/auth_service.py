@@ -9,7 +9,7 @@ from utils.error_codes import RegisterStatus, LoginStatus
 
 class AuthService:
     def __init__(self):
-        self.db_service = DatabaseService('account')
+        self.db_service = DatabaseService(config.ACCOUNT_DB_NAME)
         
     def __del__(self):
         self.db_service.close()
@@ -38,7 +38,9 @@ class AuthService:
         query = "SELECT * FROM users WHERE username = ?"
         args = (username,)
         result = self.db_service.query(query, args)
-        if not result or not bcrypt.checkpw(password.encode(), result[0][2].encode()):
+        if not result:
+            return LoginStatus.INVALID_CREDENTIALS, ''
+        if not bcrypt.checkpw(password.encode(), result[0][2].encode()):
             self.log_login_attempt(username, False)
             return LoginStatus.INVALID_CREDENTIALS, ''
         else:
