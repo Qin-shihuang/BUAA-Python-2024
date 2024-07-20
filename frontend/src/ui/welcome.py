@@ -5,7 +5,7 @@ from PyQt5.QtGui import QFont, QIcon, QPixmap, QCursor
 import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
-    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction
+    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
 
 
 class WelcomePage(QWidget):
@@ -305,6 +305,8 @@ class WelcomePage(QWidget):
                 flag = True
         if flag:
             menu.exec_(QPoint(QCursor.pos().x(), QCursor.pos().y()))
+        else:
+            QMessageBox.warning(self, '提示', '请先选中待查文件')
 
     def set_target_file(self):
         self.target_file_button.setText(self.sender().text())
@@ -368,7 +370,7 @@ class CheckBoxHeader(QHeaderView):
 
         if logicalIndex == 0:
             option = QStyleOptionButton()
-            option.rect = QRect(3, 5, 10, 10)
+            option.rect = QRect(3, 6, 10, 10)
             option.state = QStyle.State_Enabled | QStyle.State_Active
             if self.isOn:
                 option.state |= QStyle.State_On
