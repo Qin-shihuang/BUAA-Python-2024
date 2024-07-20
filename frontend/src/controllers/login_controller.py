@@ -7,7 +7,7 @@ Description: Login controller
 
 from PyQt5.QtCore import QObject
 
-from utils.error_codes import LoginStatus, RegisterStatus
+from utils.error_codes import ErrorCode
 from utils.api_client import ApiClient
 
 class LoginController(QObject):
@@ -16,22 +16,22 @@ class LoginController(QObject):
         
     def try_login(self, username, password):
         if username == "":
-            return LoginStatus.USERNAME_EMPTY, ''
+            return ErrorCode.USERNAME_EMPTY, ''
         if password == "":
-            return LoginStatus.PASSWORD_EMPTY, ''
+            return ErrorCode.PASSWORD_EMPTY, ''
         return self.api_client.login(username, password)
     
-    def try_register(self, username, password, confirmPassword) -> RegisterStatus:
+    def try_register(self, username, password, confirmPassword) -> ErrorCode:
         if username == "":
-            return RegisterStatus.USERNAME_EMPTY
+            return ErrorCode.USERNAME_EMPTY
         if len(username) > 20:
-            return RegisterStatus.USERNAME_TOO_LONG
+            return ErrorCode.USERNAME_TOO_LONG
         if password == "":
-            return RegisterStatus.PASSWORD_EMPTY
+            return ErrorCode.PASSWORD_EMPTY
         if any(not requirement for requirement, _ in self.check_password_requirements(password)):
-            return RegisterStatus.PASSWORD_INVALID
+            return ErrorCode.PASSWORD_INVALID
         if password != confirmPassword:
-            return RegisterStatus.PASSWORDS_MISMATCH
+            return ErrorCode.PASSWORDS_MISMATCH
         return self.api_client.register(username, password)
         
     def check_password_requirements(self, password):

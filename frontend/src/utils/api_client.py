@@ -13,7 +13,7 @@ import generated.plagiarism_detection_pb2 as pb
 import generated.plagiarism_detection_pb2_grpc as pb_grpc
 
 from utils.file_handler import FileHandler
-from utils.error_codes import LoginStatus, RegisterStatus, UploadFileStatus, GetUploadedFileListStatus, DownloadFileStatus, DeleteFileStatus
+from utils.error_codes import ErrorCode
 
 from config import grpc_server_address
 
@@ -52,34 +52,47 @@ class ApiClient:
     def login(self, username, password):
         try:
             response = self.auth_stub.Login(pb.LoginRequest(username=username, password=hash_password(password)))
-            if response.status == LoginStatus.SUCCESS.value[0]:
+            if response.status == ErrorCode.SUCCESS.value:
                 self.token = response.token
                 self.file_handler = FileHandler(username)
-                return LoginStatus.SUCCESS, response.token
+                return ErrorCode.SUCCESS
             else:
-                return LoginStatus.from_value(response.status), ''
+                return ErrorCode.from_value(response.status)
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
-                return LoginStatus.NETWORK_ERROR, ''
-            return LoginStatus.UNKNOWN_ERROR, ''
+                return ErrorCode.NETWORK_ERROR
+            return ErrorCode.UNKNOWN_ERROR
     
-    def register(self, username, password) -> RegisterStatus:
+    def register(self, username, password) -> ErrorCode:
         try:
             response = self.auth_stub.Register(pb.RegisterRequest(username=username, password=hash_password(password)))
-            return RegisterStatus.from_value(response.status)
+            return ErrorCode.from_value(response.status)
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
-                return RegisterStatus.NETWORK_ERROR
-            return RegisterStatus.UNKNOWN_ERROR
+                return ErrorCode.NETWORK_ERROR
+            return ErrorCode.UNKNOWN_ERROR
+        
+    def get_login_history(self, limit=1):
+        try:
+            response = self.auth_stub.GetLoginHistory(pb.GetLoginHistoryRequest(token=self.token, limit=limit))
+            status = response.status
+            if status == ErrorCode.SUCCESS.value:
+                return ErrorCode.SUCCESS, [(login.login_time, login.success) for login in response.record]
+            else:
+                return ErrorCode.from_value(status), []
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                return ErrorCode.NETWORK_ERROR, []
+            return ErrorCode.UNKNOWN_ERROR, []
         
     # MARK: - File
-    def upload_file(self, token, file_path):
+    def upload_file(self, file_path):
         content = FileHandler.read_file(file_path)
         
         def request_generator():
             try:
                 CHUNK_SIZE = 4096
-                metadata = pb.FileMetadata(token=token, file_path=file_path, size=len(content))
+                metadata = pb.FileMetadata(token=self.token, file_path=file_path, size=len(content))
                 yield pb.UploadFileRequest(metadata=metadata)
                 for i in range(0, len(content), CHUNK_SIZE):
                     file_chunk = pb.FileChunk(data=content[i:i+CHUNK_SIZE])
@@ -90,82 +103,82 @@ class ApiClient:
         try:
             response = self.file_stub.UploadFile(request_generator())
             status = response.status
-            if status == UploadFileStatus.SUCCESS.value[0]:
-                return UploadFileStatus.SUCCESS, response.file_id
+            if status == ErrorCode.SUCCESS.value:
+                return ErrorCode.SUCCESS, response.file_id
             else:
-                return UploadFileStatus.from_value(status), -1
+                return ErrorCode.from_value(status), -1
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
-                return UploadFileStatus.NETWORK_ERROR, -1
-            return UploadFileStatus.UNKNOWN_ERROR, -1       
+                return ErrorCode.NETWORK_ERROR, -1
+            return ErrorCode.UNKNOWN_ERROR, -1       
     
-    def get_uploaded_file_list(self, token):
+    def get_uploaded_file_list(self):
         try:
-            response = self.file_stub.GetUploadedFileList(pb.GetUploadedFileListRequest(token=token))
+            response = self.file_stub.GetUploadedFileList(pb.GetUploadedFileListRequest(token=self.token))
             status = response.status
-            if status == GetUploadedFileListStatus.SUCCESS.value[0]:
-                return GetUploadedFileListStatus.SUCCESS, [(file.id, file.file_path, file.size, file.uploaded_at) for file in response.files]
+            if status == ErrorCode.SUCCESS.value:
+                return ErrorCode.SUCCESS, [(file.id, file.file_path, file.size, file.uploaded_at) for file in response.files]
             else:
-                return GetUploadedFileListStatus.from_value(status), []
+                return ErrorCode.from_value(status), []
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
-                return UploadFileStatus.NETWORK_ERROR, []
-            return UploadFileStatus.UNKNOWN_ERROR, []
+                return ErrorCode.NETWORK_ERROR, []
+            return ErrorCode.UNKNOWN_ERROR, []
         
-    def download_file(self, token, file_id):
+    def download_file(self, file_id):
         try:
-            responses = self.file_stub.DownloadFile(pb.DownloadFileRequest(token=token, file_id=file_id))
+            responses = self.file_stub.DownloadFile(pb.DownloadFileRequest(token=self.token, file_id=file_id))
             status = None
             content = b''
             for resp in responses:
                 if resp.HasField('status'):
                     status = resp.status
-                    if status != DownloadFileStatus.SUCCESS.value[0]:
-                        return DownloadFileStatus.from_value(status), b''
+                    if status != ErrorCode.SUCCESS.value:
+                        return ErrorCode.from_value(status), b''
                 elif resp.HasField('chunk'):
                     if status is None:
-                        return DownloadFileStatus.UNKNOWN_ERROR, b''
+                        return ErrorCode.UNKNOWN_ERROR, b''
                     content += resp.chunk.data
-            return DownloadFileStatus.SUCCESS, content
+            return ErrorCode.SUCCESS, content
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
-                return DownloadFileStatus.NETWORK_ERROR, b''
-            return DownloadFileStatus.UNKNOWN_ERROR, b''
+                return ErrorCode.NETWORK_ERROR, b''
+            return ErrorCode.UNKNOWN_ERROR, b''
     
-    def download_multiple_files(self, token, file_ids):
+    def download_multiple_files(self, file_ids):
         try:
             filename = f"{time.time()}.zip"
-            responses = self.file_stub.DownloadMultipleFiles(pb.DownloadMultipleFilesRequest(token=token, file_ids=file_ids))
+            responses = self.file_stub.DownloadMultipleFiles(pb.DownloadMultipleFilesRequest(token=self.token, file_ids=file_ids))
             status = None
             content = b''
             for resp in responses:
                 if resp.HasField('status'):
                     status = resp.status
-                    if status != DownloadFileStatus.SUCCESS.value[0]:
-                        return DownloadFileStatus.from_value(status), b''
+                    if status != ErrorCode.SUCCESS.value:
+                        return ErrorCode.from_value(status), b''
                 elif resp.HasField('chunk'):
                     if status is None:
-                        return DownloadFileStatus.UNKNOWN_ERROR, b''
+                        return ErrorCode.UNKNOWN_ERROR, b''
                     content += resp.chunk.data
             self.file_handler.write_file('pack', filename, content)
-            return DownloadFileStatus.SUCCESS, content
+            return ErrorCode.SUCCESS, content
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
-                return DownloadFileStatus.NETWORK_ERROR, b''
-            return DownloadFileStatus.UNKNOWN_ERROR, b''
+                return ErrorCode.NETWORK_ERROR, b''
+            return ErrorCode.UNKNOWN_ERROR, b''
         
-    def delete_file(self, token, file_id):
+    def delete_file(self, file_id):
         try:
-            response = self.file_stub.DeleteFile(pb.DeleteFileRequest(token=token, file_id=file_id))
+            response = self.file_stub.DeleteFile(pb.DeleteFileRequest(token=self.token, file_id=file_id))
             status = response.status
-            if status == DeleteFileStatus.SUCCESS.value[0]:
-                return DeleteFileStatus.SUCCESS
+            if status == ErrorCode.SUCCESS.value:
+                return ErrorCode.SUCCESS
             else:
-                return DeleteFileStatus.from_value(status)
+                return ErrorCode.from_value(status)
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
-                return DeleteFileStatus.NETWORK_ERROR
-            return DeleteFileStatus.UNKNOWN_ERROR
+                return ErrorCode.NETWORK_ERROR
+            return ErrorCode.UNKNOWN_ERROR
         
 
     

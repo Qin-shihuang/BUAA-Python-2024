@@ -1,8 +1,10 @@
 from PyQt5.QtWidgets import QFileDialog, QPushButton, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt5.QtCore import Qt
 
+from ui.login_history import LoginHistoryWidget
+
 from utils.api_client import ApiClient
-from utils.error_codes import UploadFileStatus, GetUploadedFileListStatus, DownloadFileStatus, DeleteFileStatus
+from utils.error_codes import ErrorCode
 from utils.file_handler import FileHandler
 class FileUploadWidget(QWidget):
     def __init__(self):
@@ -11,8 +13,7 @@ class FileUploadWidget(QWidget):
         self.initUI()
         self.setAttribute(Qt.WA_QuitOnClose, True)
 
-    def show(self, token):
-        self.token = token
+    def show(self):
         self.updateList()
         self.file_handler = FileHandler()
         super().show()
@@ -55,16 +56,16 @@ class FileUploadWidget(QWidget):
             
     def startUpload(self, files):
         for file in files:
-            status, file_id = self.api_client.upload_file(self.token, file)    
-            if status == UploadFileStatus.SUCCESS:
+            status, file_id = self.api_client.upload_file(file)    
+            if status == ErrorCode.SUCCESS:
                 print(f"File {file} uploaded successfully with id {file_id}")
             else:
                 print(f"Failed to upload file {file}", status.value[1])
             self.updateList()
                 
     def updateList(self):
-        status, file_list = self.api_client.get_uploaded_file_list(self.token)
-        if status == GetUploadedFileListStatus.SUCCESS:
+        status, file_list = self.api_client.get_uploaded_file_list()
+        if status == ErrorCode.SUCCESS:
             self.tableWidget.setRowCount(0)
             for file in file_list:
                 def add_file(file_id, file_path, size, upload_time):
@@ -98,8 +99,8 @@ class FileUploadWidget(QWidget):
         if len(self.tableWidget.selectedItems()) // 5 == 1:
             file_id = int(self.tableWidget.selectedItems()[0].text())
             file_name = self.tableWidget.selectedItems()[1].text()
-            status, content = self.api_client.download_file(self.token, file_id)
-            if status == DownloadFileStatus.SUCCESS:
+            status, content = self.api_client.download_file(file_id)
+            if status == ErrorCode.SUCCESS:
                 self.file_handler.write_file(file_id, file_name, content)
                 print(f"File {file_name} downloaded successfully")
             else:
@@ -109,8 +110,8 @@ class FileUploadWidget(QWidget):
         for i in range(0, len(self.tableWidget.selectedItems()), 5):
             file_id = int(self.tableWidget.selectedItems()[i].text())
             file_ids.append(file_id)
-        status, content = self.api_client.download_multiple_files(self.token, file_ids)
-        if status == DownloadFileStatus.SUCCESS:
+        status, content = self.api_client.download_multiple_files(file_ids)
+        if status == ErrorCode.SUCCESS:
             print(f"Files downloaded successfully")
         else:
             print(f"Failed to download file", status.value[1])
@@ -120,8 +121,8 @@ class FileUploadWidget(QWidget):
             return
         for i in range(0, len(self.tableWidget.selectedItems()), 5):
             file_id = int(self.tableWidget.selectedItems()[i].text())
-            status = self.api_client.delete_file(self.token, file_id)
-            if status == DeleteFileStatus.SUCCESS:
+            status = self.api_client.delete_file(file_id)
+            if status == ErrorCode.SUCCESS:
                 print(f"File {file_id} deleted successfully")
             else:
                 print(f"Failed to delete file {file_id}", status.value[1])
