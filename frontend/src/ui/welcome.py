@@ -129,9 +129,10 @@ class WelcomePage(QWidget):
 
         self.file_table.setColumnCount(5)
         self.file_table.setHorizontalHeaderLabels(('     名称 ', '大小', '上传时间', '  路径  ', '预览'))
-        self.file_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        # self.file_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self.file_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self.file_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.file_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.file_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.file_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
         self.file_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
         self.file_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.file_table.setFocusPolicy(Qt.NoFocus)
