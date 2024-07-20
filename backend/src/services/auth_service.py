@@ -39,7 +39,7 @@ class AuthService:
         args = (username,)
         result = self.db_service.query(query, args)
         if not result:
-            return LoginStatus.INVALID_CREDENTIALS, ''
+            return ErrorCode.INVALID_CREDENTIALS, ''
         if not bcrypt.checkpw(password.encode(), result[0][2].encode()):
             self.log_login_attempt(username, False)
             return ErrorCode.INVALID_CREDENTIALS, ''

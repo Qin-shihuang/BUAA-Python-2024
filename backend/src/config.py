@@ -8,7 +8,7 @@ Description: Configuration file
 SERVER_PORT = 11451
 
 DATABASE_PATH = "data"
-ACCOUNT_DB_NAME = "accounts"
+ACCOUNT_DB_NAME = "account"
 STORAGE_DB_NAME = "storage"
 
 SALT = b'$2b$12$K8lipoVF6qbTU9LKIiD11e'
