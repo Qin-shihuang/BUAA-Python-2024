@@ -121,6 +121,11 @@ class AuthServiceStub(object):
                 request_serializer=plagiarism__detection__pb2.RegisterRequest.SerializeToString,
                 response_deserializer=plagiarism__detection__pb2.RegisterResponse.FromString,
                 _registered_method=True)
+        self.GetLoginHistory = channel.unary_unary(
+                '/plagiarism_detection.AuthService/GetLoginHistory',
+                request_serializer=plagiarism__detection__pb2.GetLoginHistoryRequest.SerializeToString,
+                response_deserializer=plagiarism__detection__pb2.GetLoginHistoryResponse.FromString,
+                _registered_method=True)
 
 
 class AuthServiceServicer(object):
@@ -138,6 +143,12 @@ class AuthServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetLoginHistory(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AuthServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -150,6 +161,11 @@ def add_AuthServiceServicer_to_server(servicer, server):
                     servicer.Register,
                     request_deserializer=plagiarism__detection__pb2.RegisterRequest.FromString,
                     response_serializer=plagiarism__detection__pb2.RegisterResponse.SerializeToString,
+            ),
+            'GetLoginHistory': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetLoginHistory,
+                    request_deserializer=plagiarism__detection__pb2.GetLoginHistoryRequest.FromString,
+                    response_serializer=plagiarism__detection__pb2.GetLoginHistoryResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -206,6 +222,33 @@ class AuthService(object):
             '/plagiarism_detection.AuthService/Register',
             plagiarism__detection__pb2.RegisterRequest.SerializeToString,
             plagiarism__detection__pb2.RegisterResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetLoginHistory(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/plagiarism_detection.AuthService/GetLoginHistory',
+            plagiarism__detection__pb2.GetLoginHistoryRequest.SerializeToString,
+            plagiarism__detection__pb2.GetLoginHistoryResponse.FromString,
             options,
             channel_credentials,
             insecure,

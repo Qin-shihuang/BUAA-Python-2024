@@ -10,7 +10,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 
 from controllers.login_controller import LoginController
-from utils.error_codes import LoginStatus, RegisterStatus
+from utils.error_codes import ErrorCode
 from utils.health_checker import ServerHealthChecker
 
 
@@ -179,22 +179,22 @@ class LoginWindow(QWidget):
         self.stacked_widget.setCurrentIndex(0)
         
     def login_button_clicked(self):
-        status, token = self.login_controller.try_login(self.login_username_input.text(), self.login_password_input.text())
-        if status == LoginStatus.SUCCESS:
+        status = self.login_controller.try_login(self.login_username_input.text(), self.login_password_input.text())
+        if status == ErrorCode.SUCCESS:
             if self.login_callback:
-                self.login_callback(token)
+                self.login_callback()
                 self.health_checker.stop()
                 self.close()
             else:
                 self.login_error_label.setStyleSheet("color: green")
-                self.login_error_label.setText("Logged in successfully, token: " + token)
+                self.login_error_label.setText("Logged in successfully")
         else:
             self.login_error_label.setStyleSheet("color: red")
-            self.login_error_label.setText(LoginStatus.get_error_message(status))
+            self.login_error_label.setText(ErrorCode.get_error_message(status))
             
     def register_button_clicked(self):
         resp = self.login_controller.try_register(self.register_username_input.text(), self.register_password_input.text(), self.register_password_repeat_input.text())
-        if resp == RegisterStatus.SUCCESS:
+        if resp == ErrorCode.SUCCESS:
             self.stacked_widget.setCurrentIndex(0)
             self.login_error_label.setStyleSheet("color: green")
             self.login_error_label.setText(f"Registered successfully! Please login.")
@@ -202,7 +202,7 @@ class LoginWindow(QWidget):
             self.login_password_input.setText(self.register_password_input.text())
         else:
             self.register_error_label.setStyleSheet("color: red")
-            self.register_error_label.setText(RegisterStatus.get_error_message(resp))
+            self.register_error_label.setText(ErrorCode.get_error_message(resp))
             
     def register_password_repeat_lost_focus(self, event):
         if self.register_password_input.text() != self.register_password_repeat_input.text():
