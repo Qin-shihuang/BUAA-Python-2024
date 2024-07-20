@@ -8,8 +8,13 @@ from utils.error_codes import ErrorCode
 
 
 class AuthService:
-    def __init__(self):
-        self.db_service = DatabaseService(config.ACCOUNT_DB_NAME)
+    _instance = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.db_service = DatabaseService(config.DB_NAME)
+        return cls._instance
         
     def __del__(self):
         self.db_service.close()
@@ -69,7 +74,7 @@ class AuthService:
         
 
 def create_token(user_id, username):
-    exp = datetime.datetime.utcnow() + datetime.timedelta(hours=12)
+    exp = datetime.datetime.now() + datetime.timedelta(hours=12)
     payload = {
         "user_id": user_id,
         "username": username,

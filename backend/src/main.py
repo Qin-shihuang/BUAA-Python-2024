@@ -10,6 +10,8 @@ from config import SERVER_PORT
 from apis.ping import PingServiceServicer
 from apis.auth import AuthServiceServicer
 from apis.file import FileServiceServicer
+from apis.check import CheckServiceServicer
+from apis.report import ReportServiceServicer
 
 
 def serve():
@@ -17,6 +19,8 @@ def serve():
     pb_grpc.add_PingServiceServicer_to_server(PingServiceServicer(), server)
     pb_grpc.add_AuthServiceServicer_to_server(AuthServiceServicer(), server)
     pb_grpc.add_FileServiceServicer_to_server(FileServiceServicer(), server)
+    pb_grpc.add_CheckServiceServicer_to_server(CheckServiceServicer(), server)
+    pb_grpc.add_ReportServiceServicer_to_server(ReportServiceServicer(), server)
     server.add_insecure_port(f'[::]:{SERVER_PORT}')
     server.start()
     print(f"Server started on port {SERVER_PORT}")

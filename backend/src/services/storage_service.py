@@ -1,18 +1,23 @@
 import io
 import os
-import json
 import time
 import hashlib
 import zipfile
 
-from config import STORAGE_DB_NAME, UPLOAD_FOLDER
+from config import DB_NAME, UPLOAD_FOLDER
 from services.database_service import DatabaseService
 
 class StorageService:
-    def __init__(self):
-        self.db_service = DatabaseService(STORAGE_DB_NAME)
-        if not os.path.exists(UPLOAD_FOLDER):
-            os.makedirs(UPLOAD_FOLDER)
+    _instance = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.db_service = DatabaseService(DB_NAME)
+            if not os.path.exists(UPLOAD_FOLDER):
+                os.makedirs(UPLOAD_FOLDER)
+        return cls._instance
+    
         
     def __del__(self):
         self.db_service.close()

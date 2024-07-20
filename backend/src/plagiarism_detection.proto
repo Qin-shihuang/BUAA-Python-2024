@@ -21,15 +21,14 @@ service FileService {
 }
 
 service CheckService {
-    rpc OneToOneCheck(OneToOneCheckRequest) returns (OneToOneCheckResponse) {}
     rpc OneToManyCheck(OneToManyCheckRequest) returns (stream OneToManyCheckResponse) {}
     rpc ManyToManyCheck(ManyToManyCheckRequest) returns (stream ManyToManyCheckResponse) {}
 }
 
 service ReportService {
-    rpc GetCheckList(GetCheckListRequest) returns (GetCheckListResponse) {}
-    rpc GetCheck(GetCheckRequest) returns (GetCheckResponse) {}
-    rpc GetAllReportList(GetAllReportListRequest) returns (GetAllReportListResponse) {}
+    rpc GetTaskList(GetTaskListRequest) returns (GetTaskListResponse) {}
+    rpc GetTask(GetTaskRequest) returns (GetTaskResponse) {}
+    // rpc GetAllReportList(GetAllReportListRequest) returns (GetAllReportListResponse) {}
     rpc GetReport(GetReportRequest) returns (GetReportResponse) {}
     rpc UpdateReport(UpdateReportRequest) returns (UpdateReportResponse) {}
 }
@@ -147,69 +146,51 @@ message DeleteFileResponse {
     int32 status = 1;
 }
 
-message OneToOneCheckRequest {
-    string token = 1;
-    int32 file1_id = 2;
-    int32 file2_id = 3;
-}
-
-message OneToOneCheckResponse {
-    int32 status = 1;
-    int32 check_id = 2;
-    ReportInfo report = 3;
-}
 
 message OneToManyCheckRequest {
     string token = 1;
-    int32 one_file_id = 2;
-    repeated int32 many_file_ids = 3;
+    int32 main_file_id = 2;
+    repeated int32 file_ids = 3;
 }
 
 message OneToManyCheckResponse {
     oneof data {
-        ManyCheckMetadata metadata = 1;
-        ReportInfo reports = 2;
+        int32 status = 1;
+        Empty empty = 2;
+        string task = 3;
     }
 }
 
 message ManyToManyCheckRequest {
-    ManyCheckMetadata metadata = 1;
+    string token = 1;
     repeated int32 file_ids = 2;
 }
 
 message ManyToManyCheckResponse {
     oneof data {
         int32 status = 1;
-        ReportInfo reports = 2;
+        Empty empty = 2;
+        string task = 3;
     }
 }
 
-message GetCheckListRequest {
+message GetTaskListRequest {
     string token = 1;
 }
 
-message GetCheckListResponse {
+message GetTaskListResponse {
     int32 status = 1;
-    repeated int32 check_ids = 2;
+    repeated TaskPreview task_previews = 2;
 }
 
-message GetCheckRequest {
+message GetTaskRequest {
     string token = 1;
-    int32 check_id = 2;
+    int32 task_id = 2;
 }
 
-message GetCheckResponse {
+message GetTaskResponse {
     int32 status = 1;
-    repeated ReportInfo reports = 2;
-}
-
-message GetAllReportListRequest {
-    string token = 1;
-}
-
-message GetAllReportListResponse {
-    int32 status = 1;
-    repeated ReportInfo reports = 2;
+    string task = 2;
 }
 
 message GetReportRequest {
@@ -232,14 +213,13 @@ message UpdateReportResponse {
     int32 status = 1;
 }
 
-message ManyCheckMetadata {
-    int32 status = 1;
-    int32 check_id = 2;
+message TaskPreview {
+    int32 id = 1;
+    int32 type = 2;
+    optional int32 main_file_id = 3;
+    int32 file_count = 4;
+    string created_at = 5;
 }
 
-message ReportInfo {
-    int32 report_id = 1;
-    // file1_id ALWAYS SMALLER THAN file2_id IN SQL QUERY
-    int32 file1_id = 2;
-    int32 file2_id = 3;
+message Empty {
 }

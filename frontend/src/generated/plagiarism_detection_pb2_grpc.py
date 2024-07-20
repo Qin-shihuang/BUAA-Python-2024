@@ -513,11 +513,6 @@ class CheckServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.OneToOneCheck = channel.unary_unary(
-                '/plagiarism_detection.CheckService/OneToOneCheck',
-                request_serializer=plagiarism__detection__pb2.OneToOneCheckRequest.SerializeToString,
-                response_deserializer=plagiarism__detection__pb2.OneToOneCheckResponse.FromString,
-                _registered_method=True)
         self.OneToManyCheck = channel.unary_stream(
                 '/plagiarism_detection.CheckService/OneToManyCheck',
                 request_serializer=plagiarism__detection__pb2.OneToManyCheckRequest.SerializeToString,
@@ -532,12 +527,6 @@ class CheckServiceStub(object):
 
 class CheckServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
-
-    def OneToOneCheck(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
 
     def OneToManyCheck(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -554,11 +543,6 @@ class CheckServiceServicer(object):
 
 def add_CheckServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'OneToOneCheck': grpc.unary_unary_rpc_method_handler(
-                    servicer.OneToOneCheck,
-                    request_deserializer=plagiarism__detection__pb2.OneToOneCheckRequest.FromString,
-                    response_serializer=plagiarism__detection__pb2.OneToOneCheckResponse.SerializeToString,
-            ),
             'OneToManyCheck': grpc.unary_stream_rpc_method_handler(
                     servicer.OneToManyCheck,
                     request_deserializer=plagiarism__detection__pb2.OneToManyCheckRequest.FromString,
@@ -579,33 +563,6 @@ def add_CheckServiceServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class CheckService(object):
     """Missing associated documentation comment in .proto file."""
-
-    @staticmethod
-    def OneToOneCheck(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/plagiarism_detection.CheckService/OneToOneCheck',
-            plagiarism__detection__pb2.OneToOneCheckRequest.SerializeToString,
-            plagiarism__detection__pb2.OneToOneCheckResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
 
     @staticmethod
     def OneToManyCheck(request,
@@ -671,20 +628,15 @@ class ReportServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetCheckList = channel.unary_unary(
-                '/plagiarism_detection.ReportService/GetCheckList',
-                request_serializer=plagiarism__detection__pb2.GetCheckListRequest.SerializeToString,
-                response_deserializer=plagiarism__detection__pb2.GetCheckListResponse.FromString,
+        self.GetTaskList = channel.unary_unary(
+                '/plagiarism_detection.ReportService/GetTaskList',
+                request_serializer=plagiarism__detection__pb2.GetTaskListRequest.SerializeToString,
+                response_deserializer=plagiarism__detection__pb2.GetTaskListResponse.FromString,
                 _registered_method=True)
-        self.GetCheck = channel.unary_unary(
-                '/plagiarism_detection.ReportService/GetCheck',
-                request_serializer=plagiarism__detection__pb2.GetCheckRequest.SerializeToString,
-                response_deserializer=plagiarism__detection__pb2.GetCheckResponse.FromString,
-                _registered_method=True)
-        self.GetAllReportList = channel.unary_unary(
-                '/plagiarism_detection.ReportService/GetAllReportList',
-                request_serializer=plagiarism__detection__pb2.GetAllReportListRequest.SerializeToString,
-                response_deserializer=plagiarism__detection__pb2.GetAllReportListResponse.FromString,
+        self.GetTask = channel.unary_unary(
+                '/plagiarism_detection.ReportService/GetTask',
+                request_serializer=plagiarism__detection__pb2.GetTaskRequest.SerializeToString,
+                response_deserializer=plagiarism__detection__pb2.GetTaskResponse.FromString,
                 _registered_method=True)
         self.GetReport = channel.unary_unary(
                 '/plagiarism_detection.ReportService/GetReport',
@@ -701,26 +653,21 @@ class ReportServiceStub(object):
 class ReportServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def GetCheckList(self, request, context):
+    def GetTaskList(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetCheck(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetAllReportList(self, request, context):
+    def GetTask(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetReport(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """rpc GetAllReportList(GetAllReportListRequest) returns (GetAllReportListResponse) {}
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -734,20 +681,15 @@ class ReportServiceServicer(object):
 
 def add_ReportServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetCheckList': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetCheckList,
-                    request_deserializer=plagiarism__detection__pb2.GetCheckListRequest.FromString,
-                    response_serializer=plagiarism__detection__pb2.GetCheckListResponse.SerializeToString,
+            'GetTaskList': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTaskList,
+                    request_deserializer=plagiarism__detection__pb2.GetTaskListRequest.FromString,
+                    response_serializer=plagiarism__detection__pb2.GetTaskListResponse.SerializeToString,
             ),
-            'GetCheck': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetCheck,
-                    request_deserializer=plagiarism__detection__pb2.GetCheckRequest.FromString,
-                    response_serializer=plagiarism__detection__pb2.GetCheckResponse.SerializeToString,
-            ),
-            'GetAllReportList': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetAllReportList,
-                    request_deserializer=plagiarism__detection__pb2.GetAllReportListRequest.FromString,
-                    response_serializer=plagiarism__detection__pb2.GetAllReportListResponse.SerializeToString,
+            'GetTask': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTask,
+                    request_deserializer=plagiarism__detection__pb2.GetTaskRequest.FromString,
+                    response_serializer=plagiarism__detection__pb2.GetTaskResponse.SerializeToString,
             ),
             'GetReport': grpc.unary_unary_rpc_method_handler(
                     servicer.GetReport,
@@ -771,7 +713,7 @@ class ReportService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetCheckList(request,
+    def GetTaskList(request,
             target,
             options=(),
             channel_credentials=None,
@@ -784,9 +726,9 @@ class ReportService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/plagiarism_detection.ReportService/GetCheckList',
-            plagiarism__detection__pb2.GetCheckListRequest.SerializeToString,
-            plagiarism__detection__pb2.GetCheckListResponse.FromString,
+            '/plagiarism_detection.ReportService/GetTaskList',
+            plagiarism__detection__pb2.GetTaskListRequest.SerializeToString,
+            plagiarism__detection__pb2.GetTaskListResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -798,7 +740,7 @@ class ReportService(object):
             _registered_method=True)
 
     @staticmethod
-    def GetCheck(request,
+    def GetTask(request,
             target,
             options=(),
             channel_credentials=None,
@@ -811,36 +753,9 @@ class ReportService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/plagiarism_detection.ReportService/GetCheck',
-            plagiarism__detection__pb2.GetCheckRequest.SerializeToString,
-            plagiarism__detection__pb2.GetCheckResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def GetAllReportList(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/plagiarism_detection.ReportService/GetAllReportList',
-            plagiarism__detection__pb2.GetAllReportListRequest.SerializeToString,
-            plagiarism__detection__pb2.GetAllReportListResponse.FromString,
+            '/plagiarism_detection.ReportService/GetTask',
+            plagiarism__detection__pb2.GetTaskRequest.SerializeToString,
+            plagiarism__detection__pb2.GetTaskResponse.FromString,
             options,
             channel_credentials,
             insecure,

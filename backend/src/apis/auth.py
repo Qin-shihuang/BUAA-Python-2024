@@ -23,11 +23,9 @@ class AuthServiceServicer(pb_grpc.AuthServiceServicer):
     def GetLoginHistory(self, request, context):
         token = request.token
         limit = request.limit
-        auth_status, auth_payload = verify_token(token)
+        auth_status, user_id = verify_token(token)
         if not auth_status:
             return pb.GetLoginHistoryResponse(status=ErrorCode.UNAUTHORIZED.value)
-        else:
-            user_id = auth_payload
         try:
             records = []
             for h in self.auth_service.get_login_history(user_id, limit):

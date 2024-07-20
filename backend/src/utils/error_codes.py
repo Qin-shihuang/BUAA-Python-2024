@@ -24,6 +24,12 @@ class ErrorCode(Enum):
     FILE_TOO_LARGE = 2004
     FILE_NOT_FOUND = 2005
     
+    # Task errors
+    TASK_NOT_FOUND = 3001
+    
+    # Report errors
+    REPORT_NOT_FOUND = 4001
+    
     @classmethod
     def from_value(cls, value):
         for code in ErrorCode:

@@ -19,11 +19,9 @@ class FileServiceServicer(pb_grpc.FileServiceServicer):
                 if req.HasField("metadata"):
                     file_metadata = req.metadata
                     token = file_metadata.token
-                    auth_status, auth_payload = verify_token(token)
+                    auth_status, user_id = verify_token(token)
                     if not auth_status:
                         return pb.UploadFileResponse(status=ErrorCode.UNAUTHORIZED.value)
-                    else:
-                        user_id = auth_payload
                     if file_metadata.size > 2 * 1024 * 1024:
                         return pb.UploadFileResponse(status=ErrorCode.FILE_TOO_LARGE.value)
                 elif req.HasField("chunk"):
@@ -42,11 +40,9 @@ class FileServiceServicer(pb_grpc.FileServiceServicer):
         
     def GetUploadedFileList(self, request, context):
         token = request.token
-        auth_status, auth_payload = verify_token(token)
+        auth_status, user_id = verify_token(token)
         if not auth_status:
             return pb.GetUploadedFileListResponse(status=ErrorCode.UNAUTHORIZED.value)
-        else:
-            user_id = auth_payload
         try:
             info_list = [pb.FileInfo(id=id, file_path=file_path, size=size, uploaded_at=uploaded_at) for id, file_path, size, uploaded_at in self.storage_service.get_file_list(user_id)]
             return pb.GetUploadedFileListResponse(status=ErrorCode.SUCCESS.value, files=info_list)
@@ -55,11 +51,9 @@ class FileServiceServicer(pb_grpc.FileServiceServicer):
         
     def DownloadFile(self, request, context):
         token = request.token
-        auth_status, auth_payload = verify_token(token)
+        auth_status, user_id = verify_token(token)
         if not auth_status:
             return pb.DownloadFileResponse(status=ErrorCode.UNAUTHORIZED.value)
-        else:
-            user_id = auth_payload
         file_id = request.file_id
         owner_status, owner_id = self.storage_service.get_file_owner(file_id)
         if not owner_status:
@@ -79,11 +73,9 @@ class FileServiceServicer(pb_grpc.FileServiceServicer):
     
     def DeleteFile(self, request, context):
         token = request.token
-        auth_status, auth_payload = verify_token(token)
+        auth_status, user_id = verify_token(token)
         if not auth_status:
             return pb.DeleteFileResponse(status=ErrorCode.UNAUTHORIZED.value)
-        else:
-            user_id = auth_payload
         file_id = request.file_id
         owner_status, owner_id = self.storage_service.get_file_owner(file_id)
         if not owner_status:
@@ -97,11 +89,9 @@ class FileServiceServicer(pb_grpc.FileServiceServicer):
     
     def DownloadMultipleFiles(self, request, context):
         token = request.token
-        auth_status, auth_payload = verify_token(token)
+        auth_status, user_id = verify_token(token)
         if not auth_status:
             return pb.DownloadMultipleFilesResponse(status=ErrorCode.UNAUTHORIZED.value)
-        else:
-            user_id = auth_payload
         file_ids = []
         for file_id in request.file_ids:
             owner_status, owner_id = self.storage_service.get_file_owner(file_id)

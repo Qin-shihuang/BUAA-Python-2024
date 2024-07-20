@@ -24,4 +24,25 @@ CREATE TABLE IF NOT EXISTS uploaded_files (
     FOREIGN KEY (uploader_id) REFERENCES users(id)
 )
 
-CREATE TABLE IF NOT EXISTS 
+CREATE TABLE IF NOT EXISTS tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    owner_id INTEGER NOT NULL,
+    type INTEGER NOT NULL,
+    main_file_id INTEGER,
+    file_count INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (owner_id) REFERENCES users(id),
+    FOREIGN KEY (main_file_id) REFERENCES uploaded_files(id)
+);
+
+CREATE TABLE IF NOT EXISTS reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    owner_id INTEGER NOT NULL,
+    file_id_1 INTEGER NOT NULL,
+    file_id_2 INTEGER NOT NULL,
+    similarity FLOAT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (owner_id) REFERENCES users(id),
+    FOREIGN KEY (file_id_1) REFERENCES uploaded_files(id),
+    FOREIGN KEY (file_id_2) REFERENCES uploaded_files(id)
+);
