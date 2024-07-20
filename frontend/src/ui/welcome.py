@@ -91,7 +91,7 @@ class WelcomePage(QWidget):
         self.upload_file_button = QPushButton('上传文件')
         self.upload_file_button.clicked.connect(self.upload_file)
         delete_file_button = QPushButton('删除已选中文件')
-        delete_file_button.clicked.connect(self.delete_files)
+        delete_file_button.clicked.connect(self.clear_selected_files)
         file_layout = QHBoxLayout()
         file_layout.addWidget(self.file_label)
         file_layout.addWidget(self.upload_file_button)
@@ -128,7 +128,7 @@ class WelcomePage(QWidget):
         # self.file_table.setColumnWidth(0, 60)
 
         self.file_table.setColumnCount(5)
-        self.file_table.setHorizontalHeaderLabels(('     名称 ', '大小', '上传时间', '  路径  ', '预览'))
+        self.file_table.setHorizontalHeaderLabels(('     名称 ', '大小', '上传时间', '路径', '操作'))
         self.file_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.file_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.file_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
@@ -234,7 +234,7 @@ class WelcomePage(QWidget):
             self.file_table.insertRow(row)
 
             checkbox = QTableWidgetItem(info.fileName())
-            checkbox.setCheckState(Qt.Unchecked)
+            checkbox.setCheckState(Qt.Checked)
             self.file_table.setItem(row, 0, checkbox)
             self.file_table.setItem(row, 1, QTableWidgetItem(str('{:.1f}'.format(info.size() / 1024)) + 'KB'))
             self.file_table.setItem(row, 2, QTableWidgetItem(current_time))
@@ -250,7 +250,15 @@ class WelcomePage(QWidget):
             open_button.setFixedSize(18, 18)
             open_button.clicked.connect(self.open_file)
 
+            delete_button = QPushButton()
+            delete_button.setIcon(QIcon('frontend/assets/Delete.svg'))
+            delete_button.setIconSize(QSize(10, 10))
+            delete_button.setStyleSheet("background-color: red;border-radius: 9px")
+            delete_button.setFixedSize(18, 18)
+            delete_button.clicked.connect(self.delete_file)
+
             widget_layout.addWidget(open_button)
+            widget_layout.addWidget(delete_button)
             widget.setLayout(widget_layout)
             widget_layout.setContentsMargins(5, 2, 5, 2)
             self.file_table.setCellWidget(row, 4, widget)
@@ -271,8 +279,17 @@ class WelcomePage(QWidget):
         file_path = self.file_table.item(row, 3).text()
         print(file_path)
 
-    def delete_files(self):
+    def delete_file(self):
         # TODO: delete file from backend
+        x = self.sender().parentWidget().frameGeometry().x()
+        y = self.sender().parentWidget().frameGeometry().y()
+        row = self.file_table.indexAt(QPoint(x, y)).row()
+        if self.file_table.item(row, 0).checkState() == Qt.Checked:
+            self.target_file_button.setText('点击选择目标文件')
+        self.file_table.removeRow(row)
+
+    def clear_selected_files(self):
+        # TODO: delete files from backend
         for row in range(self.file_table.rowCount() - 1, -1, -1):
             if self.file_table.item(row, 0).checkState() == Qt.Checked:
                 self.file_table.removeRow(row)
@@ -307,7 +324,7 @@ class WelcomePage(QWidget):
         if flag:
             menu.exec_(QPoint(QCursor.pos().x(), QCursor.pos().y()))
         else:
-            QMessageBox.warning(self, '提示', '请先选中待查文件')
+            QMessageBox.warning(self, '提示', '请先选中所有待查文件')
 
     def set_target_file(self):
         self.target_file_button.setText(self.sender().text())
