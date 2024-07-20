@@ -1,11 +1,11 @@
 import os
 import sys
 from PyQt5.QtCore import Qt, QDateTime, QFileInfo, pyqtSignal, QRect, QSize, QPoint
-from PyQt5.QtGui import QFont, QIcon, QPixmap
+from PyQt5.QtGui import QFont, QIcon, QPixmap, QCursor
 import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
-    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox
+    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction
 
 
 class WelcomePage(QWidget):
@@ -90,7 +90,7 @@ class WelcomePage(QWidget):
         self.file_label = QLabel('上传待查文件')
         self.upload_file_button = QPushButton('上传文件')
         self.upload_file_button.clicked.connect(self.upload_file)
-        clear_file_button = QPushButton('清空已上传文件')
+        clear_file_button = QPushButton('删除已选中文件')
         clear_file_button.clicked.connect(self.clear_file)
         file_layout = QHBoxLayout()
         file_layout.addWidget(self.file_label)
@@ -109,13 +109,13 @@ class WelcomePage(QWidget):
         mode_layout.addWidget(group_button)
 
         self.target_layout = QHBoxLayout()
-        self.target_file_label = QLabel('选择目标文件(仅一对多查重模式)<sup style="color: red">*</sup>')
-        self.target_file_combobox = QComboBox()
-        self.target_file_combobox.addItem('请选择目标文件')
-        self.target_file_combobox.currentIndexChanged.connect(lambda: self.target_file_label.setStyleSheet("color: black"))
+        self.target_file_label = QLabel('选择目标文件(仅一对多查重模式)')
 
+        self.target_file_button = QPushButton('点击选择目标文件')
+        self.target_file_button.setStyleSheet("QPushButton::menu-indicator{image:none}")
+        self.target_file_button.clicked.connect(self.select_target_file)
         self.target_layout.addWidget(self.target_file_label)
-        self.target_layout.addWidget(self.target_file_combobox)
+        self.target_layout.addWidget(self.target_file_button)
 
         self.file_table = QTableWidget()
         # TODO: init file table items from backend
@@ -124,7 +124,7 @@ class WelcomePage(QWidget):
         self.file_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.file_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
-        self.file_table.setHorizontalHeader(CheckBoxHeader(combobox=self.target_file_combobox))
+        self.file_table.setHorizontalHeader(CheckBoxHeader())
         # self.file_table.setColumnWidth(0, 60)
 
         self.file_table.setColumnCount(5)
@@ -137,7 +137,8 @@ class WelcomePage(QWidget):
         self.file_table.setFocusPolicy(Qt.NoFocus)
         self.file_table.setAlternatingRowColors(True)
 
-        self.file_table.cellClicked.connect(self.toggle_current_checkbox)
+        # self.file_table.cellPressed.connect(self.toggle_current_checkbox)
+        self.file_table.itemPressed.connect(self.toggle_current_checkbox)
 
         start_layout = QHBoxLayout()
         self.error_label = QLabel()
@@ -218,10 +219,8 @@ class WelcomePage(QWidget):
     def toggle_current_checkbox(self):
         item = self.file_table.item(self.file_table.currentRow(), 0)
         if item.checkState() == Qt.Checked:
-            self.target_file_combobox.removeItem(self.target_file_combobox.findText(item.text()))
             item.setCheckState(Qt.Unchecked)
         else:
-            self.target_file_combobox.addItem(item.text())
             item.setCheckState(Qt.Checked)
 
     def upload_file(self):
@@ -231,7 +230,6 @@ class WelcomePage(QWidget):
             info = QFileInfo(file)
             row = self.file_table.rowCount()
             self.file_table.insertRow(row)
-            # self.file_table.setSortingEnabled(True)
 
             checkbox = QTableWidgetItem(info.fileName())
             checkbox.setCheckState(Qt.Unchecked)
@@ -244,14 +242,14 @@ class WelcomePage(QWidget):
             widget_layout = QHBoxLayout()
 
             open_button = QPushButton()
-            open_button.setIcon(QIcon('frontend/src/ui/icons/Open.svg'))
+            open_button.setIcon(QIcon('frontend/assets/Open.svg'))
             open_button.setIconSize(QSize(10, 10))
             open_button.setStyleSheet("background-color: green;border-radius: 9px")
             open_button.setFixedSize(18, 18)
             open_button.clicked.connect(self.open_file)
 
             delete_button = QPushButton()
-            delete_button.setIcon(QIcon('frontend/src/ui/icons/Delete.svg'))
+            delete_button.setIcon(QIcon('delete.svg'))
             delete_button.setIconSize(QSize(10, 10))
             delete_button.setStyleSheet("background-color: red;border-radius: 9px")
             delete_button.setFixedSize(18, 18)
@@ -274,8 +272,7 @@ class WelcomePage(QWidget):
     def clear_file(self):
         self.file_table.clearContents()
         self.file_table.setRowCount(0)
-        self.target_file_combobox.clear()
-        self.target_file_combobox.addItem('请选择目标文件')
+        self.target_file_button.setText('点击选择目标文件')
 
     def open_file(self):
         # TODO: open file from backend, view in code editor
@@ -290,9 +287,6 @@ class WelcomePage(QWidget):
         x = self.sender().parentWidget().frameGeometry().x()
         y = self.sender().parentWidget().frameGeometry().y()
         row = self.file_table.indexAt(QPoint(x, y)).row()
-        if self.file_table.item(row, 0).checkState() == Qt.Checked:
-            self.target_file_combobox.removeItem(
-                self.target_file_combobox.findText(self.file_table.item(row, 0).text()))
         self.file_table.removeRow(row)
 
     def switch_mode(self):
@@ -303,10 +297,10 @@ class WelcomePage(QWidget):
             if sender.isChecked():
                 self.check_mode = 0
                 self.upload_widget.layout().insertLayout(5, self.target_layout)
-                self.target_file_combobox.show()
+                self.target_file_button.show()
                 self.target_file_label.show()
             else:
-                self.target_file_combobox.hide()
+                self.target_file_button.hide()
                 self.target_file_label.hide()
                 self.upload_widget.layout().removeItem(self.target_layout)
         elif sender.text() == '组内自查':
@@ -335,7 +329,7 @@ class WelcomePage(QWidget):
             self.mode_select_label.setStyleSheet("color: red")
             self.error_label.setText('请选择查重模式')
             return
-        elif self.check_mode == 0 and self.target_file_combobox.currentText() == '请选择目标文件':
+        elif self.check_mode == 0 and self.target_file_button.text() == '点击选择目标文件':
             self.target_file_label.setStyleSheet("color: red")
             self.error_label.setText('请选择目标文件')
             return
@@ -346,18 +340,33 @@ class WelcomePage(QWidget):
         for row in range(self.file_table.rowCount()):
             if self.file_table.item(row, 0).checkState() == Qt.Checked:
                 files.append(self.file_table.item(row, 3).text())
-        target_file = self.target_file_combobox.currentText()
+        target_file = self.target_file_button.text()
         print(target_file, files)
 
+
+
+    def select_target_file(self):
+        menu = QMenu()
+        flag=False
+        for row in range(self.file_table.rowCount()):
+            if self.file_table.item(row, 0).checkState() == Qt.Checked:
+                action = menu.addAction(self.file_table.item(row, 0).text())
+                action.triggered.connect(self.set_target_file)
+                flag=True
+        if flag:
+            menu.exec_(QPoint(QCursor.pos().x(),QCursor.pos().y()))
+
+    def set_target_file(self):
+        self.target_file_button.setText(self.sender().text())
+        self.target_file_label.setStyleSheet("color: black")
 
 class CheckBoxHeader(QHeaderView):
     select_all_clicked = pyqtSignal(bool)
 
-    def __init__(self, orientation=Qt.Horizontal, parent=None, combobox=None):
+    def __init__(self, orientation=Qt.Horizontal, parent=None):
         super(CheckBoxHeader, self).__init__(orientation, parent)
         self.isOn = False
         self.select_all_clicked.connect(self.toggle_all_checkboxes)
-        self.target_file_combobox = combobox
 
     def paintSection(self, painter, rect, logicalIndex):
         painter.save()
@@ -387,13 +396,10 @@ class CheckBoxHeader(QHeaderView):
 
     def toggle_all_checkboxes(self, check):
         table = self.parent()
-        self.target_file_combobox.clear()
-        self.target_file_combobox.addItem('请选择目标文件')
         for row in range(table.rowCount()):
             item = table.item(row, 0)
             if check:
                 item.setCheckState(Qt.Checked)
-                self.target_file_combobox.addItem(item.text())
             else:
                 item.setCheckState(Qt.Unchecked)
 
@@ -404,5 +410,4 @@ if __name__ == "__main__":
 
     welcome_page = WelcomePage()
     welcome_page.show()
-
     exit(app.exec_())
