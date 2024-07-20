@@ -90,12 +90,12 @@ class WelcomePage(QWidget):
         self.file_label = QLabel('上传待查文件')
         self.upload_file_button = QPushButton('上传文件')
         self.upload_file_button.clicked.connect(self.upload_file)
-        clear_file_button = QPushButton('删除已选中文件')
-        clear_file_button.clicked.connect(self.clear_file)
+        delete_file_button = QPushButton('删除已选中文件')
+        delete_file_button.clicked.connect(self.delete_files)
         file_layout = QHBoxLayout()
         file_layout.addWidget(self.file_label)
         file_layout.addWidget(self.upload_file_button)
-        file_layout.addWidget(clear_file_button)
+        file_layout.addWidget(delete_file_button)
 
         self.mode_select_label = QLabel('选择查重模式')
         self.check_mode = None
@@ -128,7 +128,7 @@ class WelcomePage(QWidget):
         # self.file_table.setColumnWidth(0, 60)
 
         self.file_table.setColumnCount(5)
-        self.file_table.setHorizontalHeaderLabels(('     名称 ', '大小', '上传时间', '  路径  ', '操作'))
+        self.file_table.setHorizontalHeaderLabels(('     名称 ', '大小', '上传时间', '  路径  ', '预览'))
         self.file_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         # self.file_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.file_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
@@ -222,6 +222,7 @@ class WelcomePage(QWidget):
             item.setCheckState(Qt.Unchecked)
         else:
             item.setCheckState(Qt.Checked)
+        self.target_file_button.setText('点击选择目标文件')
 
     def upload_file(self):
         self.files, _ = QFileDialog.getOpenFileNames(self, "请选择待查重代码", "./", "Python (*.py)")
@@ -248,15 +249,7 @@ class WelcomePage(QWidget):
             open_button.setFixedSize(18, 18)
             open_button.clicked.connect(self.open_file)
 
-            delete_button = QPushButton()
-            delete_button.setIcon(QIcon('delete.svg'))
-            delete_button.setIconSize(QSize(10, 10))
-            delete_button.setStyleSheet("background-color: red;border-radius: 9px")
-            delete_button.setFixedSize(18, 18)
-            delete_button.clicked.connect(self.delete_file)
-
             widget_layout.addWidget(open_button)
-            widget_layout.addWidget(delete_button)
             widget.setLayout(widget_layout)
             widget_layout.setContentsMargins(5, 2, 5, 2)
             self.file_table.setCellWidget(row, 4, widget)
@@ -269,11 +262,6 @@ class WelcomePage(QWidget):
         #         text = f.read()
         #     self.textedit.setText(text)
 
-    def clear_file(self):
-        self.file_table.clearContents()
-        self.file_table.setRowCount(0)
-        self.target_file_button.setText('点击选择目标文件')
-
     def open_file(self):
         # TODO: open file from backend, view in code editor
         x = self.sender().parentWidget().frameGeometry().x()
@@ -282,12 +270,12 @@ class WelcomePage(QWidget):
         file_path = self.file_table.item(row, 3).text()
         print(file_path)
 
-    def delete_file(self):
+    def delete_files(self):
         # TODO: delete file from backend
-        x = self.sender().parentWidget().frameGeometry().x()
-        y = self.sender().parentWidget().frameGeometry().y()
-        row = self.file_table.indexAt(QPoint(x, y)).row()
-        self.file_table.removeRow(row)
+        for row in range(self.file_table.rowCount() - 1, -1, -1):
+            if self.file_table.item(row, 0).checkState() == Qt.Checked:
+                self.file_table.removeRow(row)
+        self.target_file_button.setText('点击选择目标文件')
 
     def switch_mode(self):
         sender = self.sender()
@@ -306,6 +294,21 @@ class WelcomePage(QWidget):
         elif sender.text() == '组内自查':
             if sender.isChecked():
                 self.check_mode = 1
+
+    def select_target_file(self):
+        menu = QMenu()
+        flag = False
+        for row in range(self.file_table.rowCount()):
+            if self.file_table.item(row, 0).checkState() == Qt.Checked:
+                action = menu.addAction(self.file_table.item(row, 0).text())
+                action.triggered.connect(self.set_target_file)
+                flag = True
+        if flag:
+            menu.exec_(QPoint(QCursor.pos().x(), QCursor.pos().y()))
+
+    def set_target_file(self):
+        self.target_file_button.setText(self.sender().text())
+        self.target_file_label.setStyleSheet("color: black")
 
     def show_history(self):
         self.task_name_label.setStyleSheet("color: black")
@@ -337,28 +340,18 @@ class WelcomePage(QWidget):
         self.error_label.setText('Success!')
         # enter code editor...
         files = []
+        cnt = 0
         for row in range(self.file_table.rowCount()):
             if self.file_table.item(row, 0).checkState() == Qt.Checked:
                 files.append(self.file_table.item(row, 3).text())
+                cnt += 1
+        if cnt < 2:
+            self.error_label.setStyleSheet("color: red")
+            self.error_label.setText('请至少选择两个文件')
+            return
         target_file = self.target_file_button.text()
         print(target_file, files)
 
-
-
-    def select_target_file(self):
-        menu = QMenu()
-        flag=False
-        for row in range(self.file_table.rowCount()):
-            if self.file_table.item(row, 0).checkState() == Qt.Checked:
-                action = menu.addAction(self.file_table.item(row, 0).text())
-                action.triggered.connect(self.set_target_file)
-                flag=True
-        if flag:
-            menu.exec_(QPoint(QCursor.pos().x(),QCursor.pos().y()))
-
-    def set_target_file(self):
-        self.target_file_button.setText(self.sender().text())
-        self.target_file_label.setStyleSheet("color: black")
 
 class CheckBoxHeader(QHeaderView):
     select_all_clicked = pyqtSignal(bool)
