@@ -61,6 +61,10 @@ class HistoryPage(QWidget):
                 width: 0px;
                 height: 0px;
             }
+            QTableWidget {
+               border-radius: 5px;
+               font-size: 13px;
+            }
         """)
 
         layout = QVBoxLayout()
@@ -89,8 +93,29 @@ class HistoryPage(QWidget):
         history_layout.addWidget(history_title_label)
         self.history_widget.setLayout(history_layout)
 
-        return_button = QPushButton('return')
-        history_layout.addWidget(return_button)
+        self.task_table = QTableWidget()
+        self.task_table.setColumnCount(7)
+        self.task_table.setHorizontalHeaderLabels(
+            ['任务ID', '任务名称', '任务类型', '目标文件ID', '查重文件数', '任务提交时间', '查看'])
+        self.task_table.verticalHeader().setVisible(False)
+        self.task_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.task_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.task_table.setFocusPolicy(Qt.NoFocus)
+        self.task_table.setAlternatingRowColors(True)
+        self.task_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.task_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeToContents)
+        self.task_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        self.task_table.cellDoubleClicked.connect(self.view_task)
+        history_layout.addWidget(self.task_table)
+
+        self.demo()
+
+        return_layout = QHBoxLayout()
+        return_layout.addStretch(1)
+        return_button = QPushButton('  Return  ')
+        # TODO: return_button.clicked.connect(self.switch_to_welcome_page)
+        return_layout.addWidget(return_button)
+        history_layout.addLayout(return_layout)
 
         layout.addWidget(self.history_widget)
 
@@ -109,6 +134,34 @@ class HistoryPage(QWidget):
         # self.login_window = LoginWindow(self.switch_to_login_window)
         # self.login_window.show()
         self.close()
+
+    def demo(self):
+        for row in range(100):
+            self.task_table.insertRow(row)
+            for col in range(7):
+                self.task_table.setItem(row, col, QTableWidgetItem(f'{row} - {col}'))
+                if col == 6:
+                    view_widget = QWidget()
+                    view_layout = QHBoxLayout()
+                    view_widget.setLayout(view_layout)
+                    view_button = QPushButton('View')
+                    view_button.setStyleSheet(
+                        'padding: 5px; background-color: #4CAF50; color: white; border: none; border-radius: 11px;')
+                    view_button.clicked.connect(self.view_task_for_button)
+                    view_layout.addWidget(view_button)
+                    view_layout.setContentsMargins(5, 5, 5, 5)
+                    self.task_table.setCellWidget(row, col, view_widget)
+
+    def view_task_for_button(self):
+        x = self.sender().parentWidget().frameGeometry().x()
+        y = self.sender().parentWidget().frameGeometry().y()
+        row = self.task_table.indexAt(QPoint(x, y)).row()
+        task_id = self.task_table.item(row, 0).text()
+        print('View task' + task_id)
+
+    def view_task(self, row, col):
+        task_id = self.task_table.item(row, 0).text()
+        print('View task' + task_id)
 
 
 if __name__ == "__main__":

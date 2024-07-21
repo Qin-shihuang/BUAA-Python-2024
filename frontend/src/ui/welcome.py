@@ -61,6 +61,10 @@ class WelcomePage(QWidget):
                 width: 0px;
                 height: 0px;
             }
+            QTableWidget {
+               border-radius: 5px;
+               font-size: 13px;
+            }
         """)
 
         layout = QVBoxLayout()
@@ -131,7 +135,6 @@ class WelcomePage(QWidget):
 
         self.file_table = QTableWidget()
         # TODO: init file table items from backend
-        self.file_table.setStyleSheet("QTableWidget{font-size:13px;}")
         self.file_table.verticalHeader().setVisible(False)
         self.file_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.file_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
