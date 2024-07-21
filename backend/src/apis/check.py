@@ -19,6 +19,7 @@ class CheckServiceServicer(pb_grpc.CheckServiceServicer):
         auth_status, user_id = verify_token(token)
         if not auth_status:
             return pb.OneToManyCheckResponse(status=ErrorCode.UNAUTHORIZED.value)
+        task_name = request.task_name
         main_file_id = request.main_file_id
         file_ids = []
         for file_id in request.file_ids:
@@ -28,7 +29,7 @@ class CheckServiceServicer(pb_grpc.CheckServiceServicer):
             if owner_id != user_id:
                 return pb.OneToManyCheckResponse(status=ErrorCode.UNAUTHORIZED.value)
             file_ids.append(file_id)
-        task = self.check_service.create_task(0, user_id, main_file_id=main_file_id, file_ids=file_ids)
+        task = self.check_service.create_task(0, user_id, task_name, main_file_id=main_file_id, file_ids=file_ids)
         if task is None:
             return pb.OneToManyCheckResponse(status=ErrorCode.UNKNOWN_ERROR.value)
         def generate_responses():
@@ -46,6 +47,7 @@ class CheckServiceServicer(pb_grpc.CheckServiceServicer):
         if not auth_status:
             return pb.ManyToManyCheckResponse(status=ErrorCode.UNAUTHORIZED.value)
         file_ids = []
+        task_name = request.task_name
         for file_id in request.file_ids:
             file_status, owner_id = self.storage_service.get_file_owner(file_id)
             if not file_status:
@@ -53,7 +55,7 @@ class CheckServiceServicer(pb_grpc.CheckServiceServicer):
             if owner_id != user_id:
                 return pb.ManyToManyCheckResponse(status=ErrorCode.UNAUTHORIZED.value)
             file_ids.append(file_id)
-        task_id = self.check_service.create_task(1, user_id, file_ids=file_ids)
+        task_id = self.check_service.create_task(1, user_id, task_name, file_ids=file_ids)
         def generate_responses():
             yield pb.ManyToManyCheckResponse(status=ErrorCode.SUCCESS.value)
             for i in range(len(file_ids)):

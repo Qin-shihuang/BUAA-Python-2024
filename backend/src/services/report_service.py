@@ -14,7 +14,7 @@ class ReportService:
         self.db_service.close()
         
     def get_task_list(self, user_id):
-        query = "SELECT id, type, main_file_id, file_count, created_at FROM tasks WHERE owner_id = ? ORDER BY created_at DESC"
+        query = "SELECT id, task_name, type, main_file_id, file_count, created_at FROM tasks WHERE owner_id = ? ORDER BY created_at DESC"
         args = (user_id,)
         result = self.db_service.query(query, args)
         return result

@@ -149,8 +149,9 @@ message DeleteFileResponse {
 
 message OneToManyCheckRequest {
     string token = 1;
-    int32 main_file_id = 2;
-    repeated int32 file_ids = 3;
+    string task_name = 2;
+    int32 main_file_id = 3;
+    repeated int32 file_ids = 4;
 }
 
 message OneToManyCheckResponse {
@@ -163,7 +164,8 @@ message OneToManyCheckResponse {
 
 message ManyToManyCheckRequest {
     string token = 1;
-    repeated int32 file_ids = 2;
+    string task_name = 2;
+    repeated int32 file_ids = 3;
 }
 
 message ManyToManyCheckResponse {
@@ -216,9 +218,10 @@ message UpdateReportResponse {
 message TaskPreview {
     int32 id = 1;
     int32 type = 2;
-    optional int32 main_file_id = 3;
-    int32 file_count = 4;
-    string created_at = 5;
+    string task_name = 3;
+    optional int32 main_file_id = 4;
+    int32 file_count = 5;
+    string created_at = 6;
 }
 
 message Empty {

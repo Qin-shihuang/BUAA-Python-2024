@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS uploaded_files (
 CREATE TABLE IF NOT EXISTS tasks (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     owner_id INTEGER NOT NULL,
+    task_name VARCHAR(255) NOT NULL,
     type INTEGER NOT NULL,
     main_file_id INTEGER,
     file_count INTEGER NOT NULL,

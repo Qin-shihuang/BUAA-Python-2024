@@ -18,9 +18,9 @@ class ReportServiceServicer(pb_grpc.ReportServiceServicer):
         task_previews = []
         for task in self.report_service.get_task_list(user_id):
             if task[1] == 0:
-                task_previews.append(pb.TaskPreview(id=task[0], type=task[1], main_file_id=task[2], file_count=task[3], created_at=task[4]))
+                task_previews.append(pb.TaskPreview(id=task[0], task_name=task[1], type=task[2], main_file_id=task[3], file_count=task[4], created_at=task[5]))
             else:
-                task_previews.append(pb.TaskPreview(id=task[0], type=task[1], file_count=task[3], created_at=task[4]))
+                task_previews.append(pb.TaskPreview(id=task[0], task_name=task[1], type=task[2], file_count=task[4], created_at=task[5]))
         return pb.GetTaskListResponse(status=ErrorCode.SUCCESS.value, task_previews=task_previews)
     
     def GetTask(self, request, context):

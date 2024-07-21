@@ -181,9 +181,9 @@ class ApiClient:
             return ErrorCode.UNKNOWN_ERROR
 
     # MARK: - Check
-    def one_to_many_check(self, main_file_id, file_ids, signal):
+    def one_to_many_check(self, task_name, main_file_id, file_ids, signal):
         try:
-            responses = self.file_stub.OneToManyCheck(pb.OneToManyCheckRequest(token=self.token, main_file_id=main_file_id, file_ids=file_ids))
+            responses = self.file_stub.OneToManyCheck(pb.OneToManyCheckRequest(token=self.token, task_name=task_name, main_file_id=main_file_id, file_ids=file_ids))
             for resp in responses:
                 if resp.HasField('status'):
                     status = resp.status
@@ -198,9 +198,9 @@ class ApiClient:
                 return ErrorCode.NETWORK_ERROR, -1
             return ErrorCode.UNKNOWN_ERROR, -1
     
-    def many_to_many_check(self, file_ids, signal):
+    def many_to_many_check(self, task_name, file_ids, signal):
         try:
-            responses = self.file_stub.ManyToManyCheck(pb.ManyToManyCheckRequest(token=self.token, file_ids=file_ids))
+            responses = self.file_stub.ManyToManyCheck(pb.ManyToManyCheckRequest(token=self.token, task_name=task_name, file_ids=file_ids))
             for resp in responses:
                 if resp.HasField('status'):
                     status = resp.status
@@ -221,7 +221,7 @@ class ApiClient:
             response = self.file_stub.GetTaskList(pb.GetTaskListRequest(token=self.token))
             status = response.status
             if status == ErrorCode.SUCCESS.value:
-                return ErrorCode.SUCCESS, [(task.id, task.type, task.main_file_id, task.file_count, task.created_at) for task in response.task_previews]
+                return ErrorCode.SUCCESS, [(task.id, task.task_name, task.type, task.main_file_id, task.file_count, task.created_at) for task in response.task_previews]
             else:
                 return ErrorCode.from_value(status), []
         except grpc.RpcError as e:

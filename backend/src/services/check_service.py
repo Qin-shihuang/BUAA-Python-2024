@@ -17,19 +17,19 @@ class CheckService:
     def __del__(self):
         self.db_service.close()
         
-    def create_task(self, type, owner_id, main_file_id=None, file_ids=[]) -> TaskModel:
+    def create_task(self, type, owner_id, task_name, main_file_id=None, file_ids=[]) -> TaskModel:
         file_count = len(file_ids)
         if type == 0:
             if main_file_id is None or file_count == 0:
                 return None
-            query = "INSERT INTO tasks (type, owner_id, file_count) VALUES (?, ?, ?)"
-            args = (type, owner_id, file_count)
+            query = "INSERT INTO tasks (type, owner_id, task_name, file_count) VALUES (?, ?, ?, ?)"
+            args = (type, owner_id, task_name, file_count)
             self.db_service.query(query, args)
         elif type == 1:
             if file_count < 2:
                 return None
-            query = "INSERT INTO tasks (type, owner_id, main_file_id, file_count) VALUES (?, ?, ?, ?)"
-            args = (type, owner_id, main_file_id, file_count)
+            query = "INSERT INTO tasks (type, owner_id, task_name, main_file_id, file_count) VALUES (?, ?, ?, ?, ?)"
+            args = (type, owner_id, task_name, main_file_id, file_count)
             self.db_service.query(query, args)
         query = "SELECT id FROM tasks WHERE owner_id = ? ORDER BY id DESC LIMIT 1"
         args = (owner_id,)
