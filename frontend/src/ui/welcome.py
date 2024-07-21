@@ -81,11 +81,8 @@ class WelcomePage(QWidget):
         logout_layout.addWidget(self.logout_button)
         layout.addLayout(logout_layout)
 
-        self.stack_widget = QStackedWidget()
-        layout.addWidget(self.stack_widget)
-
-        # --------------------stack_widget_0------------------- #
         self.upload_widget = QWidget()
+        layout.addWidget(self.upload_widget)
 
         title_label = QLabel('<p style="color: green">上传待查代码</p>')
         title_label.setFont(QFont('Arial', 20, QFont.Bold))
@@ -164,7 +161,7 @@ class WelcomePage(QWidget):
         start_layout.addStretch(1)
         history_button = QPushButton('查看历史查重任务')
         start_button = QPushButton('开始查重')
-        history_button.clicked.connect(self.show_history)
+        # history_button.clicked.connect(self.show_history)
         start_button.clicked.connect(self.start_check)
         start_layout.addWidget(history_button)
         start_layout.addWidget(start_button)
@@ -177,23 +174,6 @@ class WelcomePage(QWidget):
         upload_layout.addWidget(self.file_table)
         upload_layout.addLayout(start_layout)
         self.upload_widget.setLayout(upload_layout)
-
-        self.stack_widget.addWidget(self.upload_widget)
-
-        # --------------------stack_widget_1------------------- #
-        self.history_widget = QWidget()
-        history_title_label = QLabel('<p style="color: green">历史查重任务</p>')
-        history_title_label.setFont(QFont('Arial', 20, QFont.Bold))
-
-        history_layout = QVBoxLayout()
-        history_layout.addWidget(history_title_label)
-        self.history_widget.setLayout(history_layout)
-
-        self.stack_widget.addWidget(self.history_widget)
-        # tmp
-        tmp_btn = QPushButton('return')
-        history_layout.addWidget(tmp_btn)
-        tmp_btn.clicked.connect(lambda: self.stack_widget.setCurrentIndex(0))
 
     def center(self):
         frameGm = self.frameGeometry()
@@ -345,13 +325,12 @@ class WelcomePage(QWidget):
         self.target_file_button.setText(self.sender().text())
         self.target_file_label.setStyleSheet("color: black")
 
-    def show_history(self):
-        self.task_name_label.setStyleSheet("color: black")
-        self.file_label.setStyleSheet("color: black")
-        self.mode_select_label.setStyleSheet("color: black")
-        self.target_file_label.setStyleSheet("color: black")
-        self.error_label.clear()
-        self.stack_widget.setCurrentIndex(1)
+    # def show_history(self):
+    #     self.task_name_label.setStyleSheet("color: black")
+    #     self.file_label.setStyleSheet("color: black")
+    #     self.mode_select_label.setStyleSheet("color: black")
+    #     self.target_file_label.setStyleSheet("color: black")
+    #     self.error_label.clear()
 
     def start_check(self):
         self.error_label.setStyleSheet("color: red")
