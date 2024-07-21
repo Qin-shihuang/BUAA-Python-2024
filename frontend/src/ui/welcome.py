@@ -234,7 +234,14 @@ class WelcomePage(QWidget):
             checkbox = QTableWidgetItem(info.fileName())
             checkbox.setCheckState(Qt.Checked)
             self.file_table.setItem(row, 0, checkbox)
-            self.file_table.setItem(row, 1, QTableWidgetItem(str('{:.1f}'.format(info.size() / 1024)) + 'KB'))
+            size = info.size()
+            if size < 1024:
+                size_str = f"{size} B"
+            elif size < 1024 * 1024:
+                size_str = f"{size / 1024:.2f} KB"
+            else:
+                size_str = f"{size / 1024 / 1024:.2f} MB"
+            self.file_table.setItem(row, 1, QTableWidgetItem(size_str))
             self.file_table.setItem(row, 2, QTableWidgetItem(current_time))
             self.file_table.setItem(row, 3, QTableWidgetItem(info.filePath()))
 
