@@ -28,13 +28,16 @@ class CheckServiceServicer(pb_grpc.CheckServiceServicer):
             if owner_id != user_id:
                 return pb.OneToManyCheckResponse(status=ErrorCode.UNAUTHORIZED.value)
             file_ids.append(file_id)
-        task = gen_task(0)
+        task = self.check_service.create_task(0, user_id, main_file_id=main_file_id, file_ids=file_ids)
+        if task is None:
+            return pb.OneToManyCheckResponse(status=ErrorCode.UNKNOWN_ERROR.value)
         def generate_responses():
             yield pb.OneToManyCheckResponse(status=ErrorCode.SUCCESS.value)
             for file_id in file_ids:
-                check_plagiarism(main_file_id, file_id)
+                self.check_service.do_single_check(task, main_file_id, file_id)
                 yield pb.OneToManyCheckResponse(empty=pb.Empty())
-            yield pb.OneToManyCheckResponse(task=task)
+            self.check_service.finish_task(task)
+            yield pb.OneToManyCheckResponse(task=task.taskId)
         return generate_responses()
             
     def ManyToManyCheck(self, request, context):
@@ -50,20 +53,13 @@ class CheckServiceServicer(pb_grpc.CheckServiceServicer):
             if owner_id != user_id:
                 return pb.ManyToManyCheckResponse(status=ErrorCode.UNAUTHORIZED.value)
             file_ids.append(file_id)
-        task = gen_task(1)
+        task_id = self.check_service.create_task(1, user_id, file_ids=file_ids)
         def generate_responses():
             yield pb.ManyToManyCheckResponse(status=ErrorCode.SUCCESS.value)
             for i in range(len(file_ids)):
                 for j in range(i + 1, len(file_ids)):
-                    check_plagiarism(file_ids[i], file_ids[j])
+                    self.check_service.do_single_check(file_ids[i], file_ids[j])
                     yield pb.ManyToManyCheckResponse(empty=pb.Empty())
-            yield pb.ManyToManyCheckResponse(task=task)
+            yield pb.ManyToManyCheckResponse(task=task_id)
         return generate_responses()
         
-def check_plagiarism(file_id1, file_id2):
-    # TODO: real plagiarism check
-    time.sleep(0.5)
-    
-def gen_task(n):
-    return 0
-    
