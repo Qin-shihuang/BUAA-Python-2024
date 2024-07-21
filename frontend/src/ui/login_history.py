@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QFileDialog, QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QHeaderView
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtCore import Qt
 

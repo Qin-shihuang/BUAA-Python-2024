@@ -179,8 +179,94 @@ class ApiClient:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
                 return ErrorCode.NETWORK_ERROR
             return ErrorCode.UNKNOWN_ERROR
-        
 
+    # MARK: - Check
+    def one_to_many_check(self, main_file_id, file_ids, signal):
+        try:
+            responses = self.file_stub.OneToManyCheck(pb.OneToManyCheckRequest(token=self.token, main_file_id=main_file_id, file_ids=file_ids))
+            for resp in responses:
+                if resp.HasField('status'):
+                    status = resp.status
+                    if status != ErrorCode.SUCCESS.value:
+                        return ErrorCode.from_value(status), -1
+                elif resp.HasField('empty'):
+                    signal.emit(0)
+                elif resp.HasField('task'):
+                    return ErrorCode.SUCCESS, resp.task
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                return ErrorCode.NETWORK_ERROR, -1
+            return ErrorCode.UNKNOWN_ERROR, -1
     
+    def many_to_many_check(self, file_ids, signal):
+        try:
+            responses = self.file_stub.ManyToManyCheck(pb.ManyToManyCheckRequest(token=self.token, file_ids=file_ids))
+            for resp in responses:
+                if resp.HasField('status'):
+                    status = resp.status
+                    if status != ErrorCode.SUCCESS.value:
+                        return ErrorCode.from_value(status), -1
+                elif resp.HasField('empty'):
+                    signal.emit(0)
+                elif resp.HasField('task'):
+                    return ErrorCode.SUCCESS, resp.task
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                return ErrorCode.NETWORK_ERROR, -1
+            return ErrorCode.UNKNOWN_ERROR, -1
+    
+    # MARK: - Report
+    def GetTaskList(self):
+        try:
+            response = self.file_stub.GetTaskList(pb.GetTaskListRequest(token=self.token))
+            status = response.status
+            if status == ErrorCode.SUCCESS.value:
+                return ErrorCode.SUCCESS, [(task.id, task.type, task.main_file_id, task.file_count, task.created_at) for task in response.task_previews]
+            else:
+                return ErrorCode.from_value(status), []
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                return ErrorCode.NETWORK_ERROR, []
+            return ErrorCode.UNKNOWN_ERROR, []
+        
+    def GetTask(self, task_id):
+        try:
+            response = self.file_stub.GetTask(pb.GetTaskRequest(token=self.token, task_id=task_id))
+            status = response.status
+            if status == ErrorCode.SUCCESS.value:
+                return ErrorCode.SUCCESS, response.task
+            else:
+                return ErrorCode.from_value(status), None
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                return ErrorCode.NETWORK_ERROR, None
+            return ErrorCode.UNKNOWN_ERROR, None
+        
+    def GetReport(self, report_id):
+        try:
+            response = self.file_stub.GetReport(pb.GetReportRequest(token=self.token, report_id=report_id))
+            status = response.status
+            if status == ErrorCode.SUCCESS.value:
+                return ErrorCode.SUCCESS, response.report
+            else:
+                return ErrorCode.from_value(status), None
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                return ErrorCode.NETWORK_ERROR, None
+            return ErrorCode.UNKNOWN_ERROR, None
+        
+    def UpdateReport(self, report_id, report):
+        try:
+            response = self.file_stub.UpdateReport(pb.UpdateReportRequest(token=self.token, report_id=report_id, report=report))
+            status = response.status
+            if status == ErrorCode.SUCCESS.value:
+                return ErrorCode.SUCCESS
+            else:
+                return ErrorCode.from_value(status)
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.UNAVAILABLE:
+                return ErrorCode.NETWORK_ERROR
+            return ErrorCode.UNKNOWN_ERROR
+
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
