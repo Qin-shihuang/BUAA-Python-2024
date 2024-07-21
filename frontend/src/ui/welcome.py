@@ -40,11 +40,26 @@ class WelcomePage(QWidget):
                 color: red;
                 font-size: 12px;
             }
-            QScrollBar:vertical{
-                background:#f0f0f0;
-                padding:0px;
-                border-radius:20px;
-                max-width:12px;
+            QScrollBar:vertical, QScrollBar:horizontal {
+                border: none;
+                background: #e0e0e0;
+                width: 8px;
+                margin: 0px 0px 0px 0px;
+            }
+            QScrollBar::handle:vertical, QScrollBar::handle:horizontal {
+                background: #a0a0a0;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                height: 0;
+                width: 0;
+                subcontrol-origin: margin;
+            }
+            QScrollBar::sub-page:vertical,
+            QScrollBar::add-page:vertical {
+                background: none;
+                width: 0px;
+                height: 0px;
             }
         """)
 
