@@ -447,9 +447,14 @@ class WelcomePage(QWidget):
             self.error_label.setStyleSheet("color: red")
             self.error_label.setText('请至少选择两个文件')
             return
-        main_file_id = self.file_dict[self.target_file_button.text()] if self.check_mode == 0 else None
-        file_ids.remove(main_file_id) ### really?
-        # _, task = self.api_client.one_to_many_check(self.task_name_input.text(), main_file_id, file_ids, None) # api signal none!
+        
+        # if self.check_mode == 0:
+        #     main_file_id = self.file_dict[self.target_file_button.text()]
+        #     file_ids.remove(main_file_id) ### really?
+        #     _, task = self.api_client.one_to_many_check(self.task_name_input.text(), main_file_id, file_ids, None) # api signal none!
+        # else:
+        #     _, task = self.api_client.many_to_many_check(self.task_name_input.text(), file_ids, None) # api signal none!
+        
         # if _ == ErrorCode.SUCCESS:
         #     pass
         #     # switch to check page
