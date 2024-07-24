@@ -227,6 +227,56 @@ class WelcomePage(QWidget):
             item.setCheckState(Qt.Checked)
         self.target_file_button.setText('点击选择目标文件')
 
+
+    # def get_uploaded_files(self):
+    #     _, file_list = self.api_client.get_uploaded_file_list()
+    #     if _ != ErrorCode.SUCCESS:
+    #         QMessageBox.critical(self, 'Error', 'Failed to get uploaded files!')
+    #         return
+    #     for file_info in file_list:
+    #         row = self.file_table.rowCount()
+    #         self.file_table.insertRow(row)
+
+    #         checkbox = QTableWidgetItem(os.path.basename(file_info[1])) # no need to exist?
+    #         checkbox.setCheckState(Qt.Unchecked)
+    #         self.file_table.setItem(row, 0, checkbox)
+    #         size = file_info[2]
+    #         if size < 1024:
+    #             size_str = f"{size} B"
+    #         elif size < 1024 * 1024:
+    #             size_str = f"{size / 1024:.2f} KB"
+    #         else:
+    #             size_str = f"{size / 1024 / 1024:.2f} MB"
+    #         self.file_table.setItem(row, 1, QTableWidgetItem(size_str))
+    #         self.file_table.setItem(row, 2, QTableWidgetItem(file_info[3]))
+    #         self.file_table.setItem(row, 3, QTableWidgetItem(file_info[1]))
+
+    #         widget = QWidget()
+    #         widget_layout = QHBoxLayout()
+
+    #         open_button = QPushButton()
+    #         open_button.setIcon(QIcon('frontend/assets/Open.svg'))
+    #         open_button.setIconSize(QSize(10, 10))
+    #         open_button.setStyleSheet("background-color: green;border-radius: 9px")
+    #         open_button.setFixedSize(18, 18)
+    #         open_button.clicked.connect(self.open_file)
+
+    #         delete_button = QPushButton()
+    #         delete_button.setIcon(QIcon('frontend/assets/Delete.svg'))
+    #         delete_button.setIconSize(QSize(10, 10))
+    #         delete_button.setStyleSheet("background-color: red;border-radius: 9px")
+    #         delete_button.setFixedSize(18, 18)
+    #         delete_button.clicked.connect(self.delete_file)
+
+    #         widget_layout.addWidget(open_button)
+    #         widget_layout.addWidget(delete_button)
+    #         widget.setLayout(widget_layout)
+    #         widget_layout.setContentsMargins(5, 2, 5, 2)
+    #         self.file_table.setCellWidget(row, 4, widget)
+
+    #         self.file_dict[file_info[1]] = file_info[0]
+
+
     def upload_file(self):
         self.files, _ = QFileDialog.getOpenFileNames(self, "请选择待查重代码", "./", "Python (*.py)")
         current_time = self.get_current_time()
@@ -290,7 +340,13 @@ class WelcomePage(QWidget):
         y = self.sender().parentWidget().frameGeometry().y()
         row = self.file_table.indexAt(QPoint(x, y)).row()
         file_path = self.file_table.item(row, 3).text()
-        print(file_path)
+
+        # _, file_content = self.api_client.download_file(self.file_dict[file_path])
+        # if _ == ErrorCode.SUCCESS:
+        #     # enter code editor...
+        #     print(file_content)
+        # else:
+        #     QMessageBox.critical(self, 'Error', 'Failed to open file!')
 
     def delete_file(self):
         # TODO: delete file from backend
@@ -311,6 +367,11 @@ class WelcomePage(QWidget):
         for row in range(self.file_table.rowCount() - 1, -1, -1):
             if self.file_table.item(row, 0).checkState() == Qt.Checked:
                 self.file_table.removeRow(row)
+                
+                # file_id = self.file_dict.pop(self.file_table.item(row, 3).text())
+                # _ = self.api_client.delete_file(file_id)
+                # if _ != ErrorCode.SUCCESS:
+                #     QMessageBox.critical(self, 'Error', 'Failed to delete file!')
         self.target_file_button.setText('点击选择目标文件')
 
     def switch_mode(self):
@@ -375,19 +436,25 @@ class WelcomePage(QWidget):
             return
         self.error_label.setStyleSheet("color: green")
         self.error_label.setText('Success!')
-        # enter code editor...
-        files = []
+
+        file_ids = []
         cnt = 0
         for row in range(self.file_table.rowCount()):
             if self.file_table.item(row, 0).checkState() == Qt.Checked:
-                files.append(self.file_table.item(row, 3).text())
+                file_ids.append(self.file_dict[self.file_table.item(row, 3).text()])
                 cnt += 1
         if cnt < 2:
             self.error_label.setStyleSheet("color: red")
             self.error_label.setText('请至少选择两个文件')
             return
-        target_file = self.target_file_button.text()
-        print(target_file, files)
+        main_file_id = self.file_dict[self.target_file_button.text()] if self.check_mode == 0 else None
+        file_ids.remove(main_file_id) ### really?
+        # _, task = self.api_client.one_to_many_check(self.task_name_input.text(), main_file_id, file_ids, None) # api signal none!
+        # if _ == ErrorCode.SUCCESS:
+        #     pass
+        #     # switch to check page
+        # else:
+        #     QMessageBox.critical(self, 'Error', 'Failed to start check!')
 
 
 class CheckBoxHeader(QHeaderView):
