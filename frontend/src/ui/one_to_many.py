@@ -98,9 +98,17 @@ class OneToManyPage(QWidget):
         self.target_file_input.setFont(QFont('Arial', 10, QFont.Bold))
         self.target_file_input.setText(self.get_target_file())
 
+        self.compare_file_label = QLabel('待比较文件')
+        self.compare_file_label.setFont(QFont('Arial', 13, QFont.Bold))
+        self.compare_file_input = QLineEdit()
+        self.compare_file_input.setReadOnly(True)
+        self.compare_file_input.setFont(QFont('Arial', 10, QFont.Bold))
+
         target_file_layout = QHBoxLayout()
         target_file_layout.addWidget(self.target_file_label)
         target_file_layout.addWidget(self.target_file_input)
+        target_file_layout.addWidget(self.compare_file_label)
+        target_file_layout.addWidget(self.compare_file_input)
 
         self.file_table = QTableWidget()
         # TODO: init file table items from backend
@@ -187,6 +195,7 @@ class OneToManyPage(QWidget):
         if radio_button:
             radio_button.setChecked(True)
             self.compare_file = self.file_table.item(item.row(), 3).text()
+            self.compare_file_input.setText(radio_button.text())
 
     def start_compare(self):
         if self.compare_file is None:
