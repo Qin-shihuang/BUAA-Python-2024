@@ -4,8 +4,14 @@ from PyQt5.QtCore import pyqtSignal, QObject
 
 class ProgressSignal(QObject):
     update = pyqtSignal(int)
+    
+    def emit(self, progress):
+        self.update.emit(progress)
+        
+    def connect(self, callback):
+        self.update.connect(callback)
 
-class ProgressWindow(QWidget):    
+class ProgressWidget(QWidget):    
     def __init__(self, desp, total):
         super().__init__()
         self.setWindowTitle("Progress")

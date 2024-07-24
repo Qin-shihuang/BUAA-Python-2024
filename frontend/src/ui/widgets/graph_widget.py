@@ -1,7 +1,7 @@
 import networkx as nx
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QMouseEvent, QPainter, QColor, QPen
-from PyQt5.QtCore import Qt, QPointF, QRectF
+from PyQt5.QtCore import Qt, QPointF, QRectF, pyqtSignal, QObject
 
 
 CLUSTER_COLORS = [
@@ -122,7 +122,15 @@ class GraphWidget(QWidget):
             return triggerd_edges[0]
         return None
              
-                
+class EdgeSelectedSignal(QObject):
+    edgeClicked = pyqtSignal(tuple)
+    
+    def emit(self, edge):
+        self.edgeClicked.emit(edge)
+        
+    def connect(self, callback):
+        self.edgeClicked.connect(callback)
+               
 def _pointer_line_distance(p, start, end, tolerance=5):
     x0, y0 = p.x(), p.y()
     x1, y1 = start.x(), start.y()
@@ -133,5 +141,4 @@ def _pointer_line_distance(p, start, end, tolerance=5):
       not min(y1, y2) - tolerance <= y0 <= max(y1, y2) + tolerance:
           return tolerance + 1
     return abs((y2-y1)*x0 - (x2-x1)*y0 + x2*y1 - y2*x1) / ((y2-y1)**2 + (x2-x1)**2)**0.5
-    
     
