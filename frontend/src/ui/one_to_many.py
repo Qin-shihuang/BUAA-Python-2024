@@ -101,6 +101,7 @@ class OneToManyPage(QWidget):
         self.compare_file_label = QLabel('待比较文件')
         self.compare_file_label.setFont(QFont('Arial', 13, QFont.Bold))
         self.compare_file_input = QLineEdit()
+        self.compare_file_input.setText('Please select a file to compare below.')
         self.compare_file_input.setReadOnly(True)
         self.compare_file_input.setFont(QFont('Arial', 10, QFont.Bold))
 
@@ -114,6 +115,7 @@ class OneToManyPage(QWidget):
         # TODO: init file table items from backend
         self.file_table.verticalHeader().setVisible(False)
         self.file_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.file_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.file_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         # self.file_table.setColumnWidth(0, 60)
 
@@ -123,21 +125,21 @@ class OneToManyPage(QWidget):
         header_item = QTableWidgetItem('相似度')
         header_item.setFont(QFont('Arial', 10, QFont.Bold))
         self.file_table.setHorizontalHeaderItem(4, header_item)
+        self.file_table.setStyleSheet("selection-background-color: #66BB6A")
 
         self.file_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.file_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        # self.file_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         # self.file_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         # self.file_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         # self.file_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
         # self.file_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
 
         self.file_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.file_table.setFocusPolicy(Qt.NoFocus)
         self.file_table.setAlternatingRowColors(True)
 
         self.file_table_init()
         self.compare_file = None
-        self.file_table.itemPressed.connect(self.toggle_current_radio_button)
+        self.file_table.cellClicked.connect(self.select_current_file)
 
         start_layout = QHBoxLayout()
         start_layout.addStretch(1)
@@ -180,9 +182,7 @@ class OneToManyPage(QWidget):
         # TODO: color for different similarity level
         self.file_table.setRowCount(15)
         for row in range(self.file_table.rowCount()):
-            radio_button = QRadioButton(f'test{row}.py')
-            radio_button.setFont(QFont('Arial', 10))
-            self.file_table.setCellWidget(row, 0, radio_button)
+            self.file_table.setItem(row, 0, QTableWidgetItem(f'test{row}.py'))
             self.file_table.setItem(row, 1, QTableWidgetItem('10KB'))
             self.file_table.setItem(row, 2, QTableWidgetItem('2021-06-01 12:00:00'))
             self.file_table.setItem(row, 3, QTableWidgetItem(f'D:/test{row}.py'))
@@ -190,12 +190,9 @@ class OneToManyPage(QWidget):
             sim_item.setTextAlignment(Qt.AlignCenter)
             self.file_table.setItem(row, 4, sim_item)
 
-    def toggle_current_radio_button(self, item):
-        radio_button = self.file_table.cellWidget(item.row(), 0)
-        if radio_button:
-            radio_button.setChecked(True)
-            self.compare_file = self.file_table.item(item.row(), 3).text()
-            self.compare_file_input.setText(radio_button.text())
+    def select_current_file(self, row, col):
+        self.compare_file = self.file_table.item(row, 3).text()
+        self.compare_file_input.setText(self.file_table.item(row, 0).text())
 
     def start_compare(self):
         if self.compare_file is None:
