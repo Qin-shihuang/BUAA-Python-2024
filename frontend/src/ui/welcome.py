@@ -6,7 +6,8 @@ import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
     QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
-
+# from utils.error_codes import ErrorCode
+# from utils.api_client import ApiClient
 
 class WelcomePage(QWidget):
     def __init__(self):
@@ -15,6 +16,8 @@ class WelcomePage(QWidget):
         self.setWindowTitle("Welcome")
         self.resize(900, 600)
         self.center()
+
+        # self.api_client = ApiClient()
 
         self.setStyleSheet("""
             QWidget {
@@ -103,6 +106,7 @@ class WelcomePage(QWidget):
         task_name_layout.addWidget(self.task_name_input)
         task_name_layout.addWidget(reset_task_name_button)
 
+        self.file_dict = {}
         self.file_label = QLabel('上传待查文件')
         self.upload_file_button = QPushButton('上传文件')
         self.upload_file_button.clicked.connect(self.upload_file)
@@ -268,13 +272,17 @@ class WelcomePage(QWidget):
             widget_layout.setContentsMargins(5, 2, 5, 2)
             self.file_table.setCellWidget(row, 4, widget)
 
+            # _, file_id = self.api_client.upload_file(file)
+            # if _ == ErrorCode.SUCCESS:
+            #     self.file_dict[file] = file_id
+            # else:
+            #     QMessageBox.critical(self, 'Error', 'Failed to upload files!')
+            #     self.file_table.removeRow(row)
+            #     return
+
         if self.file_table.rowCount() > 0:
             self.file_label.setStyleSheet("color: black")
             self.error_label.clear()
-        # if filename:
-        #     with open(filename, 'r') as f:
-        #         text = f.read()
-        #     self.textedit.setText(text)
 
     def open_file(self):
         # TODO: open file from backend, view in code editor
@@ -292,6 +300,11 @@ class WelcomePage(QWidget):
         if self.file_table.item(row, 0).checkState() == Qt.Checked:
             self.target_file_button.setText('点击选择目标文件')
         self.file_table.removeRow(row)
+
+        # file_id = self.file_dict.pop(self.file_table.item(row, 3).text())
+        # _ = self.api_client.delete_file(file_id)
+        # if _ != ErrorCode.SUCCESS:
+        #     QMessageBox.critical(self, 'Error', 'Failed to delete file!')
 
     def clear_selected_files(self):
         # TODO: delete files from backend
