@@ -6,7 +6,8 @@ import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
     QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
-
+# from utils.error_codes import ErrorCode
+# from utils.api_client import ApiClient
 
 class HistoryPage(QWidget):
     def __init__(self):
@@ -187,12 +188,16 @@ class HistoryPage(QWidget):
         x = self.sender().parentWidget().frameGeometry().x()
         y = self.sender().parentWidget().frameGeometry().y()
         row = self.task_table.indexAt(QPoint(x, y)).row()
-        task_id = self.task_table.item(row, 0).text()
-        print('View task' + task_id)
+        self.view_task(row, 0)
 
     def view_task(self, row, col):
         task_id = self.task_table.item(row, 0).text()
-        print('View task' + task_id)
+        # _, task = self.api_client.GetTask(task_id)
+        # if _ == ErrorCode.SUCCESS:
+        #     pass
+        #     # switch to check page
+        # else:
+        #     QMessageBox.critical(self, 'Error', 'Failed to get task!')
 
 
 if __name__ == "__main__":
