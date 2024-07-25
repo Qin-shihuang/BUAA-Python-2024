@@ -150,6 +150,8 @@ class ManyToManyTaskWindow(QWidget):
                     self.table_widget.setCellWidget(index, 1, ColorHintTextWidget(f"{self.labels[j]}", CLUSTER_COLORS[self.clustering[j]]))
                     self.table_widget.setItem(index, 2, QTableWidgetItem(f"{self.distance_matrix[i][j]:.2f}"))
                     index += 1
+        self.table_widget.resizeColumnsToContents()
+        self.table_widget.sortItems(2)
         
         
         
