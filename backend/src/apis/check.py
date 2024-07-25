@@ -58,10 +58,12 @@ class CheckServiceServicer(pb_grpc.CheckServiceServicer):
         task_id = self.check_service.create_task(1, user_id, task_name, file_ids=file_ids)
         def generate_responses():
             yield pb.ManyToManyCheckResponse(status=ErrorCode.SUCCESS.value)
+            matrix = [[0.0 for _ in range(len(file_ids))] for _ in range(len(file_ids))]
             for i in range(len(file_ids)):
                 for j in range(i + 1, len(file_ids)):
-                    self.check_service.do_single_check(file_ids[i], file_ids[j])
+                    matrix[i][j] = (i, j, self.check_service.do_single_check(file_ids[i], file_ids[j]))
                     yield pb.ManyToManyCheckResponse(empty=pb.Empty())
+            self.check_service.finish_task(task_id, matrix=matrix)
             yield pb.ManyToManyCheckResponse(task=task_id)
         return generate_responses()
         

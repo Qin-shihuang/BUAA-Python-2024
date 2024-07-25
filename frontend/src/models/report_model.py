@@ -24,16 +24,3 @@ class ReportModel:
         
     def fromJson(jsonStr):
         return ReportModel(**json.loads(jsonStr))
-        
-class FileSegmentModel:
-    def __init__(
-        self,
-        startLine,
-        startColumn,
-        endLine,
-        endColumn
-    ):
-        self.startLine = startLine
-        self.startColumn = startColumn
-        self.endLine = endLine
-        self.endColumn = endColumn

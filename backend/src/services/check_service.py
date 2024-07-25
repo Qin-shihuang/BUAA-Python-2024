@@ -2,7 +2,7 @@ import time
 
 from config import DB_NAME
 from models.task_model import TaskModel
-from models.report_model import ReportModel, FileSegmentModel
+from models.report_model import ReportModel
 from services.database_service import DatabaseService
 
 class CheckService:
@@ -46,32 +46,42 @@ class CheckService:
         result = self.db_service.query(query, args)
         if result:
             task.reportIds.append(result[0][0])
-            return
+            with open(f'report/{result[0][0]}.json', 'r') as f:
+                report = ReportModel.fromJson(f.read())
+                return report.similarity
         # create a new report
-        sim, dup = self.check_plagiarism(file_id1, file_id2)
+        dist, dup = self.check_plagiarism(file_id1, file_id2)
         query = "INSERT INTO reports (owner_id, file_id1, file_id2, similarity) VALUES (?, ?, ?, ?)"
-        args = (owner_id, file_id1, file_id2, sim)
+        args = (owner_id, file_id1, file_id2, dist)
         self.db_service.query(query, args)
         query = "SELECT id FROM reports WHERE owner_id = ? AND file_id1 = ? AND file_id2 = ?"
         result = self.db_service.query(query, args)
         report_id = result[0][0]
         task.reportIds.append(report_id)
-        report = ReportModel(report_id, owner_id, file_id1, file_id2, sim, dup)
+        report = ReportModel(report_id, owner_id, file_id1, file_id2, dist, dup)
         with open(f'report/{report_id}.json', 'w') as f:
             f.write(report.to_json())
+        return dist
         
+    def finish_task(self, task, matrix=None):
+        task_id = task.taskId
+        if task.taskType == 1:
+            if matrix is None:
+                raise ValueError("clustering data is required for manyToMany task")
+            
+        with open(f'task/{task_id}.json', 'w') as f:
+            f.write(task.to_json())
+            
     def check_plagiarism(file_id1, file_id2):
         # TODO: implement this
         time.sleep(0.5)
         similarity = 0.5
         dup=[{
-            "file1": FileSegmentModel(1, 1, 2, 2),
-            "file2": FileSegmentModel(3, 3, 4, 4)
+            "file1": (1 , 2),
+            "file2": (1 , 2),
         }]
         return similarity, dup
-        
-        
-    def finish_task(self, task):
-        task_id = task.taskId
-        with open(f'task/{task_id}.json', 'w') as f:
-            f.write(task.to_json())
+            
+    def clustering(self, matrix):
+        # TODO: implement this
+        return {0: [1, 2], 1: [3, 4]}
