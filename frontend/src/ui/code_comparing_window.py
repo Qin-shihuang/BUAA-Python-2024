@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QCom
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QTextCursor
 
-from ui.code_editor import CodeEditor
+from ui.widgets.code_editor_widget import CodeEditor
 
 files = {
     "File 1": "def hello_world():\n"
@@ -85,26 +85,21 @@ class CodeComparingWindow(QMainWindow):
     def on_left_selection_changed(self):
         cursor = self.leftCE.textCursor()
         if cursor.hasSelection() and not self.leftTextSelected:
-            # print("lSelection changed")
             self.leftTextSelected = True
             if self.rightTextSelected:
                 self.flag_button.setEnabled(True)
         elif not cursor.hasSelection() and self.leftTextSelected:
-            # print("lSelection cleared")
             self.leftTextSelected = False
             self.flag_button.setEnabled(False)
-
-        
+     
 
     def on_right_selection_changed(self):
         cursor = self.rightCE.textCursor()
         if cursor.hasSelection() and not self.rightTextSelected:
-            # print("rSelection changed")
             self.rightTextSelected = True
             if self.leftTextSelected:
                 self.flag_button.setEnabled(True)
         elif not cursor.hasSelection() and self.rightTextSelected:
-            # print("rSelection cleared")
             self.rightTextSelected = False
             self.flag_button.setEnabled(False)
             
@@ -115,15 +110,12 @@ class CodeComparingWindow(QMainWindow):
         rcursor = self.rightCE.textCursor()
         lpos = get_pos_from_cursor(lcursor)
         rpos = get_pos_from_cursor(rcursor)
-        print(lpos)
-        print(rpos)
         self.leftCE.add_hightlight_areas([lpos])
         self.rightCE.add_hightlight_areas([rpos])
         lcursor.setPosition(lcursor.selectionStart(), QTextCursor.MoveAnchor)
         rcursor.setPosition(rcursor.selectionStart(), QTextCursor.MoveAnchor)
         self.leftCE.setTextCursor(lcursor)
         self.rightCE.setTextCursor(rcursor)
-        
         
     def on_clear_button_clicked(self):
         self.leftCE.clear_highlight()

@@ -41,7 +41,7 @@ class CodeEditor(QPlainTextEdit):
         
     def add_hightlight_areas(self, areas):
         for area in areas:
-            self.bg_highlight_manager.add_highlight_area(*area)
+            self.bg_highlight_manager.add_highlight_area(area)
 
     # def set_font_size(self, size):
     #     font = self.font()
@@ -110,7 +110,8 @@ class CodeEditor(QPlainTextEdit):
         selection_end = cursor.selectionEnd()
         highlight_color = QColor(Qt.lightGray).lighter(120)
         selections = self.extraSelections()
-        selections = selections[1:]
+        if selections and selections[0].format.background().color() == highlight_color:
+            selections = selections[1:]
         start_line = self.document().findBlock(selection_start).blockNumber()
         end_line = self.document().findBlock(selection_end).blockNumber()
         if start_line == end_line:
@@ -150,20 +151,17 @@ class BackgroungHighlightManager:
             QColor(210, 240, 255),
         ]
         self.highlights = []
-
         
-    def add_highlight_area(self, start_row, start_col, end_row, end_col):
-        self.highlights.append((start_row, start_col, end_row, end_col))
+    def add_highlight_area(self, area):
+        self.highlights.append(area)
         self.paint_highlight_area()
         
     def clear_highlight_areas(self):
         self.highlights = []
         self.editor.setExtraSelections(self.editor.extraSelections()[0:1])
         
-        
-        
-        
     def paint_highlight_area(self):
+        self.editor.setExtraSelections(self.editor.extraSelections()[0:1])
         for i, (start_row, start_col, end_row, end_col) in enumerate(self.highlights):
             if start_row < 1 or start_col < 1 or end_row < 1 or end_col < 1:
                 continue
