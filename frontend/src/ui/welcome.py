@@ -74,21 +74,6 @@ class WelcomePage(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        # MARK: User Info
-        logout_layout = QHBoxLayout()
-        logout_layout.addStretch(1)
-
-        self.user_info_label = QLabel()
-        # username = self.get_username()
-        # self.user_info_label.setText(f"Welcome, {username} ")
-        self.user_info_label.setFont(QFont('Arial', 13))
-        logout_layout.addWidget(self.user_info_label)
-
-        self.logout_button = QPushButton("Logout")
-        self.logout_button.clicked.connect(self.switch_to_login_window)
-        logout_layout.addWidget(self.logout_button)
-        layout.addLayout(logout_layout)
-
         self.upload_widget = QWidget()
         layout.addWidget(self.upload_widget)
 
@@ -164,11 +149,10 @@ class WelcomePage(QWidget):
         self.error_label.setStyleSheet("color: red")
         start_layout.addWidget(self.error_label)
         start_layout.addStretch(1)
-        history_button = QPushButton('查看历史查重任务')
+        self.history_button = QPushButton('查看历史查重任务')
         start_button = QPushButton('开始查重')
-        # history_button.clicked.connect(self.show_history)
         start_button.clicked.connect(self.start_check)
-        start_layout.addWidget(history_button)
+        start_layout.addWidget(self.history_button)
         start_layout.addWidget(start_button)
 
         upload_layout = QVBoxLayout()
@@ -180,26 +164,12 @@ class WelcomePage(QWidget):
         upload_layout.addLayout(start_layout)
         self.upload_widget.setLayout(upload_layout)
 
-    def show(self, username):
-        self.get_uploaded_files()
-        self.user_info_label.setText(f"Welcome, {username} ")
-        super().show()
-
     def center(self):
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
         centerPoint = QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
-
-    # def get_username(self):
-    #     return "admin"
-    #     # TODO: Get username from login window
-
-    def switch_to_login_window(self):
-        self.close()
-        self.login_window = LoginWindow(WelcomePage().show)
-        self.login_window.show()
 
     def get_default_name(self):
         datetime = QDateTime.currentDateTime()
@@ -410,13 +380,6 @@ class WelcomePage(QWidget):
     def set_target_file(self):
         self.target_file_button.setText(self.sender().text())
         self.target_file_label.setStyleSheet("color: black")
-
-    # def show_history(self):
-    #     self.task_name_label.setStyleSheet("color: black")
-    #     self.file_label.setStyleSheet("color: black")
-    #     self.mode_select_label.setStyleSheet("color: black")
-    #     self.target_file_label.setStyleSheet("color: black")
-    #     self.error_label.clear()
 
     def start_check(self):
         self.error_label.setStyleSheet("color: red")

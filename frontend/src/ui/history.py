@@ -6,8 +6,8 @@ import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
     QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
-# from utils.error_codes import ErrorCode
-# from utils.api_client import ApiClient
+from utils.error_codes import ErrorCode
+from utils.api_client import ApiClient
 
 class HistoryPage(QWidget):
     def __init__(self):
@@ -72,21 +72,6 @@ class HistoryPage(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        # MARK: User Info
-        logout_layout = QHBoxLayout()
-        logout_layout.addStretch(1)
-
-        self.user_info_label = QLabel()
-        username = self.get_username()
-        self.user_info_label.setText(f"Welcome, {username} ")
-        self.user_info_label.setFont(QFont('Arial', 13))
-        logout_layout.addWidget(self.user_info_label)
-
-        self.logout_button = QPushButton("Logout")
-        self.logout_button.clicked.connect(self.switch_to_login_window)
-        logout_layout.addWidget(self.logout_button)
-        layout.addLayout(logout_layout)
-
         self.history_widget = QWidget()
         history_title_label = QLabel('<p style="color: green">历史查重任务</p>')
         history_title_label.setFont(QFont('Arial', 20, QFont.Bold))
@@ -114,9 +99,8 @@ class HistoryPage(QWidget):
 
         return_layout = QHBoxLayout()
         return_layout.addStretch(1)
-        return_button = QPushButton('  Return  ')
-        # TODO: return_button.clicked.connect(self.switch_to_welcome_page)
-        return_layout.addWidget(return_button)
+        self.return_button = QPushButton('  Return  ')
+        return_layout.addWidget(self.return_button)
         history_layout.addLayout(return_layout)
 
         layout.addWidget(self.history_widget)
@@ -128,15 +112,6 @@ class HistoryPage(QWidget):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
-    def get_username(self):
-        return "admin"
-        # TODO: Get username from login window
-
-    def switch_to_login_window(self):
-        # self.login_window = LoginWindow(self.switch_to_login_window)
-        # self.login_window.show()
-        self.close()
-
     def demo(self):
         for row in range(100):
             self.task_table.insertRow(row)
@@ -146,7 +121,7 @@ class HistoryPage(QWidget):
                     view_widget = QWidget()
                     view_layout = QHBoxLayout()
                     view_widget.setLayout(view_layout)
-                    view_button = QPushButton('View')
+                    view_button = QPushButton(' View ')
                     view_button.setStyleSheet(
                         'padding: 5px; background-color: #4CAF50; color: white; border: none; border-radius: 11px;')
                     view_button.clicked.connect(self.view_task_for_button)
