@@ -10,6 +10,7 @@ class ColorHintTextWidget(QWidget):
         
         self.label = QLabel(text)
         self.label.setContentsMargins(20, 0, 0, 0)
+        self.label.setAlignment(Qt.AlignVCenter)
         
         layout = QVBoxLayout()
         layout.addWidget(self.label)
