@@ -182,7 +182,7 @@ class LoginWindow(QWidget):
         status = self.login_controller.try_login(self.login_username_input.text(), self.login_password_input.text())
         if status == ErrorCode.SUCCESS:
             if self.login_callback:
-                self.login_callback()
+                self.login_callback(self.login_username_input.text())
                 self.health_checker.stop()
                 self.close()
             else:

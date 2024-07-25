@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
     QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
 from utils.error_codes import ErrorCode
 from utils.api_client import ApiClient
+from ui.login import LoginWindow
 
 class WelcomePage(QWidget):
     def __init__(self):
@@ -78,8 +79,8 @@ class WelcomePage(QWidget):
         logout_layout.addStretch(1)
 
         self.user_info_label = QLabel()
-        username = self.get_username()
-        self.user_info_label.setText(f"Welcome, {username} ")
+        # username = self.get_username()
+        # self.user_info_label.setText(f"Welcome, {username} ")
         self.user_info_label.setFont(QFont('Arial', 13))
         logout_layout.addWidget(self.user_info_label)
 
@@ -179,6 +180,11 @@ class WelcomePage(QWidget):
         upload_layout.addLayout(start_layout)
         self.upload_widget.setLayout(upload_layout)
 
+    def show(self, username):
+        self.get_uploaded_files()
+        self.user_info_label.setText(f"Welcome, {username} ")
+        super().show()
+
     def center(self):
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
@@ -186,14 +192,14 @@ class WelcomePage(QWidget):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
-    def get_username(self):
-        return "admin"
-        # TODO: Get username from login window
+    # def get_username(self):
+    #     return "admin"
+    #     # TODO: Get username from login window
 
     def switch_to_login_window(self):
-        # self.login_window = LoginWindow(self.switch_to_login_window)
-        # self.login_window.show()
         self.close()
+        self.login_window = LoginWindow(WelcomePage().show)
+        self.login_window.show()
 
     def get_default_name(self):
         datetime = QDateTime.currentDateTime()
@@ -357,10 +363,6 @@ class WelcomePage(QWidget):
         self.file_table.removeRow(row)
         if _ != ErrorCode.SUCCESS:
             QMessageBox.critical(self, 'Error', 'Failed to delete file!')
-    
-    def show(self):
-        self.get_uploaded_files()
-        super().show()
     
     def clear_selected_files(self):
         for row in range(self.file_table.rowCount() - 1, -1, -1):
