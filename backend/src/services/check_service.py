@@ -63,10 +63,10 @@ class CheckService:
             f.write(report.to_json())
         return dist
         
-    def finish_task(self, task, matrix=None):
+    def finish_task(self, task, file_ids=None, matrix=None):
         task_id = task.taskId
         if task.taskType == 1:
-            if matrix is None:
+            if matrix is None or file_ids is None:
                 raise ValueError("clustering data is required for manyToMany task")
             
         with open(f'task/{task_id}.json', 'w') as f:
@@ -82,6 +82,6 @@ class CheckService:
         }]
         return similarity, dup
             
-    def clustering(self, matrix):
+    def clustering(self, file_ids, matrix):
         # TODO: implement this
         return {0: [1, 2], 1: [3, 4]}
