@@ -5,7 +5,7 @@ from PyQt5.QtGui import QFont, QIcon, QPixmap, QCursor, QColor
 import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
-    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
+    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox, QSpinBox
 
 
 class OneToManyPage(QWidget):
@@ -119,8 +119,8 @@ class OneToManyPage(QWidget):
         self.file_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         # self.file_table.setColumnWidth(0, 60)
 
-        self.file_table.setColumnCount(5)
-        self.file_table.setHorizontalHeaderLabels(('名称', '大小', '上传时间', '路径', '相似度'))
+        self.file_table.setColumnCount(6)
+        self.file_table.setHorizontalHeaderLabels(('名称', '大小', '上传时间', '路径', '相似度', '导出'))
 
         header_item = QTableWidgetItem('相似度')
         header_item.setFont(QFont('Arial', 10, QFont.Bold))
@@ -132,7 +132,7 @@ class OneToManyPage(QWidget):
         # self.file_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         # self.file_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         # self.file_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
-        # self.file_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        self.file_table.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents)
 
         self.file_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.file_table.setAlternatingRowColors(True)
@@ -142,6 +142,22 @@ class OneToManyPage(QWidget):
         self.file_table.cellClicked.connect(self.select_current_file)
 
         start_layout = QHBoxLayout()
+
+        batch_export_button = QPushButton('批量导出')
+        batch_export_button.clicked.connect(self.export_files)
+        batch_label1 = QLabel('查重率高于')
+        self.batch_spinbox = QSpinBox()
+        self.batch_spinbox.setRange(0, 100)
+        self.batch_spinbox.setValue(30)
+        self.batch_spinbox.setSingleStep(1)
+        self.batch_spinbox.setSuffix('%')
+        batch_label2 = QLabel('的代码')
+
+        start_layout.addWidget(batch_export_button)
+        start_layout.addWidget(batch_label1)
+        start_layout.addWidget(self.batch_spinbox)
+        start_layout.addWidget(batch_label2)
+
         start_layout.addStretch(1)
         return_button = QPushButton('Return')
         compare_button = QPushButton('Compare')
@@ -189,6 +205,35 @@ class OneToManyPage(QWidget):
             sim_item = QTableWidgetItem(f'{90.00 - row}%')
             sim_item.setTextAlignment(Qt.AlignCenter)
             self.file_table.setItem(row, 4, sim_item)
+
+            widget = QWidget()
+            widget_layout = QHBoxLayout()
+            export_button = QPushButton()
+            export_button.setIcon(QIcon('frontend/assets/Download.svg'))
+            export_button.setIconSize(QSize(10, 10))
+            export_button.setStyleSheet("background-color: green;border-radius: 9px")
+            export_button.setFixedSize(18, 18)
+            export_button.clicked.connect(self.export_file)
+
+            widget_layout.addWidget(export_button)
+            widget.setLayout(widget_layout)
+            widget_layout.setContentsMargins(5, 2, 5, 2)
+            self.file_table.setCellWidget(row, 5, widget)
+
+    def export_file(self):
+        x = self.sender().parentWidget().frameGeometry().x()
+        y = self.sender().parentWidget().frameGeometry().y()
+        row = self.file_table.indexAt(QPoint(x, y)).row()
+        file_path = self.file_table.item(row, 3).text()
+        print(file_path)  # TODO: export file
+
+        filepath, _ = QFileDialog.getSaveFileName(self, "代码导出", "./", "Python (*.py)")
+        # file = open(filepath, 'w')
+        print(filepath)
+        # file.write(txt)
+
+    def export_files(self):
+        pass
 
     def select_current_file(self, row, col):
         self.compare_file = self.file_table.item(row, 3).text()
