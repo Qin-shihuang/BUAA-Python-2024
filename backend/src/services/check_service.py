@@ -66,12 +66,14 @@ class CheckService:
             f.write(report.to_json())
         return dist
         
-    def finish_task(self, task, matrix=None):
+    def finish_task(self, task, file_ids=None, matrix=None):
         task_id = task.taskId
         if task.taskType == 1:
-            if matrix is None:
+            if matrix is None or file_ids is None:
                 raise ValueError("clustering data is required for manyToMany task")
-            
+        
+        clusters=clustering(file_ids, matrix)
+        task.clusters = clusters
         with open(f'task/{task_id}.json', 'w') as f:
             f.write(task.to_json())
             
@@ -86,6 +88,3 @@ class CheckService:
                 "file2": (m[2], m[3]),
             })
         return distance, dup
-            
-    def clustering(self, fileIds, matrix):
-        return clustering(fileIds, matrix)
