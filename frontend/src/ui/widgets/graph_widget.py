@@ -52,7 +52,7 @@ class GraphWidget(QWidget):
                 if distance_matrix[i][j] <= threshold:
                     self.graph.add_edge(i, j, weight=distance_matrix[i][j])
         
-        self.pos = nx.spring_layout(self.graph, seed=self.seed)
+        self.pos = nx.spring_layout(self.graph, seed=self.seed, weight='weight', k=1.6)
         self._normalize()
         self.update()
 
@@ -115,7 +115,9 @@ class GraphWidget(QWidget):
             clicked_edge = self._get_edge_at(event.pos())
             if clicked_edge and self.edgeSelectedSignal and clicked_edge == self.clicked_edge:
                 self.edgeSelectedSignal.emit((clicked_edge[0], clicked_edge[1]))
-            self.clicked_edge = clicked_edge
+                self.clicked_edge = None
+            else:
+                self.clicked_edge = clicked_edge
             self.update()
             
     def mouseMoveEvent(self, a0: QMouseEvent) -> None:
