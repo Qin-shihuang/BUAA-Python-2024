@@ -139,19 +139,13 @@ class ManyToManyTaskWindow(QWidget):
         self.filter_widget.update_data(data)
         
         # Update table
-        # TODO: Just hide the rows instead of clearing and reinserting
-        self.table_widget.setRowCount(0)
-        index = 0
-        for i in selected_lines:
-            for j in selected_lines:
-                if i < j:
-                    self.table_widget.insertRow(index)
-                    self.table_widget.setCellWidget(index, 0, ColorHintTextWidget(f"{self.labels[i]}", CLUSTER_COLORS[self.clustering[i]]))
-                    self.table_widget.setCellWidget(index, 1, ColorHintTextWidget(f"{self.labels[j]}", CLUSTER_COLORS[self.clustering[j]]))
-                    self.table_widget.setItem(index, 2, QTableWidgetItem(f"{self.distance_matrix[i][j]:.2f}"))
-                    index += 1
-        self.table_widget.resizeColumnsToContents()
-        self.table_widget.sortItems(2)
+        for i in range(self.table_widget.rowCount()):
+            label1 = self.table_widget.cellWidget(i, 0).label.text()
+            label2 = self.table_widget.cellWidget(i, 1).label.text()
+            if self.clustering[self.labels.index(label1)] not in checked or self.clustering[self.labels.index(label2)] not in checked:
+                self.table_widget.setRowHidden(i, True)
+            else:
+                self.table_widget.setRowHidden(i, False)
         
         
         
