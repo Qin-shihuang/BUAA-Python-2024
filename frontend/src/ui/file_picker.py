@@ -60,7 +60,7 @@ class FileUploadWidget(QWidget):
             if status == ErrorCode.SUCCESS:
                 print(f"File {file} uploaded successfully with id {file_id}")
             else:
-                print(f"Failed to upload file {file}", status.value[1])
+                print(f"Failed to upload file: {file}", status.name)
             self.updateList()
                 
     def updateList(self):

@@ -1,9 +1,11 @@
-import time
-
 from config import DB_NAME
 from models.task_model import TaskModel
 from models.report_model import ReportModel
 from services.database_service import DatabaseService
+from services.storage_service import StorageService
+
+from utils.pyac.checker import test_two_files
+from utils.pyac.clustering import clustering
 
 class CheckService:
     _instance = None
@@ -12,6 +14,7 @@ class CheckService:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.db_service = DatabaseService(DB_NAME)
+            cls._instance.storage_service = StorageService()
         return cls._instance
     
     def __del__(self):
@@ -48,7 +51,7 @@ class CheckService:
             task.reportIds.append(result[0][0])
             with open(f'report/{result[0][0]}.json', 'r') as f:
                 report = ReportModel.fromJson(f.read())
-                return report.similarity
+                return report.diatance
         # create a new report
         dist, dup = self.check_plagiarism(file_id1, file_id2)
         query = "INSERT INTO reports (owner_id, file_id1, file_id2, similarity) VALUES (?, ?, ?, ?)"
@@ -72,16 +75,17 @@ class CheckService:
         with open(f'task/{task_id}.json', 'w') as f:
             f.write(task.to_json())
             
-    def check_plagiarism(file_id1, file_id2):
-        # TODO: implement this
-        time.sleep(0.5)
-        similarity = 0.5
-        dup=[{
-            "file1": (1 , 2),
-            "file2": (1 , 2),
-        }]
-        return similarity, dup
+    def check_plagiarism(self, file_id1, file_id2):
+        sub1 = self.storage_service.get_submission(file_id1)
+        sub2 = self.storage_service.get_submission(file_id2)
+        distance, match = test_two_files(sub1, sub2)
+        dup = []
+        for m in match:
+            dup.append({
+                "file1": (m[0], m[1]),
+                "file2": (m[2], m[3]),
+            })
+        return distance, dup
             
-    def clustering(self, matrix):
-        # TODO: implement this
-        return {0: [1, 2], 1: [3, 4]}
+    def clustering(self, fileIds, matrix):
+        return clustering(fileIds, matrix)

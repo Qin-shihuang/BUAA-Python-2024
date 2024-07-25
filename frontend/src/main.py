@@ -20,8 +20,8 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     file_upload_widget = FileUploadWidget()        
     login_history_widget = LoginHistoryWidget()
-    
-    login_window = LoginWindow(login_history_widget.show)
+
+    login_window = LoginWindow(file_upload_widget.show)
     login_window.show()
-    
+
     exit(app.exec_())

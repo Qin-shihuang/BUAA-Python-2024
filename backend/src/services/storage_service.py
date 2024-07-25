@@ -6,6 +6,7 @@ import zipfile
 
 from config import DB_NAME, UPLOAD_FOLDER
 from services.database_service import DatabaseService
+from utils.pyac.submission import Submission
 
 class StorageService:
     _instance = None
@@ -14,10 +15,10 @@ class StorageService:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.db_service = DatabaseService(DB_NAME)
+            cls._instance.submissions = {}
             if not os.path.exists(UPLOAD_FOLDER):
                 os.makedirs(UPLOAD_FOLDER)
         return cls._instance
-    
         
     def __del__(self):
         self.db_service.close()
@@ -108,6 +109,14 @@ class StorageService:
                 z.write(file_path, f"{id}_{original_name}")
         zip_buffer.seek(0)
         return zip_buffer.read()
+    
+    def get_submission(self, file_id):
+        if file_id not in self.submissions:
+            status, content = self.get_file(file_id)
+            if not status:
+                return None
+            self.submissions[file_id] = Submission.from_string(content.decode())
+        return self.submissions[file_id]
     
 def generate_filename(user_id, file_path, content):
     original_extension = file_path.split('.')[-1]
