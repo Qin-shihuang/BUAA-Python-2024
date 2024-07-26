@@ -190,15 +190,16 @@ class ApiClient:
                 if resp.HasField('status'):
                     status = resp.status
                     if status != ErrorCode.SUCCESS.value:
-                        return ErrorCode.from_value(status), -1
+                        return ErrorCode.from_value(status), ''
                 elif resp.HasField('empty'):
-                    signal.emit(0)
+                    if signal:
+                        signal.emit(0)
                 elif resp.HasField('task'):
                     return ErrorCode.SUCCESS, resp.task
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
-                return ErrorCode.NETWORK_ERROR, -1
-            return ErrorCode.UNKNOWN_ERROR, -1
+                return ErrorCode.NETWORK_ERROR, ''
+            return ErrorCode.UNKNOWN_ERROR, ''
     
     def many_to_many_check(self, task_name, file_ids, signal):
         try:
@@ -207,15 +208,16 @@ class ApiClient:
                 if resp.HasField('status'):
                     status = resp.status
                     if status != ErrorCode.SUCCESS.value:
-                        return ErrorCode.from_value(status), -1
+                        return ErrorCode.from_value(status), ''
                 elif resp.HasField('empty'):
-                    signal.emit(0)
+                    if signal:
+                        signal.emit(0)
                 elif resp.HasField('task'):
                     return ErrorCode.SUCCESS, resp.task
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
-                return ErrorCode.NETWORK_ERROR, -1
-            return ErrorCode.UNKNOWN_ERROR, -1
+                return ErrorCode.NETWORK_ERROR, ''
+            return ErrorCode.UNKNOWN_ERROR, ''
     
     # MARK: - Report
     def GetTaskList(self):
