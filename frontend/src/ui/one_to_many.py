@@ -70,15 +70,20 @@ class OneToManyPage(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        title_layout = QHBoxLayout()
         title_label = QLabel('<p style="color: green">一对多查重</p>')
         title_label.setFont(QFont('Arial', 20, QFont.Bold))
+        
+        task_name_label = QLabel('任务名称')
+        task_name_label.setFont(QFont('Arial', 13, QFont.Bold))
+        task_name_input = QLineEdit()
+        task_name_input.setReadOnly(True)
+        task_name_input.setFont(QFont('Arial', 10, QFont.Bold))
         task_name = 'Task_2024-7-26_11:18:54'
-        task_name_label = QLabel(f'{task_name}')
-        task_name_label.setFont(QFont('Arial', 15, QFont.Bold))
-        title_layout.addWidget(title_label)
-        title_layout.addStretch(1)
-        title_layout.addWidget(task_name_label)
+        task_name_input.setText(task_name)
+
+        task_name_layout = QHBoxLayout()
+        task_name_layout.addWidget(task_name_label)
+        task_name_layout.addWidget(task_name_input)
 
         self.target_file_label = QLabel('目标文件')
         self.target_file_label.setFont(QFont('Arial', 13, QFont.Bold))
@@ -155,7 +160,8 @@ class OneToManyPage(QWidget):
         start_layout.addWidget(return_button)
         start_layout.addWidget(compare_button)
 
-        layout.addLayout(title_layout)
+        layout.addWidget(title_label)
+        layout.addLayout(task_name_layout)
         layout.addLayout(target_file_layout)
         layout.addWidget(self.file_table)
         layout.addLayout(start_layout)
@@ -174,7 +180,7 @@ class OneToManyPage(QWidget):
     def file_table_init(self):
         # TODO: SORT BY SIMILARITY
         # TODO: color for different similarity level
-        self.file_table.setRowCount(50)
+        self.file_table.setRowCount(5)
         for row in range(self.file_table.rowCount()):
             self.file_table.setItem(row, 0, QTableWidgetItem(f'test{row}.py'))
             self.file_table.setItem(row, 1, QTableWidgetItem('10KB'))
