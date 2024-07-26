@@ -134,6 +134,7 @@ class OneToManyPage(QWidget):
         self.file_table_init()
         self.compare_file = None
         self.file_table.cellClicked.connect(self.select_current_file)
+        self.file_table.cellDoubleClicked.connect(self.start_compare)
 
         start_layout = QHBoxLayout()
 
