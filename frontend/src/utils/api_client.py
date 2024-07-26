@@ -37,6 +37,8 @@ class ApiClient:
         self.ping_stub = pb_grpc.PingServiceStub(channel)
         self.auth_stub = pb_grpc.AuthServiceStub(channel)
         self.file_stub = pb_grpc.FileServiceStub(channel)
+        self.check_stub = pb_grpc.CheckServiceStub(channel)
+        self.report_stub = pb_grpc.ReportServiceStub(channel)
         self.token = None
         self.file_handler = None
     
@@ -183,7 +185,7 @@ class ApiClient:
     # MARK: - Check
     def one_to_many_check(self, task_name, main_file_id, file_ids, signal):
         try:
-            responses = self.file_stub.OneToManyCheck(pb.OneToManyCheckRequest(token=self.token, task_name=task_name, main_file_id=main_file_id, file_ids=file_ids))
+            responses = self.check_stub.OneToManyCheck(pb.OneToManyCheckRequest(token=self.token, task_name=task_name, main_file_id=main_file_id, file_ids=file_ids))
             for resp in responses:
                 if resp.HasField('status'):
                     status = resp.status
@@ -200,7 +202,7 @@ class ApiClient:
     
     def many_to_many_check(self, task_name, file_ids, signal):
         try:
-            responses = self.file_stub.ManyToManyCheck(pb.ManyToManyCheckRequest(token=self.token, task_name=task_name, file_ids=file_ids))
+            responses = self.check_stub.ManyToManyCheck(pb.ManyToManyCheckRequest(token=self.token, task_name=task_name, file_ids=file_ids))
             for resp in responses:
                 if resp.HasField('status'):
                     status = resp.status
@@ -218,7 +220,7 @@ class ApiClient:
     # MARK: - Report
     def GetTaskList(self):
         try:
-            response = self.file_stub.GetTaskList(pb.GetTaskListRequest(token=self.token))
+            response = self.report_stub.GetTaskList(pb.GetTaskListRequest(token=self.token))
             status = response.status
             if status == ErrorCode.SUCCESS.value:
                 return ErrorCode.SUCCESS, [(task.id, task.task_name, task.type, task.main_file_id, task.file_count, task.created_at) for task in response.task_previews]
@@ -231,7 +233,7 @@ class ApiClient:
         
     def GetTask(self, task_id):
         try:
-            response = self.file_stub.GetTask(pb.GetTaskRequest(token=self.token, task_id=task_id))
+            response = self.report_stub.GetTask(pb.GetTaskRequest(token=self.token, task_id=task_id))
             status = response.status
             if status == ErrorCode.SUCCESS.value:
                 return ErrorCode.SUCCESS, response.task
@@ -244,7 +246,7 @@ class ApiClient:
         
     def GetReport(self, report_id):
         try:
-            response = self.file_stub.GetReport(pb.GetReportRequest(token=self.token, report_id=report_id))
+            response = self.report_stub.GetReport(pb.GetReportRequest(token=self.token, report_id=report_id))
             status = response.status
             if status == ErrorCode.SUCCESS.value:
                 return ErrorCode.SUCCESS, response.report
@@ -257,7 +259,7 @@ class ApiClient:
         
     def UpdateReport(self, report_id, report):
         try:
-            response = self.file_stub.UpdateReport(pb.UpdateReportRequest(token=self.token, report_id=report_id, report=report))
+            response = self.report_stub.UpdateReport(pb.UpdateReportRequest(token=self.token, report_id=report_id, report=report))
             status = response.status
             if status == ErrorCode.SUCCESS.value:
                 return ErrorCode.SUCCESS
