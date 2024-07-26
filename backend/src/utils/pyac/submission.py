@@ -16,16 +16,12 @@ class Submission:
     compressed_size: Optional[int] = None
 
     def __init__(self, content: str):
-        self.root = content
-        self.content = self.root.toStringTree(recog=self.root.parser)
-
-    @staticmethod
-    def from_string(content: str):
-        return Submission(parse(content))
+        self.root = parse(content)
+        self.content = content
 
     def getCompSize(self) -> int:
-        if self.compressed is None:
-            self.compressed_size = len(zlib.compress(self.content.encode()))
+        if self.compressed_size is None:
+            self.compressed_size = len(zlib.compress(self.root.toStringTree(recog=self.root.parser).encode()))
         return self.compressed_size
     
 def parse(content):

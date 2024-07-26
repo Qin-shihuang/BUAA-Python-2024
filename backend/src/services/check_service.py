@@ -37,13 +37,15 @@ class CheckService:
         query = "SELECT id FROM tasks WHERE owner_id = ? ORDER BY id DESC LIMIT 1"
         args = (owner_id,)
         result = self.db_service.query(query, args)
-        return TaskModel(result[0][0], type, mainFileId=main_file_id, fileIds=file_ids)
+        return TaskModel(result[0][0], type, mainFileId=main_file_id, fileIds=file_ids, reportIds=[])
     
     
     def do_single_check(self, task, owner_id, file_id1, file_id2):
         if task is None:
             return
         # first check if (owner_id, file_id1, file_id2) already exists
+        if file_id1 > file_id2:
+            file_id1, file_id2 = file_id2, file_id1
         query = "SELECT id FROM reports WHERE owner_id = ? AND file_id1 = ? AND file_id2 = ?"
         args = (owner_id, file_id1, file_id2)
         result = self.db_service.query(query, args)
@@ -58,12 +60,13 @@ class CheckService:
         args = (owner_id, file_id1, file_id2, dist)
         self.db_service.query(query, args)
         query = "SELECT id FROM reports WHERE owner_id = ? AND file_id1 = ? AND file_id2 = ?"
+        args = (owner_id, file_id1, file_id2)
         result = self.db_service.query(query, args)
         report_id = result[0][0]
         task.reportIds.append(report_id)
-        report = ReportModel(report_id, owner_id, file_id1, file_id2, dist, dup)
+        report = ReportModel(report_id, file_id1, file_id2, dist, dup)
         with open(f'report/{report_id}.json', 'w') as f:
-            f.write(report.to_json())
+            f.write(report.toJson())
         return dist
         
     def finish_task(self, task, file_ids=None, matrix=None):
@@ -71,11 +74,10 @@ class CheckService:
         if task.taskType == 1:
             if matrix is None or file_ids is None:
                 raise ValueError("clustering data is required for manyToMany task")
-        
-        clusters=clustering(file_ids, matrix)
-        task.clusters = clusters
+            clusters=clustering(file_ids, matrix)
+            task.clusters = clusters
         with open(f'task/{task_id}.json', 'w') as f:
-            f.write(task.to_json())
+            f.write(task.toJson())
             
     def check_plagiarism(self, file_id1, file_id2):
         sub1 = self.storage_service.get_submission(file_id1)

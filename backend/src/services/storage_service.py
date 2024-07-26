@@ -115,7 +115,7 @@ class StorageService:
             status, content = self.get_file(file_id)
             if not status:
                 return None
-            self.submissions[file_id] = Submission.from_string(content.decode())
+            self.submissions[file_id] = Submission(content.decode())
         return self.submissions[file_id]
     
 def generate_filename(user_id, file_path, content):

@@ -53,7 +53,7 @@ class ReportServiceServicer(pb_grpc.ReportServiceServicer):
             return pb.GetReportResponse(status=ErrorCode.REPORT_NOT_FOUND.value)
         if owner_id != user_id:
             return pb.GetReportResponse(status=ErrorCode.UNAUTHORIZED.value)
-        file_path = f"reports/{report_id}.json"
+        file_path = f"report/{report_id}.json"
         try:
             with open(file_path, "r") as f:
                 report = f.read()
@@ -73,7 +73,7 @@ class ReportServiceServicer(pb_grpc.ReportServiceServicer):
             return pb.UpdateReportResponse(status=ErrorCode.REPORT_NOT_FOUND.value)
         if owner_id != user_id:
             return pb.UpdateReportResponse(status=ErrorCode.UNAUTHORIZED.value)
-        file_path = f"reports/{report_id}.json"
+        file_path = f"report/{report_id}.json"
         try:
             with open(file_path, "w") as f:
                 f.write(report)

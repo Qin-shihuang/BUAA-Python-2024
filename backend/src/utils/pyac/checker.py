@@ -9,7 +9,7 @@ def test_two_lists(list1, list2, t0=0.25):
         row = []
         for r2 in list2:
             sub1 = Submission(r1[1])
-            sub2 = Submission(r2[1])
+            sub2 = Submission(r1[1])
             distance = ncdTest(sub1, sub2)
             row.append(distance)
         distances.append(row)
@@ -48,15 +48,16 @@ def test_two_lists(list1, list2, t0=0.25):
 
 def test_two_files(sub1, sub2, snippet_test=True):
     distance = ncdTest(sub1, sub2)
+    distance = min(1, max(0, distance))
 
-    if not snippet_test:
+    if not snippet_test or distance > 0.7:
         return distance, []
     
-    content1 = sub1.content
-    content2 = sub2.content
+    content1 = sub1.content.replace('\t', '    ').replace('\r', '')
+    content2 = sub2.content.replace('\t', '    ').replace('\r', '')
 
-    c1_lines = [s for s in content1.replace('\t', '    ').split('\n')]
-    c2_lines = [s for s in content2.replace('\t', '    ').split('\n')]
+    c1_lines = [s for s in content1.split('\n')]
+    c2_lines = [s for s in content2.split('\n')]
 
     # round1 : classes, outer functions and if statements
     i = 0
@@ -196,4 +197,4 @@ def test_two_files(sub1, sub2, snippet_test=True):
         s2_line_count = m[2][1].count('\n')
         match_lines.append((s1_line_start, s1_line_start + s1_line_count, s2_line_start, s2_line_start + s2_line_count))
 
-    return distance, match
+    return distance, match_lines
