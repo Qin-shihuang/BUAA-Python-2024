@@ -15,8 +15,8 @@ class WelcomePage(QWidget):
         super().__init__()
 
         self.setWindowTitle("Welcome")
-        self.resize(900, 600)
-        self.center()
+        # self.resize(900, 600)
+        # self.center()
 
         self.api_client = ApiClient()
 

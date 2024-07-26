@@ -43,12 +43,15 @@ class MainWindow(QMainWindow):
             }
         """)
         self.central_widget = QWidget()
+        self.central_widget.setContentsMargins(0, 0, 0, 0)
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         self.central_widget.setLayout(layout)
         self.setCentralWidget(self.central_widget)
 
         # MARK: User Info
         logout_layout = QHBoxLayout()
+        logout_layout.setContentsMargins(0, 0, 5, 0)
         logout_layout.addStretch(1)
 
         self.user_info_label = QLabel()
@@ -105,6 +108,7 @@ class MainWindow(QMainWindow):
         self.welcome_page.error_label.clear()
         self.stacked_widget.setCurrentIndex(1)
         # update history page
+        # self.history_page.get_task_infos()
 
     def switch_to_welcome_page(self):
         self.stacked_widget.setCurrentIndex(0)

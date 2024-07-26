@@ -14,8 +14,8 @@ class HistoryPage(QWidget):
         super().__init__()
 
         self.setWindowTitle("History")
-        self.resize(900, 600)
-        self.center()
+        # self.resize(900, 600)
+        # self.center()
 
         self.setStyleSheet("""
             QWidget {
@@ -67,7 +67,7 @@ class HistoryPage(QWidget):
                font-size: 13px;
             }
         """)
-        # self.api_client = ApiClient()
+        self.api_client = ApiClient()
 
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -83,13 +83,14 @@ class HistoryPage(QWidget):
         self.task_table = QTableWidget()
         self.task_table.setColumnCount(7)
         self.task_table.setHorizontalHeaderLabels(
-            ['任务ID', '任务名称', '任务类型', '目标文件ID', '查重文件数', '任务提交时间', '查看'])
+            ['任务ID', '任务名称', '任务类型', '目标文件', '查重文件数', '任务提交时间', '查看'])
         self.task_table.verticalHeader().setVisible(False)
         self.task_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.task_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.task_table.setFocusPolicy(Qt.NoFocus)
         self.task_table.setAlternatingRowColors(True)
         self.task_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.task_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.task_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeToContents)
         self.task_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.task_table.cellDoubleClicked.connect(self.view_task)
@@ -130,34 +131,33 @@ class HistoryPage(QWidget):
                     self.task_table.setCellWidget(row, col, view_widget)
 
     def get_task_infos(self):
-        pass
-        # status, tasks = self.api_client.GetTaskList()
-        # if status != ErrorCode.SUCCESS:
-        #     QMessageBox.critical(self, 'Error', 'Failed to get history tasks')
-        #     return
-        # for task in tasks:
-        #     row = self.task_table.rowCount()
-        #     self.task_table.insertRow(row)
-        #     self.task_table.setItem(row, 0, QTableWidgetItem(task[0]))
-        #     self.task_table.setItem(row, 1, QTableWidgetItem(task[1]))
-        #     if task[2] == 0:
-        #         self.task_table.setItem(row, 2, QTableWidgetItem('one-to-many'))
-        #         self.task_table.setItem(row, 3, QTableWidgetItem(task[3]))
-        #     else:
-        #         self.task_table.setItem(row, 2, QTableWidgetItem('many-to-many'))
-        #         self.task_table.setItem(row, 3, QTableWidgetItem('-----'))
-        #     self.task_table.setItem(row, 4, QTableWidgetItem(task[4]))
-        #     self.task_table.setItem(row, 5, QTableWidgetItem(task[5]))
-        #     view_widget = QWidget()
-        #     view_layout = QHBoxLayout()
-        #     view_widget.setLayout(view_layout)
-        #     view_button = QPushButton('View')
-        #     view_button.setStyleSheet(
-        #         'padding: 5px; background-color: #4CAF50; color: white; border: none; border-radius: 11px;')
-        #     view_button.clicked.connect(self.view_task_for_button)
-        #     view_layout.addWidget(view_button)
-        #     view_layout.setContentsMargins(5, 5, 5, 5)
-        #     self.task_table.setCellWidget(row, 6, view_widget)
+        status, tasks = self.api_client.GetTaskList()
+        if status != ErrorCode.SUCCESS:
+            QMessageBox.critical(self, 'Error', 'Failed to get history tasks')
+            return
+        for task in tasks:
+            row = self.task_table.rowCount()
+            self.task_table.insertRow(row)
+            self.task_table.setItem(row, 0, QTableWidgetItem(task[0]))
+            self.task_table.setItem(row, 1, QTableWidgetItem(task[1]))
+            if task[2] == 0:
+                self.task_table.setItem(row, 2, QTableWidgetItem('one-to-many'))
+                self.task_table.setItem(row, 3, QTableWidgetItem(task[3]))
+            else:
+                self.task_table.setItem(row, 2, QTableWidgetItem('many-to-many'))
+                self.task_table.setItem(row, 3, QTableWidgetItem('-----'))
+            self.task_table.setItem(row, 4, QTableWidgetItem(task[4]))
+            self.task_table.setItem(row, 5, QTableWidgetItem(task[5]))
+            view_widget = QWidget()
+            view_layout = QHBoxLayout()
+            view_widget.setLayout(view_layout)
+            view_button = QPushButton('View')
+            view_button.setStyleSheet(
+                'padding: 5px; background-color: #4CAF50; color: white; border: none; border-radius: 11px;')
+            view_button.clicked.connect(self.view_task_for_button)
+            view_layout.addWidget(view_button)
+            view_layout.setContentsMargins(5, 5, 5, 5)
+            self.task_table.setCellWidget(row, 6, view_widget)
 
     def view_task_for_button(self):
         x = self.sender().parentWidget().frameGeometry().x()
