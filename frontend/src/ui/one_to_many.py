@@ -70,26 +70,15 @@ class OneToManyPage(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        # MARK: User Info
-        logout_layout = QHBoxLayout()
-        logout_layout.addStretch(1)
-
-        self.user_info_label = QLabel()
-        username = self.get_username()
-        self.user_info_label.setText(f"Welcome, {username} ")
-        self.user_info_label.setFont(QFont('Arial', 13))
-        logout_layout.addWidget(self.user_info_label)
-
-        self.logout_button = QPushButton("Logout")
-        self.logout_button.clicked.connect(self.switch_to_login_window)
-        logout_layout.addWidget(self.logout_button)
-        layout.addLayout(logout_layout)
-
-        self.check_widget = QWidget()
-        layout.addWidget(self.check_widget)
-
+        title_layout = QHBoxLayout()
         title_label = QLabel('<p style="color: green">一对多查重</p>')
         title_label.setFont(QFont('Arial', 20, QFont.Bold))
+        task_name = 'Task_2024-7-26_11:18:54'
+        task_name_label = QLabel(f'{task_name}')
+        task_name_label.setFont(QFont('Arial', 15, QFont.Bold))
+        title_layout.addWidget(title_label)
+        title_layout.addStretch(1)
+        title_layout.addWidget(task_name_label)
 
         self.target_file_label = QLabel('目标文件')
         self.target_file_label.setFont(QFont('Arial', 13, QFont.Bold))
@@ -166,12 +155,10 @@ class OneToManyPage(QWidget):
         start_layout.addWidget(return_button)
         start_layout.addWidget(compare_button)
 
-        check_layout = QVBoxLayout()
-        check_layout.addWidget(title_label)
-        check_layout.addLayout(target_file_layout)
-        check_layout.addWidget(self.file_table)
-        check_layout.addLayout(start_layout)
-        self.check_widget.setLayout(check_layout)
+        layout.addLayout(title_layout)
+        layout.addLayout(target_file_layout)
+        layout.addWidget(self.file_table)
+        layout.addLayout(start_layout)
 
     def center(self):
         frameGm = self.frameGeometry()
@@ -180,15 +167,6 @@ class OneToManyPage(QWidget):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
-    def get_username(self):
-        return "admin"
-        # TODO: Get username from login window
-
-    def switch_to_login_window(self):
-        # self.login_window = LoginWindow(self.switch_to_login_window)
-        # self.login_window.show()
-        self.close()
-
     def get_target_file(self):
         # TODO: get target file name
         return 'test.py'
@@ -196,7 +174,7 @@ class OneToManyPage(QWidget):
     def file_table_init(self):
         # TODO: SORT BY SIMILARITY
         # TODO: color for different similarity level
-        self.file_table.setRowCount(15)
+        self.file_table.setRowCount(50)
         for row in range(self.file_table.rowCount()):
             self.file_table.setItem(row, 0, QTableWidgetItem(f'test{row}.py'))
             self.file_table.setItem(row, 1, QTableWidgetItem('10KB'))
