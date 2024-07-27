@@ -6,13 +6,13 @@ class ReportModel:
         reportId,
         file1Id,
         file2Id,
-        similarity,
+        diatance,
         duplicateSegments=[]
     ):
         self.reportId = reportId
         self.file1Id = file1Id
         self.file2Id = file2Id
-        self.similarity = similarity
+        self.diatance = diatance
         self.duplicateSegments = duplicateSegments
         
     def toJson(self):
