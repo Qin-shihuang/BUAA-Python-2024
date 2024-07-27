@@ -6,6 +6,8 @@ import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
     QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
+from models.task_model import TaskModel
+from ui.one_to_many import OneToManyPage
 from utils.error_codes import ErrorCode
 from utils.api_client import ApiClient
 from utils.info_container import InfoContainer
@@ -423,19 +425,56 @@ class WelcomePage(QWidget):
             self.error_label.setText('请至少选择两个文件')
             return
         
-        if self.check_mode == 0:
-            main_file = self.target_file_button.text()
-            main_file_id = int(self.target_files[int(main_file[:main_file.find(':')])-1])
-            file_ids.remove(main_file_id) ### really?
-            _, task = self.api_client.one_to_many_check(self.task_name_input.text(), main_file_id, file_ids, None) # api signal none!
-        else:
-            _, task = self.api_client.many_to_many_check(self.task_name_input.text(), file_ids, None) # api signal none!
+        # if self.check_mode == 0:
+        #     main_file = self.target_file_button.text()
+        #     main_file_id = int(self.target_files[int(main_file[:main_file.find(':')])-1])
+        #     file_ids.remove(main_file_id) ### really?
+        #     _, task_str = self.api_client.one_to_many_check(self.task_name_input.text(), main_file_id, file_ids, None) # api signal none!
+        # else:
+        #     _, task_str = self.api_client.many_to_many_check(self.task_name_input.text(), file_ids, None) # api signal none!
         
-        if _ == ErrorCode.SUCCESS:
-            pass
-            # switch to check page
+        # if _ != ErrorCode.SUCCESS:
+        #     QMessageBox.critical(self, 'Error', 'Failed to start check!')
+        #     return
+
+        # task = TaskModel.fromJson(task_str)
+        # for file_id in task.fileIds:
+        #     if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+        #         _, file_content = self.api_client.download_file(file_id)
+        #         if _ == ErrorCode.SUCCESS:
+        #             with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
+        #                 f.write(file_content)
+        #         else:
+        #             QMessageBox.critical(self, 'Error', 'Failed to get file!')
+        
+        # for report_id in task.reportIds:
+        #     if not os.path.exists(f'src/cache/reports/report_{report_id}.json'):
+        #         _, report_content = self.api_client.GetReport(report_id)
+        #         if _ == ErrorCode.SUCCESS:
+        #             with open(f'src/cache/reports/report_{report_id}.json', 'w') as f: # w or wb?
+        #                 f.write(report_content)
+        #         else:
+        #             QMessageBox.critical(self, 'Error', 'Failed to get report!')
+
+        # if task.taskType == 0:
+        #     main_file_id = task.mainFileId
+        #     if not os.path.exists(f'src/cache/files/file_{main_file_id}.py'):
+        #         _, file_content = self.api_client.download_file(main_file_id)
+        #         if _ == ErrorCode.SUCCESS:
+        #             with open(f'src/cache/files/file_{main_file_id}.py', 'wb') as f:
+        #                 f.write(file_content)
+        #         else:
+        #             QMessageBox.critical(self, 'Error', 'Failed to get file!')
+        
+        if self.check_mode == 0:
+            self.check_page = OneToManyPage()
+            # self.check_page.init_task(self.task_table.item(row, 1).text(), task)
+            self.check_page.show()
         else:
-            QMessageBox.critical(self, 'Error', 'Failed to start check!')
+            pass
+
+        # switch to check page
+            
 
 
 class CheckBoxHeader(QHeaderView):

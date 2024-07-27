@@ -20,7 +20,6 @@ class InfoContainer:
         if not os.path.exists('src/cache'):
             os.makedirs('src/cache')
             os.makedirs('src/cache/files')
-            os.makedirs('src/cache/tasks')
             os.makedirs('src/cache/reports')
             with open("src/cache/file_info.csv", "a", newline='') as csvfile:
                 writer = csv.writer(csvfile)

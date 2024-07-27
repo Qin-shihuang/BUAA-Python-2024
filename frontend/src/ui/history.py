@@ -206,10 +206,13 @@ class HistoryPage(QWidget):
         #                 f.write(file_content)
         #         else:
         #             QMessageBox.critical(self, 'Error', 'Failed to get file!')
-
-        self.one_to_many_page = OneToManyPage()
-        # self.one_to_many_page.init_task(self.task_table.item(row, 1).text(), task)
-        self.one_to_many_page.show()
+        
+        # if self.task_table.item(row, 2).text() == 'one-to-many':
+            self.check_page = OneToManyPage()
+            # self.check_page.init_task(self.task_table.item(row, 1).text(), task)
+            self.check_page.show()
+        # else:
+        #     pass
         # switch to check page
             
 

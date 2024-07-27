@@ -218,7 +218,16 @@ class OneToManyPage(QWidget):
             row = self.file_table.rowCount()
             self.file_table.insertRow(row)
             self.file_table.setItem(row, 0, QTableWidgetItem(file_info[0]))
-            self.file_table.setItem(row, 1, QTableWidgetItem(file_info[1]))
+
+            size = file_info[1]
+            if size < 1024:
+                size_str = f"{size} B"
+            elif size < 1024 * 1024:
+                size_str = f"{size / 1024:.2f} KB"
+            else:
+                size_str = f"{size / 1024 / 1024:.2f} MB"
+
+            self.file_table.setItem(row, 1, QTableWidgetItem(size_str))
             self.file_table.setItem(row, 2, QTableWidgetItem(file_info[3]))
             self.file_table.setItem(row, 3, QTableWidgetItem(file_info[2]))
             self.file_table.setItem(row, 6, QTableWidgetItem(str(report.file1Id)))
