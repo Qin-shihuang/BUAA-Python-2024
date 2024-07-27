@@ -34,7 +34,7 @@ class CheckService:
         query = "SELECT id FROM tasks WHERE owner_id = ? ORDER BY id DESC LIMIT 1"
         args = (owner_id,)
         result = self.db_service.query(query, args)
-        return TaskModel(result[0][0], type, owner_id, main_file_id=main_file_id, file_ids=file_ids)
+        return TaskModel(result[0][0], type, mainFileId=main_file_id, fileIds=file_ids)
     
     
     def do_single_check(self, task, owner_id, file_id1, file_id2):
