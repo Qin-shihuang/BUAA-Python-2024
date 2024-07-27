@@ -55,13 +55,15 @@ class CheckServiceServicer(pb_grpc.CheckServiceServicer):
             if owner_id != user_id:
                 return pb.ManyToManyCheckResponse(status=ErrorCode.UNAUTHORIZED.value)
             file_ids.append(file_id)
-        task_id = self.check_service.create_task(1, user_id, task_name, file_ids=file_ids)
+        task = self.check_service.create_task(1, user_id, task_name, file_ids=file_ids)
         def generate_responses():
             yield pb.ManyToManyCheckResponse(status=ErrorCode.SUCCESS.value)
+            matrix = [[0.0 for _ in range(len(file_ids))] for _ in range(len(file_ids))]
             for i in range(len(file_ids)):
                 for j in range(i + 1, len(file_ids)):
-                    self.check_service.do_single_check(file_ids[i], file_ids[j])
+                    matrix[i][j] = self.check_service.do_single_check(task, user_id, file_ids[i], file_ids[j])
                     yield pb.ManyToManyCheckResponse(empty=pb.Empty())
-            yield pb.ManyToManyCheckResponse(task=task_id)
+            self.check_service.finish_task(task.taskId, file_ids=file_ids, matrix=matrix)
+            yield pb.ManyToManyCheckResponse(task=task.taskId)
         return generate_responses()
         

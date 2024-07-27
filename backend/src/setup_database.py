@@ -49,13 +49,13 @@ CREATE TABLE IF NOT EXISTS tasks (
 CREATE TABLE IF NOT EXISTS reports (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     owner_id INTEGER NOT NULL,
-    file_id_1 INTEGER NOT NULL,
-    file_id_2 INTEGER NOT NULL,
+    file_id1 INTEGER NOT NULL,
+    file_id2 INTEGER NOT NULL,
     similarity FLOAT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (file_id_1) REFERENCES uploaded_files(id) ON DELETE CASCADE,
-    FOREIGN KEY (file_id_2) REFERENCES uploaded_files(id) ON DELETE CASCADE
+    FOREIGN KEY (file_id1) REFERENCES uploaded_files(id) ON DELETE CASCADE,
+    FOREIGN KEY (file_id2) REFERENCES uploaded_files(id) ON DELETE CASCADE
 
 ); 
 """
