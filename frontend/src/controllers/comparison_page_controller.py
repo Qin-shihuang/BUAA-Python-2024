@@ -110,7 +110,6 @@ class ComparisonPageController(QObject):
         self.right_content = file2_content
         self.left_highlight_areas = self.get_file1_highlight_areas()
         self.right_highlight_areas = self.get_file2_highlight_areas()
-        
     
     def get_file1_highlight_areas(self):
         areas = []
