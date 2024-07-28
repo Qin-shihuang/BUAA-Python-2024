@@ -53,7 +53,7 @@ class CheckService:
             task.reportIds.append(result[0][0])
             with open(f'report/{result[0][0]}.json', 'r') as f:
                 report = ReportModel.fromJson(f.read())
-                return report.diatance
+                return report.distance
         # create a new report
         dist, dup = self.check_plagiarism(file_id1, file_id2)
         query = "INSERT INTO reports (owner_id, file_id1, file_id2, similarity) VALUES (?, ?, ?, ?)"
