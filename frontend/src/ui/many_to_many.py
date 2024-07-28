@@ -1,12 +1,8 @@
 import sys
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtCore import Qt, QRect, QSize, QPoint
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import Qt
 import itertools
-from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
-    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox, QTabWidget, \
-    QSplitter, QLayout, QScrollArea, QFrame
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, QTableWidgetItem, QTabWidget
     
 from widgets.graph_widget import GraphWidget, EdgeSelectedSignal, CLUSTER_COLORS
 from widgets.filter_widget import FilterWidget, ThresholdChangedSignal
@@ -19,11 +15,12 @@ class ManyToManyTaskWindow(QWidget):
 
         # TODO: Add task name in setup()
         self.setWindowTitle("Many to Many Task")
-        self.setFixedSize(854, 935)
+        self.setGeometry(100, 100, 1000, 800)
         
         layout = QVBoxLayout()
         tab_widget = QTabWidget()
-
+        tab_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        
         self.graph_tab = QWidget()
         self._init_graph_tab()
         self.table_widget = QTableWidget()
@@ -35,6 +32,7 @@ class ManyToManyTaskWindow(QWidget):
         
         cluster_selection_changed_signal = CheckboxChangedSignal()
         self.cluster_select_area = DynamicCheckboxWidget(checkboxChangedSignal=cluster_selection_changed_signal)
+        self.cluster_select_area.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         cluster_selection_changed_signal.connect(self._on_cluster_selection_changed)
         
         layout.addWidget(tab_widget)
@@ -51,11 +49,14 @@ class ManyToManyTaskWindow(QWidget):
         mid_layout.setContentsMargins(10, 0, 0, 0)
 
         self.graph_widget = GraphWidget(edgeSelectedSignal=edge_selected_signal)
-        self.graph_widget.setFixedSize(800, 600)        
-
+        self.graph_widget.setMinimumSize(800, 600)
+        self.graph_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        
         self.filter_widget = FilterWidget(thresholdChangedSignal=threshold_changed_signal)
-        self.filter_widget.setFixedSize(650, 100)
+        self.filter_widget.setMinimumSize(650, 100)
+        self.filter_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         self.graph_label = QLabel()
+        self.graph_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         
         layout.addWidget(self.graph_widget)
         layout.addLayout(mid_layout)

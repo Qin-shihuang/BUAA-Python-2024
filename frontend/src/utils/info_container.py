@@ -17,11 +17,11 @@ class InfoContainer:
         super().__init__()
         self._initiated = True
 
-        if not os.path.exists('src/cache'):
-            os.makedirs('src/cache')
-            os.makedirs('src/cache/files')
-            os.makedirs('src/cache/reports')
-            with open("src/cache/file_info.csv", "a", newline='') as csvfile:
+        if not os.path.exists('cache'):
+            os.makedirs('cache')
+            os.makedirs('cache/files')
+            os.makedirs('cache/reports')
+            with open("cache/file_info.csv", "a", newline='') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(["id", "name", "size", "path", "time"])
 

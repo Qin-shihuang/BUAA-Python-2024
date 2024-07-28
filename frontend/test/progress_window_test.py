@@ -11,7 +11,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     progress_window = ProgressWidget("Downloading files", 100)
     signal = ProgressSignal()
-    signal.update.connect(progress_window.update_progress)
+    signal.connect(progress_window.update_progress)
     progress_window.show()
     for i in range(100):
         signal.update.emit(i + 1)
