@@ -15,7 +15,8 @@ from ui.login import LoginWindow
 from ui.main_window import MainWindow
 
 if __name__ == "__main__":
-    PyQt5.QtWidgets.QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True) 
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True) 
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
     app = QApplication(sys.argv)
 
     mainWindow = MainWindow()
