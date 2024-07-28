@@ -1,11 +1,12 @@
 import os
 import sys
-from PyQt5.QtCore import Qt, QDateTime, QFileInfo, pyqtSignal, QRect, QSize, QPoint
+from PyQt5.QtCore import Qt, QDateTime, QFileInfo, pyqtSignal, QRect, QSize, QPoint, QTimer
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QCursor, QColor
 import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
-    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox, QSpinBox
+    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox, QSpinBox, \
+    QDoubleSpinBox, QProgressBar, QFrame, QScrollArea, QScrollBar, QSizePolicy, QAbstractScrollArea, QSlider
 
 from models.report_model import ReportModel
 from utils.api_client import ApiClient
@@ -121,7 +122,7 @@ class OneToManyPage(QWidget):
         self.file_table.setHorizontalHeaderLabels(('名称', '大小', '上传时间', '路径', '相似距离', '导出', 'ID'))
         # self.file_table.setColumnHidden(6, True)
 
-        header_item = QTableWidgetItem('相似度')
+        header_item = QTableWidgetItem('相似距离')
         header_item.setFont(QFont('Arial', 10, QFont.Bold))
         self.file_table.setHorizontalHeaderItem(4, header_item)
         self.file_table.setStyleSheet("selection-background-color: #66BB6A")
@@ -141,21 +142,39 @@ class OneToManyPage(QWidget):
         self.file_table.cellClicked.connect(self.select_current_file)
         self.file_table.cellDoubleClicked.connect(self.start_compare)
 
+        slider_layout = QHBoxLayout()
+        slider_layout.addWidget(QLabel('                             '))
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setRange(0, 100)
+        self.slider.setValue(1)
+        self.slider.setSingleStep(1)
+        self.slider.setFixedWidth(150)
+        self.slider.setVisible(False)
+        self.slider.valueChanged.connect(lambda: self.lineEdit.setText(str(self.slider.value()/100)))
+        slider_layout.addWidget(self.slider)
+        slider_layout.addStretch(1)
+
         start_layout = QHBoxLayout()
 
         batch_export_button = QPushButton('批量导出')
         batch_export_button.clicked.connect(self.export_files)
-        batch_label1 = QLabel('查重率高于')
-        self.batch_spinbox = QSpinBox()
-        self.batch_spinbox.setRange(0, 100)
-        self.batch_spinbox.setValue(30)
-        self.batch_spinbox.setSingleStep(1)
-        self.batch_spinbox.setSuffix('%')
+        batch_label1 = QLabel('相似距离低于')
+        self.lineEdit = QLineEdit()
+        self.lineEdit.setFixedSize(60, 30)
+        self.lineEdit.setStyleSheet("padding: 1px;")
+        self.lineEdit.setFont(QFont('Arial', 10))
         batch_label2 = QLabel('的代码')
+
+        self.lineEdit.installEventFilter(self)
+        self.slider.installEventFilter(self)
+        self.sliderHovered = False
+        self.timer = QTimer()
+        self.timer.setSingleShot(True)
+        self.timer.timeout.connect(self.checkMousePosition)
 
         start_layout.addWidget(batch_export_button)
         start_layout.addWidget(batch_label1)
-        start_layout.addWidget(self.batch_spinbox)
+        start_layout.addWidget(self.lineEdit)
         start_layout.addWidget(batch_label2)
 
         start_layout.addStretch(1)
@@ -170,8 +189,25 @@ class OneToManyPage(QWidget):
         layout.addLayout(task_name_layout)
         layout.addLayout(target_file_layout)
         layout.addWidget(self.file_table)
+        layout.addLayout(slider_layout)
         layout.addLayout(start_layout)
 
+    def eventFilter(self, source, event):
+        if source == self.lineEdit or source == self.slider:
+            if event.type() == event.Enter:
+                self.slider.setVisible(True)
+                self.sliderHovered = True
+                self.timer.stop()  # 停止隐藏定时器
+            elif event.type() == event.Leave:
+                self.sliderHovered = False
+                self.timer.start(500)  # 设定一个短暂的延迟时间以判断鼠标是否离开组件
+        return super(QWidget, self).eventFilter(source, event)
+
+    def checkMousePosition(self):
+        # 检查鼠标是否在lineEdit或slider区域内
+        if not (self.lineEdit.underMouse() or self.slider.underMouse()):
+            self.slider.setVisible(False)
+    
     def center(self):
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
@@ -282,7 +318,7 @@ class OneToManyPage(QWidget):
                 f.write(file_content)
 
     def export_files(self):
-        thres = self.batch_spinbox.value()
+        thres = self.lineEdit.value()
 
         file_ids = []
         # for row in range(self.file_table.rowCount()):

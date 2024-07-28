@@ -139,6 +139,7 @@ class HistoryPage(QWidget):
                     self.task_table.setCellWidget(row, col, view_widget)
 
     def get_task_infos(self):
+        self.task_table.setRowCount(0)
         status, tasks = self.api_client.GetTaskList()
         if status != ErrorCode.SUCCESS:
             QMessageBox.critical(self, 'Error', 'Failed to get history tasks')

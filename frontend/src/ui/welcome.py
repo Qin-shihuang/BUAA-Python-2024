@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
     QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
 from models.task_model import TaskModel
 from ui.one_to_many import OneToManyPage
+from ui.widgets.code_editor_widget import CodeEditor
 from utils.error_codes import ErrorCode
 from utils.api_client import ApiClient
 from utils.info_container import InfoContainer
@@ -23,6 +24,9 @@ class WelcomePage(QWidget):
 
         self.api_client = ApiClient()
         self.info_container = InfoContainer()
+        self.code_editor = CodeEditor()
+        self.code_editor.set_editable(False)
+        self.code_editor.resize(800, 600)
 
         self.setStyleSheet("""
             QWidget {
@@ -98,8 +102,10 @@ class WelcomePage(QWidget):
 
         self.file_label = QLabel('上传待查文件')
         self.upload_file_button = QPushButton('上传文件')
+        self.upload_file_button.setIcon(QIcon('assets/Upload.svg'))
         self.upload_file_button.clicked.connect(self.upload_file)
         delete_file_button = QPushButton('删除已选中文件')
+        delete_file_button.setIcon(QIcon('assets/del.svg'))
         delete_file_button.clicked.connect(self.clear_selected_files)
         file_layout = QHBoxLayout()
         file_layout.addWidget(self.file_label)
@@ -146,6 +152,7 @@ class WelcomePage(QWidget):
         self.file_table.setColumnHidden(5, True)
 
         self.file_table.itemPressed.connect(self.toggle_current_checkbox)
+        self.file_table.cellDoubleClicked.connect(self.open_file_click)
 
         start_layout = QHBoxLayout()
         self.error_label = QLabel()
@@ -237,7 +244,7 @@ class WelcomePage(QWidget):
             open_button.setIconSize(QSize(10, 10))
             open_button.setStyleSheet("background-color: green;border-radius: 9px")
             open_button.setFixedSize(18, 18)
-            open_button.clicked.connect(self.open_file)
+            open_button.clicked.connect(self.open_file_btn)
 
             delete_button = QPushButton()
             delete_button.setIcon(QIcon('assets/Delete.svg'))
@@ -283,7 +290,7 @@ class WelcomePage(QWidget):
             open_button.setIconSize(QSize(10, 10))
             open_button.setStyleSheet("background-color: green;border-radius: 9px")
             open_button.setFixedSize(18, 18)
-            open_button.clicked.connect(self.open_file)
+            open_button.clicked.connect(self.open_file_btn)
 
             delete_button = QPushButton()
             delete_button.setIcon(QIcon('assets/Delete.svg'))
@@ -310,19 +317,29 @@ class WelcomePage(QWidget):
             self.file_label.setStyleSheet("color: black")
             self.error_label.clear()
 
-    def open_file(self):
-        # TODO: open file from backend, view in code editor
+    def open_file_btn(self):
         x = self.sender().parentWidget().frameGeometry().x()
         y = self.sender().parentWidget().frameGeometry().y()
         row = self.file_table.indexAt(QPoint(x, y)).row()
         file_id = int(self.file_table.item(row, 5).text())
+        self.open_file(file_id)
 
-        _, file_content = self.api_client.download_file(file_id)
-        if _ == ErrorCode.SUCCESS:
-            # enter code editor...
-            print(file_content)
-        else:
-            QMessageBox.critical(self, 'Error', 'Failed to open file!')
+    def open_file_click(self, row, col):
+        file_id = int(self.file_table.item(row, 5).text())
+        self.open_file(file_id)
+    
+    def open_file(self, file_id):
+        if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+            _, file_content = self.api_client.download_file(file_id)
+            if _ == ErrorCode.SUCCESS:
+                with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
+                    f.write(file_content)
+            else:
+                QMessageBox.critical(self, 'Error', 'Failed to get file!')
+        with open(f'src/cache/files/file_{file_id}.py', 'r') as f:
+            content = f.read()
+        self.code_editor.set_text(content)
+        self.code_editor.show()
 
     def delete_file(self):
         x = self.sender().parentWidget().frameGeometry().x()
