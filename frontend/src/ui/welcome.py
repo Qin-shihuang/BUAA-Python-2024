@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
     QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
 from models.task_model import TaskModel
 from ui.one_to_many import OneToManyPage
+from ui.widgets.code_editor_widget import CodeEditor
 from utils.error_codes import ErrorCode
 from utils.api_client import ApiClient
 from utils.info_container import InfoContainer
@@ -23,6 +24,9 @@ class WelcomePage(QWidget):
 
         self.api_client = ApiClient()
         self.info_container = InfoContainer()
+        self.code_editor = CodeEditor()
+        self.code_editor.set_editable(False)
+        self.code_editor.resize(800, 600)
 
         self.setStyleSheet("""
             QWidget {
@@ -98,8 +102,10 @@ class WelcomePage(QWidget):
 
         self.file_label = QLabel('上传待查文件')
         self.upload_file_button = QPushButton('上传文件')
+        self.upload_file_button.setIcon(QIcon('assets/Upload.svg'))
         self.upload_file_button.clicked.connect(self.upload_file)
         delete_file_button = QPushButton('删除已选中文件')
+        delete_file_button.setIcon(QIcon('assets/del.svg'))
         delete_file_button.clicked.connect(self.clear_selected_files)
         file_layout = QHBoxLayout()
         file_layout.addWidget(self.file_label)
@@ -146,6 +152,7 @@ class WelcomePage(QWidget):
         self.file_table.setColumnHidden(5, True)
 
         self.file_table.itemPressed.connect(self.toggle_current_checkbox)
+        self.file_table.cellDoubleClicked.connect(self.open_file_click)
 
         start_layout = QHBoxLayout()
         self.error_label = QLabel()
@@ -237,7 +244,7 @@ class WelcomePage(QWidget):
             open_button.setIconSize(QSize(10, 10))
             open_button.setStyleSheet("background-color: green;border-radius: 9px")
             open_button.setFixedSize(18, 18)
-            open_button.clicked.connect(self.open_file)
+            open_button.clicked.connect(self.open_file_btn)
 
             delete_button = QPushButton()
             delete_button.setIcon(QIcon('assets/Delete.svg'))
@@ -274,8 +281,6 @@ class WelcomePage(QWidget):
             self.file_table.setItem(row, 1, QTableWidgetItem(size_str))
             self.file_table.setItem(row, 2, QTableWidgetItem(current_time))
             self.file_table.setItem(row, 3, QTableWidgetItem(info.filePath()))
-
-            self.info_container.add_file_info(info.fileName(), size, info.filePath(), current_time)
             
             widget = QWidget()
             widget_layout = QHBoxLayout()
@@ -285,7 +290,7 @@ class WelcomePage(QWidget):
             open_button.setIconSize(QSize(10, 10))
             open_button.setStyleSheet("background-color: green;border-radius: 9px")
             open_button.setFixedSize(18, 18)
-            open_button.clicked.connect(self.open_file)
+            open_button.clicked.connect(self.open_file_btn)
 
             delete_button = QPushButton()
             delete_button.setIcon(QIcon('assets/Delete.svg'))
@@ -306,24 +311,35 @@ class WelcomePage(QWidget):
                 self.file_table.removeRow(row)
                 return
             self.file_table.setItem(row, 5, QTableWidgetItem(str(file_id)))
+            self.info_container.add_file_info(file_id, info.fileName(), size, info.filePath(), current_time)
 
         if self.file_table.rowCount() > 0:
             self.file_label.setStyleSheet("color: black")
             self.error_label.clear()
 
-    def open_file(self):
-        # TODO: open file from backend, view in code editor
+    def open_file_btn(self):
         x = self.sender().parentWidget().frameGeometry().x()
         y = self.sender().parentWidget().frameGeometry().y()
         row = self.file_table.indexAt(QPoint(x, y)).row()
         file_id = int(self.file_table.item(row, 5).text())
+        self.open_file(file_id)
 
-        _, file_content = self.api_client.download_file(file_id)
-        if _ == ErrorCode.SUCCESS:
-            # enter code editor...
-            print(file_content)
-        else:
-            QMessageBox.critical(self, 'Error', 'Failed to open file!')
+    def open_file_click(self, row, col):
+        file_id = int(self.file_table.item(row, 5).text())
+        self.open_file(file_id)
+    
+    def open_file(self, file_id):
+        if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+            _, file_content = self.api_client.download_file(file_id)
+            if _ == ErrorCode.SUCCESS:
+                with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
+                    f.write(file_content)
+            else:
+                QMessageBox.critical(self, 'Error', 'Failed to get file!')
+        with open(f'src/cache/files/file_{file_id}.py', 'r') as f:
+            content = f.read()
+        self.code_editor.set_text(content)
+        self.code_editor.show()
 
     def delete_file(self):
         x = self.sender().parentWidget().frameGeometry().x()
@@ -425,50 +441,50 @@ class WelcomePage(QWidget):
             self.error_label.setText('请至少选择两个文件')
             return
         
-        # if self.check_mode == 0:
-        #     main_file = self.target_file_button.text()
-        #     main_file_id = int(self.target_files[int(main_file[:main_file.find(':')])-1])
-        #     file_ids.remove(main_file_id) ### really?
-        #     _, task_str = self.api_client.one_to_many_check(self.task_name_input.text(), main_file_id, file_ids, None) # api signal none!
-        # else:
-        #     _, task_str = self.api_client.many_to_many_check(self.task_name_input.text(), file_ids, None) # api signal none!
-        
-        # if _ != ErrorCode.SUCCESS:
-        #     QMessageBox.critical(self, 'Error', 'Failed to start check!')
-        #     return
+        if self.check_mode == 0:
+            main_file = self.target_file_button.text()
+            main_file_id = int(self.target_files[int(main_file[:main_file.find(':')])-1])
+            file_ids.remove(main_file_id)
+            _, task_str = self.api_client.one_to_many_check(self.task_name_input.text(), main_file_id, file_ids, None) # api signal none!
+        else:
+            _, task_str = self.api_client.many_to_many_check(self.task_name_input.text(), file_ids, None) # api signal none!
 
-        # task = TaskModel.fromJson(task_str)
-        # for file_id in task.fileIds:
-        #     if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
-        #         _, file_content = self.api_client.download_file(file_id)
-        #         if _ == ErrorCode.SUCCESS:
-        #             with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
-        #                 f.write(file_content)
-        #         else:
-        #             QMessageBox.critical(self, 'Error', 'Failed to get file!')
+        if _ != ErrorCode.SUCCESS:
+            QMessageBox.critical(self, 'Error', 'Failed to start check!')
+            return
         
-        # for report_id in task.reportIds:
-        #     if not os.path.exists(f'src/cache/reports/report_{report_id}.json'):
-        #         _, report_content = self.api_client.GetReport(report_id)
-        #         if _ == ErrorCode.SUCCESS:
-        #             with open(f'src/cache/reports/report_{report_id}.json', 'w') as f: # w or wb?
-        #                 f.write(report_content)
-        #         else:
-        #             QMessageBox.critical(self, 'Error', 'Failed to get report!')
+        task = TaskModel.fromJson(task_str)
+        for file_id in task.fileIds:
+            if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+                _, file_content = self.api_client.download_file(file_id)
+                if _ == ErrorCode.SUCCESS:
+                    with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
+                        f.write(file_content)
+                else:
+                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
+        
+        for report_id in task.reportIds:
+            if not os.path.exists(f'src/cache/reports/report_{report_id}.json'):
+                _, report_content = self.api_client.GetReport(report_id)
+                if _ == ErrorCode.SUCCESS:
+                    with open(f'src/cache/reports/report_{report_id}.json', 'w') as f:
+                        f.write(report_content)
+                else:
+                    QMessageBox.critical(self, 'Error', 'Failed to get report!')
 
-        # if task.taskType == 0:
-        #     main_file_id = task.mainFileId
-        #     if not os.path.exists(f'src/cache/files/file_{main_file_id}.py'):
-        #         _, file_content = self.api_client.download_file(main_file_id)
-        #         if _ == ErrorCode.SUCCESS:
-        #             with open(f'src/cache/files/file_{main_file_id}.py', 'wb') as f:
-        #                 f.write(file_content)
-        #         else:
-        #             QMessageBox.critical(self, 'Error', 'Failed to get file!')
+        if task.taskType == 0:
+            main_file_id = task.mainFileId
+            if not os.path.exists(f'src/cache/files/file_{main_file_id}.py'):
+                _, file_content = self.api_client.download_file(main_file_id)
+                if _ == ErrorCode.SUCCESS:
+                    with open(f'src/cache/files/file_{main_file_id}.py', 'wb') as f:
+                        f.write(file_content)
+                else:
+                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
         
         if self.check_mode == 0:
             self.check_page = OneToManyPage()
-            # self.check_page.init_task(self.task_table.item(row, 1).text(), task)
+            self.check_page.init_task(self.task_name_input.text(), task)
             self.check_page.show()
         else:
             pass
