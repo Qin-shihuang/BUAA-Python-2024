@@ -6,17 +6,6 @@ from PyQt5.QtGui import QTextCursor
 from controllers.comparison_page_controller import ComparisonPageController
 from ui.widgets.code_editor_widget import CodeEditor
 
-highlight_areas = [
-    {
-        "file1": (1, 2),
-        "file2": (1, 2),
-    },
-    {
-        "file1": (4, 6),
-        "file2": (4, 6),
-    }
-]
-
 class ComparisonPage(QWidget):
     def __init__(self):
         super().__init__()
@@ -92,9 +81,8 @@ class ComparisonPage(QWidget):
         self.leftCE.set_text(self.controller.left_content)
         self.rightCE.set_text(self.controller.right_content)
         
-        for area in highlight_areas:
-            self.left_highlight_areas = self.controller.left_highlight_areas
-            self.right_highlight_areas = self.controller.right_highlight_areas
+        self.left_highlight_areas = self.controller.left_highlight_areas
+        self.right_highlight_areas = self.controller.right_highlight_areas
         
     def _on_show_changed(self, enable):
         if enable:

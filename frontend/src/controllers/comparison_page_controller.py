@@ -13,7 +13,7 @@ from utils.api_client import ApiClient
 from utils.info_container import InfoContainer
 
 report_content = '''{
-    "diatance": 0.11658977339743665,
+    "distance": 0.11658977339743665,
     "duplicateSegments": [
         {
             "file1": [
