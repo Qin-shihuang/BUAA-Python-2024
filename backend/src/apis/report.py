@@ -17,7 +17,7 @@ class ReportServiceServicer(pb_grpc.ReportServiceServicer):
             return pb.GetTaskListResponse(status=ErrorCode.UNAUTHORIZED.value)
         task_previews = []
         for task in self.report_service.get_task_list(user_id):
-            if task[1] == 0:
+            if task[2] == 0:
                 task_previews.append(pb.TaskPreview(id=task[0], task_name=task[1], type=task[2], main_file_id=task[3], file_count=task[4], created_at=task[5]))
             else:
                 task_previews.append(pb.TaskPreview(id=task[0], task_name=task[1], type=task[2], file_count=task[4], created_at=task[5]))
@@ -34,7 +34,7 @@ class ReportServiceServicer(pb_grpc.ReportServiceServicer):
             return pb.GetTaskResponse(status=ErrorCode.TASK_NOT_FOUND.value)
         if owner_id != user_id:
             return pb.GetTaskResponse(status=ErrorCode.UNAUTHORIZED.value)
-        file_path = f"tasks/{task_id}.json"
+        file_path = f"task/{task_id}.json"
         try:
             with open(file_path, "r") as f:
                 task = f.read()
