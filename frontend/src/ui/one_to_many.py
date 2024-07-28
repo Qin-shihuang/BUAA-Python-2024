@@ -111,7 +111,6 @@ class OneToManyPage(QWidget):
         target_file_layout.addWidget(self.compare_file_input)
 
         self.file_table = QTableWidget()
-        # TODO: init file table items from backend
         self.file_table.verticalHeader().setVisible(False)
         self.file_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.file_table.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -119,7 +118,7 @@ class OneToManyPage(QWidget):
         # self.file_table.setColumnWidth(0, 60)
 
         self.file_table.setColumnCount(7)
-        self.file_table.setHorizontalHeaderLabels(('名称', '大小', '上传时间', '路径', '相似度', '导出', 'ID'))
+        self.file_table.setHorizontalHeaderLabels(('名称', '大小', '上传时间', '路径', '相似距离', '导出', 'ID'))
         # self.file_table.setColumnHidden(6, True)
 
         header_item = QTableWidgetItem('相似度')
@@ -128,16 +127,16 @@ class OneToManyPage(QWidget):
         self.file_table.setStyleSheet("selection-background-color: #66BB6A")
 
         self.file_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        # self.file_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        # self.file_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        # self.file_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.file_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.file_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.file_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         # self.file_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
         self.file_table.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeToContents)
 
         self.file_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.file_table.setAlternatingRowColors(True)
 
-        self.file_table_init()
+        # self.file_table_init()
         self.compare_file = None
         self.file_table.cellClicked.connect(self.select_current_file)
         self.file_table.cellDoubleClicked.connect(self.start_compare)
@@ -214,7 +213,11 @@ class OneToManyPage(QWidget):
             with open(f'src/cache/reports/report_{report_id}.json', 'r') as f:
                 report = ReportModel.fromJson(f.read())
 
-            file_info = self.info_container.get_file_info(report.file1Id) # file2id???
+            if report.file1Id == task.mainFileId:
+                file_id = report.file2Id
+            else:
+                file_id = report.file1Id
+            file_info = self.info_container.get_file_info(file_id)
             row = self.file_table.rowCount()
             self.file_table.insertRow(row)
             self.file_table.setItem(row, 0, QTableWidgetItem(file_info[0]))
@@ -230,9 +233,9 @@ class OneToManyPage(QWidget):
             self.file_table.setItem(row, 1, QTableWidgetItem(size_str))
             self.file_table.setItem(row, 2, QTableWidgetItem(file_info[3]))
             self.file_table.setItem(row, 3, QTableWidgetItem(file_info[2]))
-            self.file_table.setItem(row, 6, QTableWidgetItem(str(report.file1Id)))
+            self.file_table.setItem(row, 6, QTableWidgetItem(str(file_id)))
 
-            sim_item = QTableWidgetItem(f'{report.similarity}%')
+            sim_item = QTableWidgetItem(f'{report.distance}')
             sim_item.setTextAlignment(Qt.AlignCenter)
             self.file_table.setItem(row, 4, sim_item)
 
@@ -250,31 +253,33 @@ class OneToManyPage(QWidget):
             widget_layout.setContentsMargins(5, 2, 5, 2)
             self.file_table.setCellWidget(row, 5, widget)
 
-        self.file_table.setSortingEnabled(True)
-        self.file_table.sortItems(4, Qt.DescendingOrder)
+        # self.file_table.setSortingEnabled(True)
+        # self.file_table.sortItems(4, Qt.DescendingOrder)
+        self.file_table.sortItems(4, Qt.AscendingOrder)
         # need to reload op...
 
     def export_file(self):
         x = self.sender().parentWidget().frameGeometry().x()
         y = self.sender().parentWidget().frameGeometry().y()
         row = self.file_table.indexAt(QPoint(x, y)).row()
-        # file_id = int(self.file_table.item(row, 6).text())
+        file_id = int(self.file_table.item(row, 6).text())
         file_name = self.file_table.item(row, 0).text()
         filepath, _ = QFileDialog.getSaveFileName(self, "代码导出", f"./{file_name}", "Python (*.py)")
-        print(filepath)
-        # 用原来的文件名
-        # if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
-        #     _, file_content = self.api_client.download_file(file_id)
-        #     if _ == ErrorCode.SUCCESS:
-        #         with open(filepath, 'wb') as f:
-        #             f.write(file_content)
-        #     else:
-        #         QMessageBox.critical(self, 'Error', 'Failed to get file!')
-        # else:
-        #     with open(f'src/cache/files/file_{file_id}.py', 'r') as f:
-        #         file_content = f.read()
-        #     with open(filepath, 'w') as f:
-        #         f.write(file_content)
+
+        if not filepath:
+            return
+        if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+            _, file_content = self.api_client.download_file(file_id)
+            if _ == ErrorCode.SUCCESS:
+                with open(filepath, 'wb') as f:
+                    f.write(file_content)
+            else:
+                QMessageBox.critical(self, 'Error', 'Failed to get file!')
+        else:
+            with open(f'src/cache/files/file_{file_id}.py', 'r') as f:
+                file_content = f.read()
+            with open(filepath, 'w') as f:
+                f.write(file_content)
 
     def export_files(self):
         thres = self.batch_spinbox.value()

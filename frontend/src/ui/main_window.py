@@ -108,7 +108,7 @@ class MainWindow(QMainWindow):
         self.welcome_page.error_label.clear()
         self.stacked_widget.setCurrentIndex(1)
         # update history page
-        # self.history_page.get_task_infos()
+        self.history_page.get_task_infos()
 
     def switch_to_welcome_page(self):
         self.stacked_widget.setCurrentIndex(0)

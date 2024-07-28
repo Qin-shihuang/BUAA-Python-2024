@@ -274,8 +274,6 @@ class WelcomePage(QWidget):
             self.file_table.setItem(row, 1, QTableWidgetItem(size_str))
             self.file_table.setItem(row, 2, QTableWidgetItem(current_time))
             self.file_table.setItem(row, 3, QTableWidgetItem(info.filePath()))
-
-            self.info_container.add_file_info(info.fileName(), size, info.filePath(), current_time)
             
             widget = QWidget()
             widget_layout = QHBoxLayout()
@@ -306,6 +304,7 @@ class WelcomePage(QWidget):
                 self.file_table.removeRow(row)
                 return
             self.file_table.setItem(row, 5, QTableWidgetItem(str(file_id)))
+            self.info_container.add_file_info(file_id, info.fileName(), size, info.filePath(), current_time)
 
         if self.file_table.rowCount() > 0:
             self.file_label.setStyleSheet("color: black")
@@ -425,50 +424,50 @@ class WelcomePage(QWidget):
             self.error_label.setText('请至少选择两个文件')
             return
         
-        # if self.check_mode == 0:
-        #     main_file = self.target_file_button.text()
-        #     main_file_id = int(self.target_files[int(main_file[:main_file.find(':')])-1])
-        #     file_ids.remove(main_file_id) ### really?
-        #     _, task_str = self.api_client.one_to_many_check(self.task_name_input.text(), main_file_id, file_ids, None) # api signal none!
-        # else:
-        #     _, task_str = self.api_client.many_to_many_check(self.task_name_input.text(), file_ids, None) # api signal none!
-        
-        # if _ != ErrorCode.SUCCESS:
-        #     QMessageBox.critical(self, 'Error', 'Failed to start check!')
-        #     return
+        if self.check_mode == 0:
+            main_file = self.target_file_button.text()
+            main_file_id = int(self.target_files[int(main_file[:main_file.find(':')])-1])
+            file_ids.remove(main_file_id)
+            _, task_str = self.api_client.one_to_many_check(self.task_name_input.text(), main_file_id, file_ids, None) # api signal none!
+        else:
+            _, task_str = self.api_client.many_to_many_check(self.task_name_input.text(), file_ids, None) # api signal none!
 
-        # task = TaskModel.fromJson(task_str)
-        # for file_id in task.fileIds:
-        #     if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
-        #         _, file_content = self.api_client.download_file(file_id)
-        #         if _ == ErrorCode.SUCCESS:
-        #             with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
-        #                 f.write(file_content)
-        #         else:
-        #             QMessageBox.critical(self, 'Error', 'Failed to get file!')
+        if _ != ErrorCode.SUCCESS:
+            QMessageBox.critical(self, 'Error', 'Failed to start check!')
+            return
         
-        # for report_id in task.reportIds:
-        #     if not os.path.exists(f'src/cache/reports/report_{report_id}.json'):
-        #         _, report_content = self.api_client.GetReport(report_id)
-        #         if _ == ErrorCode.SUCCESS:
-        #             with open(f'src/cache/reports/report_{report_id}.json', 'w') as f: # w or wb?
-        #                 f.write(report_content)
-        #         else:
-        #             QMessageBox.critical(self, 'Error', 'Failed to get report!')
+        task = TaskModel.fromJson(task_str)
+        for file_id in task.fileIds:
+            if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+                _, file_content = self.api_client.download_file(file_id)
+                if _ == ErrorCode.SUCCESS:
+                    with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
+                        f.write(file_content)
+                else:
+                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
+        
+        for report_id in task.reportIds:
+            if not os.path.exists(f'src/cache/reports/report_{report_id}.json'):
+                _, report_content = self.api_client.GetReport(report_id)
+                if _ == ErrorCode.SUCCESS:
+                    with open(f'src/cache/reports/report_{report_id}.json', 'w') as f:
+                        f.write(report_content)
+                else:
+                    QMessageBox.critical(self, 'Error', 'Failed to get report!')
 
-        # if task.taskType == 0:
-        #     main_file_id = task.mainFileId
-        #     if not os.path.exists(f'src/cache/files/file_{main_file_id}.py'):
-        #         _, file_content = self.api_client.download_file(main_file_id)
-        #         if _ == ErrorCode.SUCCESS:
-        #             with open(f'src/cache/files/file_{main_file_id}.py', 'wb') as f:
-        #                 f.write(file_content)
-        #         else:
-        #             QMessageBox.critical(self, 'Error', 'Failed to get file!')
+        if task.taskType == 0:
+            main_file_id = task.mainFileId
+            if not os.path.exists(f'src/cache/files/file_{main_file_id}.py'):
+                _, file_content = self.api_client.download_file(main_file_id)
+                if _ == ErrorCode.SUCCESS:
+                    with open(f'src/cache/files/file_{main_file_id}.py', 'wb') as f:
+                        f.write(file_content)
+                else:
+                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
         
         if self.check_mode == 0:
             self.check_page = OneToManyPage()
-            # self.check_page.init_task(self.task_table.item(row, 1).text(), task)
+            self.check_page.init_task(self.task_name_input.text(), task)
             self.check_page.show()
         else:
             pass
