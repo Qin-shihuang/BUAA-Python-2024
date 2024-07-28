@@ -74,6 +74,14 @@ def test_two_files(sub1, sub2, snippet_test=True):
                 snippet += c1_lines[i] + '\n'
                 i += 1
             r1_seg1.append((start, snippet))
+        elif c1_lines[i].startswith('try'):
+            start = i
+            snippet += c1_lines[i] + '\n'
+            i += 1
+            while i < len(c1_lines) and (c1_lines[i].startswith('    ') or c1_lines[i].strip() == '' or c1_lines[i].startswith('except')) or c1_lines[i].startswith('finally'):
+                snippet += c1_lines[i] + '\n'
+                i += 1
+            r1_seg1.append((start, snippet))
         elif c1_lines[i].startswith('if') or c1_lines[i].startswith('while') or c1_lines[i].startswith('for'):
             start = i
             snippet += c1_lines[i] + '\n'
@@ -100,6 +108,14 @@ def test_two_files(sub1, sub2, snippet_test=True):
                 i += 1
             
             r1_seg2.append((start, snippet))
+        elif c2_lines[i].startswith('try'):
+            start = i
+            snippet += c2_lines[i] + '\n'
+            i += 1
+            while i < len(c2_lines) and (c2_lines[i].startswith('    ') or c2_lines[i].strip() == '' or c2_lines[i].startswith('except')) or c2_lines[i].startswith('finally'):
+                snippet += c2_lines[i] + '\n'
+                i += 1
+            r1_seg2.append((start, snippet))
         elif c2_lines[i].startswith('if') or c2_lines[i].startswith('while') or c2_lines[i].startswith('for'):
             start = i
             snippet += c2_lines[i] + '\n'
@@ -114,7 +130,7 @@ def test_two_files(sub1, sub2, snippet_test=True):
 
     # rouond 2: non-matched classes
     for i in range(len(r1_seg1_unmatched)):
-        if r1_seg1_unmatched[i][1].startswith('class'):
+        if r1_seg1_unmatched[i][1].startswith('class') or r1_seg1_unmatched[i][1].startswith('try'):
             lines = r1_seg1_unmatched[i][1].split('\n')
             j = 0
             while j < len(lines):
@@ -132,7 +148,7 @@ def test_two_files(sub1, sub2, snippet_test=True):
         elif r1_seg1_unmatched[i][1].startswith('def'):
             r2_seg1.append(r1_seg1_unmatched[i])
     for i in range(len(r1_seg2_unmatched)):
-        if r1_seg2_unmatched[i][1].startswith('class'):
+        if r1_seg2_unmatched[i][1].startswith('class') or r1_seg2_unmatched[i][1].startswith('try'):
             lines = r1_seg2_unmatched[i][1].split('\n')
             j = 0
             while j < len(lines):
@@ -159,6 +175,11 @@ def test_two_files(sub1, sub2, snippet_test=True):
             i += 1
             while i < len(c1_lines) and (c1_lines[i].startswith('    ') or c1_lines[i].strip() == ''):
                 i += 1
+        elif c1_lines[i].startswith('try'):
+            start = i
+            i += 1
+            while i < len(c1_lines) and (c1_lines[i].startswith('    ') or c1_lines[i].strip() == '' or c1_lines[i].startswith('except')) or c1_lines[i].startswith('finally'):
+                i += 1
         elif c1_lines[i].startswith('if') or c1_lines[i].startswith('while') or c1_lines[i].startswith('for'):
             start = i
             i += 1
@@ -174,6 +195,11 @@ def test_two_files(sub1, sub2, snippet_test=True):
         if c2_lines[i].startswith('class') or c2_lines[i].startswith('def'):
             i += 1
             while i < len(c2_lines) and (c2_lines[i].startswith('    ') or c2_lines[i].strip() == ''):
+                i += 1
+        elif c2_lines[i].startswith('try'):
+            start = i
+            i += 1
+            while i < len(c2_lines) and (c2_lines[i].startswith('    ') or c2_lines[i].strip() == '' or c2_lines[i].startswith('except')) or c2_lines[i].startswith('finally'):
                 i += 1
         elif c2_lines[i].startswith('if') or c2_lines[i].startswith('while') or c2_lines[i].startswith('for'):
             start = i

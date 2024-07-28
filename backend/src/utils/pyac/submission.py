@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from antlr4 import *
 from utils.pyac.lexer.PythonLexer import PythonLexer
 from utils.pyac.lexer.PythonParser import PythonParser
+from antlr4.error.ErrorListener import ConsoleErrorListener
 
 @dataclass
 class Submission:
@@ -28,6 +29,7 @@ def parse(content):
     lexer = PythonLexer(InputStream(content))
     stream = CommonTokenStream(lexer)
     parser = PythonParser(stream)
+    parser.removeErrorListener(ConsoleErrorListener.INSTANCE)
     try:
         tree = parser.file_input()
     except Exception as e:
