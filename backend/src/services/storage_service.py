@@ -49,10 +49,16 @@ class StorageService:
             print(e)
             return False, -1
     
-    def get_file_owner(self, fileId):
-        query = "SELECT (uploader_id) FROM uploaded_files WHERE id = ?"
-        args = (fileId,)
-        result = self.db_service.query(query, args)
+    def get_file_owner(self, fileId, deleted_ok=True):
+        result = -1
+        if deleted_ok:
+            query = "SELECT (uploader_id) FROM uploaded_files WHERE id = ?"
+            args = (fileId,)
+            result = self.db_service.query(query, args)
+        else:
+            query = "SELECT (uploader_id) FROM uploaded_files WHERE id = ? AND deleted = FALSE"
+            args = (fileId,)
+            result = self.db_service.query(query, args)
         if not result:
             return False, None
         return True, result[0][0]
@@ -73,16 +79,7 @@ class StorageService:
     
     def delete_file(self, fileId):
         try:
-            query = "SELECT (storage_name) FROM uploaded_files WHERE id = ?"
-            args = (fileId,)
-            result = self.db_service.query(query, args)
-            query = "SELECT COUNT(*) FROM uploaded_files WHERE storage_name = ?"
-            args = (result[0][0],)
-            count = self.db_service.query(query, args)[0][0]
-            if count == 1:
-                file_path = os.path.join(UPLOAD_FOLDER, result[0][0])
-                os.remove(file_path)
-            query = "DELETE FROM uploaded_files WHERE id = ?"
+            query = "UPDATE uploaded_files SET deleted = TRUE WHERE id = ?"
             args = (fileId,)
             self.db_service.query(query, args)
             return True
@@ -92,7 +89,7 @@ class StorageService:
         
         
     def get_file_list(self, userId):
-        query = "SELECT id, original_path, size, uploaded_at FROM uploaded_files WHERE uploader_id = ?"
+        query = "SELECT id, original_path, size, uploaded_at FROM uploaded_files WHERE uploader_id = ? AND deleted = FALSE"
         args = (userId,)
         return self.db_service.query(query, args)
         
