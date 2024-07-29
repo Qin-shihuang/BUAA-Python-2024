@@ -44,7 +44,7 @@ class InfoContainer:
         with open(f'src/cache/files/file_{file_id}.py', 'r') as f:
             return f.read()
         
-    def get_record(self, report_id):
+    def get_report(self, report_id):
         with open(f'src/cache/reports/report_{report_id}.json', 'r') as f:
             return f.read()
         

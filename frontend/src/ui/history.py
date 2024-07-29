@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
     QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
     QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
 from models.task_model import TaskModel
+from ui.many_to_many import ManyToManyPage
 from ui.one_to_many import OneToManyPage
 from utils.error_codes import ErrorCode
 from utils.api_client import ApiClient
@@ -213,12 +214,12 @@ class HistoryPage(QWidget):
         
         if self.task_table.item(row, 2).text() == 'one-to-many':
             self.check_page = OneToManyPage()
-            self.check_page.init_task(self.task_table.item(row, 1).text(), task)
-            self.check_page.show()
         else:
-            pass
+            self.check_page = ManyToManyPage()
+        self.check_page.init_task(self.task_table.item(row, 1).text(), task)
+        self.check_page.show()
         # switch to check page
-            
+        self.hide()  
 
 
 if __name__ == "__main__":

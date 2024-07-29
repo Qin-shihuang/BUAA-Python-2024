@@ -114,7 +114,7 @@ class GraphWidget(QWidget):
             painter.drawEllipse(QPointF(x, y), 6, 6)
 
             if self.labels:
-                painter.drawText(int(x + 10), int(y + 5), self.labels[v])
+                painter.drawText(int(x + 10), int(y + 5), str(self.labels[v]))
                 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
