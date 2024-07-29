@@ -210,6 +210,8 @@ def test_two_files(sub1, sub2, snippet_test=True):
             if c2_lines[i].strip() != '':
                 r3_seg2.append((i, c2_lines[i]))
             i += 1
+    r3_seg1 = [s for s in r3_seg1 if len(s[1]) > 15]
+    r3_seg2 = [s for s in r3_seg2 if len(s[1]) > 15]
     r3_match, _, _ = test_two_lists(r3_seg1, r3_seg2)
 
     match = r1_match + r2_match + r3_match
