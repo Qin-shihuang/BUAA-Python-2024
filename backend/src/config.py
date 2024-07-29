@@ -16,3 +16,5 @@ JWT_SECRET = "not_secret"
 UPLOAD_FOLDER = "uploads"
 
 CHUNK_SIZE = 4096
+
+TIME_ZONE = "Asia/Shanghai"
