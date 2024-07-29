@@ -49,3 +49,4 @@ class ComparisonPageController(QObject):
         self.report.duplicateSegments.append(seg)
         new_report = self.report.toJson()
         self.api_client.UpdateReport(self.report.reportId, new_report)
+        self.info_container.update_report(self.report.reportId, new_report)

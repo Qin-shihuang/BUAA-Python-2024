@@ -145,8 +145,8 @@ class OneToManyPage(QWidget):
 
         self.file_table.setColumnCount(8)
         self.file_table.setHorizontalHeaderLabels(('名称', '大小', '上传时间', '路径', '相似距离', '导出', 'FileId', 'ReportId'))
-        # self.file_table.setColumnHidden(6, True)
-        # self.file_table.setColumnHidden(7, True)
+        self.file_table.setColumnHidden(6, True)
+        self.file_table.setColumnHidden(7, True)
 
         header_item = QTableWidgetItem('相似距离')
         header_item.setFont(QFont('Arial', 10, QFont.Bold))
@@ -281,7 +281,7 @@ class OneToManyPage(QWidget):
         self.task_name_input.setText(task_name)
         self.target_file_input.setText(self.info_container.get_file_name(task.mainFileId))
         for report_id in task.reportIds:
-            with open(f'src/cache/reports/report_{report_id}.json', 'r') as f:
+            with open(f'cache/reports/report_{report_id}.json', 'r') as f:
                 report = ReportModel.fromJson(f.read())
 
             if report.file1Id == task.mainFileId:
@@ -340,7 +340,7 @@ class OneToManyPage(QWidget):
 
         if not filepath:
             return
-        if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+        if not os.path.exists(f'cache/files/file_{file_id}.py'):
             _, file_content = self.api_client.download_file(file_id)
             if _ == ErrorCode.SUCCESS:
                 with open(filepath, 'wb') as f:
@@ -348,7 +348,7 @@ class OneToManyPage(QWidget):
             else:
                 QMessageBox.critical(self, 'Error', 'Failed to get file!')
         else:
-            with open(f'src/cache/files/file_{file_id}.py', 'r') as f:
+            with open(f'cache/files/file_{file_id}.py', 'r') as f:
                 file_content = f.read()
             with open(filepath, 'w') as f:
                 f.write(file_content)

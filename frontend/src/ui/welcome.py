@@ -218,6 +218,8 @@ class WelcomePage(QWidget):
         for file_info in file_list:
             # row = self.file_table.rowCount()
             self.info_container.add_file_info(file_info[0], os.path.basename(file_info[1]), file_info[2], file_info[1], file_info[3])
+            if file_info[4] == 1:
+                continue
             row = 0
             self.file_table.insertRow(row)
 
@@ -331,14 +333,14 @@ class WelcomePage(QWidget):
         self.open_file(file_id)
     
     def open_file(self, file_id):
-        if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+        if not os.path.exists(f'cache/files/file_{file_id}.py'):
             _, file_content = self.api_client.download_file(file_id)
             if _ == ErrorCode.SUCCESS:
-                with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
+                with open(f'cache/files/file_{file_id}.py', 'wb') as f:
                     f.write(file_content)
             else:
                 QMessageBox.critical(self, 'Error', 'Failed to get file!')
-        with open(f'src/cache/files/file_{file_id}.py', 'r') as f:
+        with open(f'cache/files/file_{file_id}.py', 'r') as f:
             content = f.read()
         self.code_editor.set_text(content)
         self.code_editor.show()
@@ -363,10 +365,10 @@ class WelcomePage(QWidget):
         self.target_file_button.setText('点击选择目标文件')
 
     def delete_file_cache(self, file_id):
-        if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+        if not os.path.exists(f'cache/files/file_{file_id}.py'):
             _, file_content = self.api_client.download_file(file_id)
             if _ == ErrorCode.SUCCESS:
-                with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
+                with open(f'cache/files/file_{file_id}.py', 'wb') as f:
                     f.write(file_content)
             else:
                 QMessageBox.critical(self, 'Error', 'Failed to delete file!')
@@ -462,29 +464,29 @@ class WelcomePage(QWidget):
         
         task = TaskModel.fromJson(task_str)
         for file_id in task.fileIds:
-            if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+            if not os.path.exists(f'cache/files/file_{file_id}.py'):
                 _, file_content = self.api_client.download_file(file_id)
                 if _ == ErrorCode.SUCCESS:
-                    with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
+                    with open(f'cache/files/file_{file_id}.py', 'wb') as f:
                         f.write(file_content)
                 else:
                     QMessageBox.critical(self, 'Error', 'Failed to get file!')
         
         for report_id in task.reportIds:
-            if not os.path.exists(f'src/cache/reports/report_{report_id}.json'):
+            if not os.path.exists(f'cache/reports/report_{report_id}.json'):
                 _, report_content = self.api_client.GetReport(report_id)
                 if _ == ErrorCode.SUCCESS:
-                    with open(f'src/cache/reports/report_{report_id}.json', 'w') as f:
+                    with open(f'cache/reports/report_{report_id}.json', 'w') as f:
                         f.write(report_content)
                 else:
                     QMessageBox.critical(self, 'Error', 'Failed to get report!')
 
         if task.taskType == 0:
             main_file_id = task.mainFileId
-            if not os.path.exists(f'src/cache/files/file_{main_file_id}.py'):
+            if not os.path.exists(f'cache/files/file_{main_file_id}.py'):
                 _, file_content = self.api_client.download_file(main_file_id)
                 if _ == ErrorCode.SUCCESS:
-                    with open(f'src/cache/files/file_{main_file_id}.py', 'wb') as f:
+                    with open(f'cache/files/file_{main_file_id}.py', 'wb') as f:
                         f.write(file_content)
                 else:
                     QMessageBox.critical(self, 'Error', 'Failed to get file!')
