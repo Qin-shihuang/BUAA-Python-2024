@@ -12,12 +12,14 @@ from ui.widgets.filter_widget import FilterWidget, ThresholdChangedSignal
 from ui.widgets.dynamic_checkbox_widget import DynamicCheckboxWidget, CheckboxChangedSignal
 from ui.widgets.color_hint_text_widget import ColorHintTextWidget
 
+from utils.api_client import ApiClient
 from utils.info_container import InfoContainer
 
 class ManyToManyPage(QWidget):
     def __init__(self):
         super().__init__()
         self.info_container = InfoContainer()
+        self.api_client = ApiClient()
         self.active_comparison_pages = []
 
         self.setWindowTitle("Many to Many Task")

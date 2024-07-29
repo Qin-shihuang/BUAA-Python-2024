@@ -185,29 +185,29 @@ class HistoryPage(QWidget):
         task = TaskModel.fromJson(task_str)
 
         for file_id in task.fileIds:
-            if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+            if not os.path.exists(f'cache/files/file_{file_id}.py'):
                 _, file_content = self.api_client.download_file(file_id)
                 if _ == ErrorCode.SUCCESS:
-                    with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
+                    with open(f'cache/files/file_{file_id}.py', 'wb') as f:
                         f.write(file_content)
                 else:
                     QMessageBox.critical(self, 'Error', 'Failed to get file!')
         
         for report_id in task.reportIds:
-            if not os.path.exists(f'src/cache/reports/report_{report_id}.json'):
+            if not os.path.exists(f'cache/reports/report_{report_id}.json'):
                 _, report_content = self.api_client.GetReport(report_id)
                 if _ == ErrorCode.SUCCESS:
-                    with open(f'src/cache/reports/report_{report_id}.json', 'w') as f:
+                    with open(f'cache/reports/report_{report_id}.json', 'w') as f:
                         f.write(report_content)
                 else:
                     QMessageBox.critical(self, 'Error', 'Failed to get report!')
 
         if task.taskType == 0:
             main_file_id = task.mainFileId
-            if not os.path.exists(f'src/cache/files/file_{main_file_id}.py'):
+            if not os.path.exists(f'cache/files/file_{main_file_id}.py'):
                 _, file_content = self.api_client.download_file(main_file_id)
                 if _ == ErrorCode.SUCCESS:
-                    with open(f'src/cache/files/file_{main_file_id}.py', 'wb') as f:
+                    with open(f'cache/files/file_{main_file_id}.py', 'wb') as f:
                         f.write(file_content)
                 else:
                     QMessageBox.critical(self, 'Error', 'Failed to get file!')
