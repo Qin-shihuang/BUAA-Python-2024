@@ -78,36 +78,36 @@ class OneToManyPage(QWidget):
                font-size: 13px;
             }
             QSlider::groove:horizontal {
-                height: 3px;  /* 设置较窄的高度 */
+                height: 3px;
                 background: #b0c4de;
-                border-radius: 1px;  /* 设置滑动槽的圆角 */
+                border-radius: 1px;
             }
             QSlider::handle:horizontal {
                 background: white;
                 border: 1px solid #5c5c5c;
-                width: 8px;  /* 设置较窄的手柄宽度 */
-                margin: -4px 0;  /* 使手柄居中 */
-                border-radius: 5px;  /* 设置滑动手柄的圆角 */
+                width: 8px;
+                margin: -4px 0;
+                border-radius: 5px;
             }
             QSlider::sub-page:horizontal {
-                background:  #4CAF50;  /* 设置划过区域的颜色 */
-                border-radius: 1px;  /* 圆角匹配槽的圆角 */
-                margin: 0px;  /* 确保没有间隙 */
+                background:  #4CAF50;
+                border-radius: 1px;
+                margin: 0px;
             }
             QSlider::add-page:horizontal {
-                background: white;  /* 设置未划过区域的颜色 */
-                border-radius: 1px;  /* 圆角匹配槽的圆角 */
-                margin: 0px;  /* 确保没有间隙 */
+                background: white;
+                border-radius: 1px;
+                margin: 0px;
             }
         """)
 
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        title_label = QLabel('<p style="color: green">一对多查重</p>')
+        title_label = QLabel('<p style="color: green">One to Many Task</p>')
         title_label.setFont(QFont('Arial', 20, QFont.Bold))
         
-        task_name_label = QLabel('任务名称')
+        task_name_label = QLabel('Task Name')
         task_name_label.setFont(QFont('Arial', 13, QFont.Bold))
         self.task_name_input = QLineEdit()
         self.task_name_input.setReadOnly(True)
@@ -117,13 +117,13 @@ class OneToManyPage(QWidget):
         task_name_layout.addWidget(task_name_label)
         task_name_layout.addWidget(self.task_name_input)
 
-        self.target_file_label = QLabel('目标文件')
+        self.target_file_label = QLabel('Target File')
         self.target_file_label.setFont(QFont('Arial', 13, QFont.Bold))
         self.target_file_input = QLineEdit()
         self.target_file_input.setReadOnly(True)
         self.target_file_input.setFont(QFont('Arial', 10, QFont.Bold))
 
-        self.compare_file_label = QLabel('待比较文件')
+        self.compare_file_label = QLabel('Compared File')
         self.compare_file_label.setFont(QFont('Arial', 13, QFont.Bold))
         self.compare_file_input = QLineEdit()
         self.compare_file_input.setText('Please select a file to compare below.')
@@ -144,11 +144,11 @@ class OneToManyPage(QWidget):
         # self.file_table.setColumnWidth(0, 60)
 
         self.file_table.setColumnCount(8)
-        self.file_table.setHorizontalHeaderLabels(('名称', '大小', '上传时间', '路径', '相似距离', '导出', 'FileId', 'ReportId'))
+        self.file_table.setHorizontalHeaderLabels(('Name', 'Size', 'Uploaded at', 'Path', 'Sim Distance', 'Export', 'FileId', 'ReportId'))
         self.file_table.setColumnHidden(6, True)
         self.file_table.setColumnHidden(7, True)
 
-        header_item = QTableWidgetItem('相似距离')
+        header_item = QTableWidgetItem('Sim Distance')
         header_item.setFont(QFont('Arial', 10, QFont.Bold))
         self.file_table.setHorizontalHeaderItem(4, header_item)
         self.file_table.setStyleSheet("selection-background-color: #66BB6A")
@@ -169,7 +169,7 @@ class OneToManyPage(QWidget):
         self.file_table.cellDoubleClicked.connect(self.start_compare)
 
         slider_layout = QHBoxLayout()
-        slider_layout.addWidget(QLabel('                              '))
+        slider_layout.addWidget(QLabel('                                                              '))
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setRange(0, 100)
         self.slider.setValue(1)
@@ -182,15 +182,14 @@ class OneToManyPage(QWidget):
 
         start_layout = QHBoxLayout()
 
-        batch_export_button = QPushButton('批量导出')
+        batch_export_button = QPushButton('Batch Export')
         batch_export_button.clicked.connect(self.export_files)
-        batch_label1 = QLabel('相似距离低于')
+        batch_label = QLabel('Files with Sim Distance below')
         self.lineEdit = QLineEdit()
         self.lineEdit.setFixedSize(60, 30)
         self.lineEdit.setStyleSheet("padding: 1px;")
         self.lineEdit.setFont(QFont('Arial', 10))
         self.lineEdit.textChanged.connect(self.updateSlider)
-        batch_label2 = QLabel('的代码')
 
         self.lineEdit.installEventFilter(self)
         self.slider.installEventFilter(self)
@@ -200,9 +199,8 @@ class OneToManyPage(QWidget):
         self.timer.timeout.connect(self.checkMousePosition)
 
         start_layout.addWidget(batch_export_button)
-        start_layout.addWidget(batch_label1)
+        start_layout.addWidget(batch_label)
         start_layout.addWidget(self.lineEdit)
-        start_layout.addWidget(batch_label2)
 
         start_layout.addStretch(1)
         compare_button = QPushButton('Compare')
@@ -230,14 +228,13 @@ class OneToManyPage(QWidget):
             if event.type() == event.Enter:
                 self.slider.setVisible(True)
                 self.sliderHovered = True
-                self.timer.stop()  # 停止隐藏定时器
+                self.timer.stop()
             elif event.type() == event.Leave:
                 self.sliderHovered = False
-                self.timer.start(500)  # 设定一个短暂的延迟时间以判断鼠标是否离开组件
+                self.timer.start(500)
         return super(QWidget, self).eventFilter(source, event)
 
     def checkMousePosition(self):
-        # 检查鼠标是否在lineEdit或slider区域内
         if not (self.lineEdit.underMouse() or self.slider.underMouse()):
             self.slider.setVisible(False)
     
@@ -249,8 +246,8 @@ class OneToManyPage(QWidget):
         self.move(frameGm.topLeft())
 
     def file_table_init(self):
-        # TODO: SORT BY SIMILARITY
-        # TODO: color for different similarity level
+        # SORT BY SIMILARITY
+        # color for different similarity level
         self.file_table.setRowCount(5)
         for row in range(self.file_table.rowCount()):
             self.file_table.setItem(row, 0, QTableWidgetItem(f'test{row}.py'))
@@ -334,7 +331,7 @@ class OneToManyPage(QWidget):
         row = self.file_table.indexAt(QPoint(x, y)).row()
         file_id = int(self.file_table.item(row, 6).text())
         file_name = self.file_table.item(row, 0).text()
-        filepath, _ = QFileDialog.getSaveFileName(self, "代码导出", f"./{file_name}", "Python (*.py)")
+        filepath, _ = QFileDialog.getSaveFileName(self, "Export Files", f"./{file_name}", "Python (*.py)")
 
         if not filepath:
             return
@@ -381,8 +378,8 @@ class OneToManyPage(QWidget):
             QMessageBox.warning(self, 'Warning', 'No files to export.', QMessageBox.Ok)
             return
         file_name = f"{time.time()}.zip"
-        # dirpath = QFileDialog.getExistingDirectory(self, "代码导出目录", "./", QFileDialog.ShowDirsOnly)
-        packpath, _ = QFileDialog.getSaveFileName(self, "代码导出", f"./{file_name}", "Zip (*.zip)")
+        # dirpath = QFileDialog.getExistingDirectory(self, "Export Files", "./", QFileDialog.ShowDirsOnly)
+        packpath, _ = QFileDialog.getSaveFileName(self, "Export Files", f"./{file_name}", "Zip (*.zip)")
         if not packpath:
             return
         _, pack_content = self.api_client.download_multiple_files(file_ids)

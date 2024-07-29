@@ -17,7 +17,7 @@ class HistoryPage(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("History")
+        self.setWindowTitle("History Tasks")
         # self.resize(900, 600)
         # self.center()
         self.api_client = ApiClient()
@@ -78,7 +78,7 @@ class HistoryPage(QWidget):
         self.setLayout(layout)
 
         self.history_widget = QWidget()
-        history_title_label = QLabel('<p style="color: green">历史查重任务</p>')
+        history_title_label = QLabel('<p style="color: green">History Tasks</p>')
         history_title_label.setFont(QFont('Arial', 20, QFont.Bold))
 
         history_layout = QVBoxLayout()
@@ -88,7 +88,7 @@ class HistoryPage(QWidget):
         self.task_table = QTableWidget()
         self.task_table.setColumnCount(7)
         self.task_table.setHorizontalHeaderLabels(
-            ['任务ID', '任务名称', '任务类型', '目标文件', '数量', '任务提交时间', '查看'])
+            ['Task ID', 'Name', 'Mode', 'Target File', 'Amount', 'Created at', 'View'])
         self.task_table.verticalHeader().setVisible(False)
         self.task_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.task_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -100,12 +100,10 @@ class HistoryPage(QWidget):
         self.task_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
         self.task_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeToContents)
         self.task_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        # self.task_table.setColumnHidden(0, True)
+        self.task_table.setColumnHidden(0, True)
 
         self.task_table.cellDoubleClicked.connect(self.view_task)
         history_layout.addWidget(self.task_table)
-
-        # self.demo()
 
         return_layout = QHBoxLayout()
         return_layout.addStretch(1)
@@ -218,7 +216,6 @@ class HistoryPage(QWidget):
             self.check_page = ManyToManyPage()
         self.check_page.init_task(self.task_table.item(row, 1).text(), task)
         self.check_page.show()
-        # switch to check page
 
 
 if __name__ == "__main__":

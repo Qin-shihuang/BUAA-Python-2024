@@ -88,22 +88,22 @@ class WelcomePage(QWidget):
         self.upload_widget = QWidget()
         layout.addWidget(self.upload_widget)
 
-        title_label = QLabel('<p style="color: green">上传待查代码</p>')
+        title_label = QLabel('<p style="color: green">New Task</p>')
         title_label.setFont(QFont('Arial', 20, QFont.Bold))
 
-        self.task_name_label = QLabel('查重任务名')
+        self.task_name_label = QLabel('Task Name')
         self.task_name_input = QLineEdit()
-        self.task_name_input.setPlaceholderText('请输入本次查重任务名称 (默认为 Task_Date_Time)')
+        self.task_name_input.setPlaceholderText('Please enter the task name (Default: Task_Date_Time)')
         # self.task_name_input.setText(self.get_default_name())
         task_name_layout = QHBoxLayout()
         task_name_layout.addWidget(self.task_name_label)
         task_name_layout.addWidget(self.task_name_input)
 
-        self.file_label = QLabel('上传待查文件')
-        self.upload_file_button = QPushButton(' 上传文件')
+        self.file_label = QLabel('Upload/Delete Files')
+        self.upload_file_button = QPushButton(' Upload Files')
         self.upload_file_button.setIcon(QIcon('assets/Upload.svg'))
         self.upload_file_button.clicked.connect(self.upload_file)
-        delete_file_button = QPushButton(' 删除已选中文件')
+        delete_file_button = QPushButton(' Clear Selected Files')
         delete_file_button.setIcon(QIcon('assets/del.svg'))
         delete_file_button.clicked.connect(self.clear_selected_files)
         file_layout = QHBoxLayout()
@@ -111,10 +111,10 @@ class WelcomePage(QWidget):
         file_layout.addWidget(self.upload_file_button)
         file_layout.addWidget(delete_file_button)
 
-        self.mode_select_label = QLabel('选择查重模式')
+        self.mode_select_label = QLabel('Checking Mode')
         self.check_mode = None
-        one2many_button = QRadioButton('一对多查重')
-        group_button = QRadioButton('组内自查')
+        one2many_button = QRadioButton('One-to-Many')
+        group_button = QRadioButton('Many-to-Many')
         one2many_button.toggled.connect(self.switch_mode)
         group_button.toggled.connect(self.switch_mode)
         mode_layout = QHBoxLayout()
@@ -123,9 +123,9 @@ class WelcomePage(QWidget):
         mode_layout.addWidget(group_button)
 
         self.target_layout = QHBoxLayout()
-        self.target_file_label = QLabel('选择目标文件(仅一对多查重模式)')
+        self.target_file_label = QLabel('Target File (one-to-many mode only)')
 
-        self.target_file_button = QPushButton('点击选择目标文件')
+        self.target_file_button = QPushButton('Click to select the target file')
         self.target_file_button.setStyleSheet("QPushButton::menu-indicator{image:none}")
         self.target_file_button.clicked.connect(self.select_target_file)
         self.target_layout.addWidget(self.target_file_label)
@@ -139,7 +139,7 @@ class WelcomePage(QWidget):
         self.file_table.setHorizontalHeader(CheckBoxHeader())
 
         self.file_table.setColumnCount(6)
-        self.file_table.setHorizontalHeaderLabels(('     名称 ', '大小', '上传时间', '路径', '操作', 'ID'))
+        self.file_table.setHorizontalHeaderLabels(('     Name ', 'Size', 'Uploaded at', 'Path', 'Op', 'ID'))
         self.file_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.file_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.file_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
@@ -160,8 +160,8 @@ class WelcomePage(QWidget):
         self.error_label.setStyleSheet("color: red")
         start_layout.addWidget(self.error_label)
         start_layout.addStretch(1)
-        self.history_button = QPushButton('查看历史查重任务')
-        start_button = QPushButton('开始查重')
+        self.history_button = QPushButton('History Tasks')
+        start_button = QPushButton('START')
         start_button.clicked.connect(self.start_check)
         start_layout.addWidget(self.history_button)
         start_layout.addWidget(start_button)
@@ -177,7 +177,7 @@ class WelcomePage(QWidget):
 
     def clear_target_file(self, row, col):
         if col == 0:
-            self.target_file_button.setText('点击选择目标文件')
+            self.target_file_button.setText('Click to select the target file')
     
     def center(self):
         frameGm = self.frameGeometry()
@@ -208,7 +208,7 @@ class WelcomePage(QWidget):
             item.setCheckState(Qt.Unchecked)
         else:
             item.setCheckState(Qt.Checked)
-        self.target_file_button.setText('点击选择目标文件')
+        self.target_file_button.setText('Click to select the target file')
 
 
     def get_uploaded_files(self):
@@ -224,7 +224,7 @@ class WelcomePage(QWidget):
             row = 0
             self.file_table.insertRow(row)
 
-            checkbox = QTableWidgetItem(os.path.basename(file_info[1])) # no need to exist?
+            checkbox = QTableWidgetItem(os.path.basename(file_info[1]))
             checkbox.setCheckState(Qt.Unchecked)
             self.file_table.setItem(row, 0, checkbox)
             size = file_info[2]
@@ -265,7 +265,7 @@ class WelcomePage(QWidget):
 
 
     def upload_file(self):
-        self.files, _ = QFileDialog.getOpenFileNames(self, "请选择待查重代码", "./", "Python (*.py)")
+        self.files, _ = QFileDialog.getOpenFileNames(self, "Upload Files", "./", "Python (*.py)")
         current_time = self.get_current_time()
         for file in self.files:
             info = QFileInfo(file)
@@ -351,7 +351,7 @@ class WelcomePage(QWidget):
         y = self.sender().parentWidget().frameGeometry().y()
         row = self.file_table.indexAt(QPoint(x, y)).row()
         if self.file_table.item(row, 0).checkState() == Qt.Checked:
-            self.target_file_button.setText('点击选择目标文件')
+            self.target_file_button.setText('Click to select the target file')
         
         file_id = int(self.file_table.item(row, 5).text())
         self.delete_file_cache(file_id)
@@ -363,7 +363,7 @@ class WelcomePage(QWidget):
                 file_id = int(self.file_table.item(row, 5).text())
                 self.delete_file_cache(file_id)
                 self.file_table.removeRow(row)
-        self.target_file_button.setText('点击选择目标文件')
+        self.target_file_button.setText('Click to select the target file')
 
     def delete_file_cache(self, file_id):
         if not os.path.exists(f'cache/files/file_{file_id}.py'):
@@ -379,7 +379,7 @@ class WelcomePage(QWidget):
         sender = self.sender()
         self.mode_select_label.setStyleSheet("color: black")
         self.error_label.clear()
-        if sender.text() == '一对多查重':
+        if sender.text() == 'One-to-Many':
             if sender.isChecked():
                 self.check_mode = 0
                 self.upload_widget.layout().insertLayout(5, self.target_layout)
@@ -389,7 +389,7 @@ class WelcomePage(QWidget):
                 self.target_file_button.hide()
                 self.target_file_label.hide()
                 self.upload_widget.layout().removeItem(self.target_layout)
-        elif sender.text() == '组内自查':
+        elif sender.text() == 'Many-to-Many':
             if sender.isChecked():
                 self.check_mode = 1
 
@@ -408,7 +408,7 @@ class WelcomePage(QWidget):
         if flag:
             menu.exec_(QPoint(QCursor.pos().x(), QCursor.pos().y()))
         else:
-            QMessageBox.warning(self, '提示', '请先选中所有待查文件')
+            QMessageBox.warning(self, 'Prompt', 'Please check all the files to be checked first.')
 
     def set_target_file(self):
         self.target_file_button.setText(self.sender().text())
@@ -418,15 +418,15 @@ class WelcomePage(QWidget):
         self.error_label.setStyleSheet("color: red")
         if not self.file_table.rowCount() > 0:
             self.file_label.setStyleSheet("color: red")
-            self.error_label.setText('请上传待查文件')
+            self.error_label.setText('Please upload files to be checked')
             return
         elif self.check_mode is None:
             self.mode_select_label.setStyleSheet("color: red")
-            self.error_label.setText('请选择查重模式')
+            self.error_label.setText('Please select the checking mode')
             return
-        elif self.check_mode == 0 and self.target_file_button.text() == '点击选择目标文件':
+        elif self.check_mode == 0 and self.target_file_button.text() == 'Click to select the target file':
             self.target_file_label.setStyleSheet("color: red")
-            self.error_label.setText('请选择目标文件')
+            self.error_label.setText('Please select the target file')
             return
         self.error_label.setStyleSheet("color: green")
         self.error_label.setText('Success!')
@@ -439,7 +439,7 @@ class WelcomePage(QWidget):
                 cnt += 1
         if cnt < 2:
             self.error_label.setStyleSheet("color: red")
-            self.error_label.setText('请至少选择两个文件')
+            self.error_label.setText('Please select at least two files')
             return
         
         if self.task_name_input.text() == '':
