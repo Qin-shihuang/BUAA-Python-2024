@@ -79,7 +79,6 @@ class StorageService:
             query = "SELECT COUNT(*) FROM uploaded_files WHERE storage_name = ?"
             args = (result[0][0],)
             count = self.db_service.query(query, args)[0][0]
-            print(count)
             if count == 1:
                 file_path = os.path.join(UPLOAD_FOLDER, result[0][0])
                 os.remove(file_path)
