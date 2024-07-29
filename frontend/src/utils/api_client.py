@@ -186,6 +186,7 @@ class ApiClient:
     def one_to_many_check(self, task_name, main_file_id, file_ids, signal):
         try:
             responses = self.check_stub.OneToManyCheck(pb.OneToManyCheckRequest(token=self.token, task_name=task_name, main_file_id=main_file_id, file_ids=file_ids))
+            i = 1
             for resp in responses:
                 if resp.HasField('status'):
                     status = resp.status
@@ -193,7 +194,8 @@ class ApiClient:
                         return ErrorCode.from_value(status), ''
                 elif resp.HasField('empty'):
                     if signal:
-                        signal.emit(0)
+                        signal.emit(i)
+                    i += 1
                 elif resp.HasField('task'):
                     return ErrorCode.SUCCESS, resp.task
         except grpc.RpcError as e:
@@ -204,6 +206,7 @@ class ApiClient:
     def many_to_many_check(self, task_name, file_ids, signal):
         try:
             responses = self.check_stub.ManyToManyCheck(pb.ManyToManyCheckRequest(token=self.token, task_name=task_name, file_ids=file_ids))
+            i = 1
             for resp in responses:
                 if resp.HasField('status'):
                     status = resp.status
@@ -211,7 +214,8 @@ class ApiClient:
                         return ErrorCode.from_value(status), ''
                 elif resp.HasField('empty'):
                     if signal:
-                        signal.emit(0)
+                        signal.emit(i)
+                    i += 1
                 elif resp.HasField('task'):
                     return ErrorCode.SUCCESS, resp.task
         except grpc.RpcError as e:
