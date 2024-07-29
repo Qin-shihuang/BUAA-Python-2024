@@ -26,6 +26,8 @@ class FilterWidget(QWidget):
     def update_data(self, values):
         self.values = values
         self.update()
+        if self.signal:
+            self.signal.emit(self.threshold, self._filter_statistics())
         
     def paintEvent(self, event):
         painter = QPainter(self)

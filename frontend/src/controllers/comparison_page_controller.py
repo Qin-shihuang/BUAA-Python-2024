@@ -20,6 +20,8 @@ class ComparisonPageController(QObject):
     def set_report(self, reportId):
         report_content = self.info_container.get_report(reportId)
         self.report = ReportModel.fromJson(report_content)
+        self.file1_name = self.info_container.get_file_name(self.report.file1Id)
+        self.file2_name = self.info_container.get_file_name(self.report.file2Id)
         file1_content = self.info_container.get_file_content(self.report.file1Id)
         file2_content = self.info_container.get_file_content(self.report.file2Id)
         self.left_content = file1_content

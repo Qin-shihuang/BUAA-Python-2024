@@ -82,6 +82,7 @@ class ManyToManyPage(QWidget):
         """)
         
         layout.addWidget(self.graph_widget)
+        layout.addStretch(1)
         layout.addLayout(mid_layout)
 
         mid_layout.addWidget(self.filter_widget)
