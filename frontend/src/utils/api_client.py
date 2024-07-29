@@ -117,7 +117,7 @@ class ApiClient:
             response = self.file_stub.GetUploadedFileList(pb.GetUploadedFileListRequest(token=self.token))
             status = response.status
             if status == ErrorCode.SUCCESS.value:
-                return ErrorCode.SUCCESS, [(file.id, file.file_path, file.size, file.uploaded_at) for file in response.files]
+                return ErrorCode.SUCCESS, [(file.id, file.file_path, file.size, file.uploaded_at, file.deleted) for file in response.files]
             else:
                 return ErrorCode.from_value(status), []
         except grpc.RpcError as e:
