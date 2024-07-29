@@ -10,7 +10,7 @@ from models.task_model import TaskModel
 from ui.many_to_many import ManyToManyPage
 from ui.one_to_many import OneToManyPage
 from ui.widgets.code_editor_widget import CodeEditor
-from ui.widgets.progress_widget import ProgressSignal, ProgressWidget
+from ui.widgets.progress_widget import ProgressSignal, ProgressWidget, start_progress_widget
 from utils.error_codes import ErrorCode
 from utils.api_client import ApiClient
 from utils.info_container import InfoContainer
@@ -444,20 +444,18 @@ class WelcomePage(QWidget):
         else:
             task_name = self.task_name_input.text()
         
-        if self.check_mode == 0:
+        if self.check_mode == 0:       
+            signal = start_progress_widget("Checking...", len(file_ids))
             main_file = self.target_file_button.text()
             main_file_id = int(self.target_files[int(main_file[:main_file.find(':')])-1])
             file_ids.remove(main_file_id)
-
-            # self.progress_window = ProgressWidget("One to Many Checking...", cnt-1)
-            # signal = ProgressSignal()
-            # signal.connect(self.progress_window.update_progress)
-            # self.progress_window.show()
-            _, task_str = self.api_client.one_to_many_check(task_name, main_file_id, file_ids, None)
+            _, task_str = self.api_client.one_to_many_check(task_name, main_file_id, file_ids, signal)
+            signal.emit(-1)
         else:
-            _, task_str = self.api_client.many_to_many_check(task_name, file_ids, None) # api signal none!
+            signal = start_progress_widget("Checking...", len(file_ids) * (len(file_ids) - 1) // 2)
+            _, task_str = self.api_client.many_to_many_check(task_name, file_ids, signal)
+            signal.emit(-1)
           # self.progress_window.signal.connect(lambda progress: self.progress_window.update_progress(99))
-        # self.progress_window.close()
 
         if _ != ErrorCode.SUCCESS:
             QMessageBox.critical(self, 'Error', 'Failed to start check!')

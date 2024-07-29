@@ -1,8 +1,7 @@
-import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 import itertools
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, QTableWidgetItem, QTabWidget, QPushButton
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, QTableWidgetItem, QTabWidget, QPushButton
     
 from models.report_model import ReportModel
 from models.task_model import TaskModel
@@ -109,14 +108,17 @@ class ManyToManyPage(QWidget):
     def init_task(self, task_name, task: TaskModel):
         self.setWindowTitle(f"Many to Many Task - {task_name}")
         assert task.taskType == 1
-        self.labels = task.fileIds
-        self.label_to_index = {label: i for i, label in enumerate(self.labels)}
-        self.clustering = [0 for _ in range(len(self.labels))]
-        self.distance_matrix = [[0 for _ in range(len(self.labels))] for _ in range(len(self.labels))]
+        self.ids = task.fileIds
+        self.labels = ["" for _ in range(len(self.ids))]
+        self.id_to_index = {label: i for i, label in enumerate(self.ids)}
+        for id in self.ids:
+            self.labels[self.id_to_index[id]] = self.info_container.get_file_name(id)
+        self.clustering = [0 for _ in range(len(self.ids))]
+        self.distance_matrix = [[0 for _ in range(len(self.ids))] for _ in range(len(self.ids))]
         self.file_pair_to_report = {}
         for k, v in task.clusters.items():
             for i in v:
-                self.clustering[self.label_to_index[i]] = int(k) - 1
+                self.clustering[self.id_to_index[i]] = int(k) - 1
         for report_id in task.reportIds:
             report_content = self.info_container.get_report(report_id)
             report = ReportModel.fromJson(report_content)
@@ -124,8 +126,8 @@ class ManyToManyPage(QWidget):
             file2_id = report.file2Id
             distance = report.distance
             self.file_pair_to_report[(file1_id, file2_id)] = report_id
-            self.distance_matrix[self.label_to_index[file1_id]][self.label_to_index[file2_id]] = distance
-            self.distance_matrix[self.label_to_index[file2_id]][self.label_to_index[file1_id]] = distance
+            self.distance_matrix[self.id_to_index[file1_id]][self.id_to_index[file2_id]] = distance
+            self.distance_matrix[self.id_to_index[file2_id]][self.id_to_index[file1_id]] = distance
 
         self.graph_widget.setup(self.distance_matrix, 0.25, self.clustering, self.labels)
         self.filter_widget.setup([(i, j, self.distance_matrix[i][j]) for i, j in itertools.combinations(range(len(self.distance_matrix)), 2)])
@@ -151,11 +153,11 @@ class ManyToManyPage(QWidget):
         self.cluster_select_area.setup(len(clusters), CLUSTER_COLORS)
         
     def _on_edge_selected(self, edge):
-        label1 = self.labels[edge[0]]
-        label2 = self.labels[edge[1]]
-        if label1 > label2:
-            label1, label2 = label2, label1
-        report_id = self.file_pair_to_report[(label1, label2)]
+        id1 = self.ids[edge[0]]
+        id2 = self.ids[edge[1]]
+        if id1 > id2:
+            id1, id2 = id2, id1
+        report_id = self.file_pair_to_report[(id1, id2)]
         comparison_page = ComparisonPage()
         comparison_page.setup(report_id)
         self.active_comparison_pages.append(comparison_page)
@@ -167,11 +169,13 @@ class ManyToManyPage(QWidget):
         self.graph_label.setText(f"Threshold: {threshold: .2f}\n\nSelected Edge count: {count}")
         
     def _on_table_row_selected(self, row, column):
-        label1 = int(self.table_widget.cellWidget(row, 0).label.text())
-        label2 = int(self.table_widget.cellWidget(row, 1).label.text())
-        if label1 > label2:
-            label1, label2 = label2, label1
-        report_id = self.file_pair_to_report[(label1, label2)]
+        label1 = self.table_widget.cellWidget(row, 0).label.text()
+        label2 = self.table_widget.cellWidget(row, 1).label.text()
+        id1 = self.ids[self.labels.index(label1)]
+        id2 = self.ids[self.labels.index(label2)]
+        if id1 > id2:
+            id1, id2 = id2, id1
+        report_id = self.file_pair_to_report[(id1, id2)]
         comparison_page = ComparisonPage()
         comparison_page.setup(report_id)
         self.active_comparison_pages.append(comparison_page)
@@ -193,22 +197,22 @@ class ManyToManyPage(QWidget):
         
         # Update table
         for i in range(self.table_widget.rowCount()):
-            label1 = int(self.table_widget.cellWidget(i, 0).label.text())
-            label2 = int(self.table_widget.cellWidget(i, 1).label.text())
-            if self.clustering[self.label_to_index[label1]] not in self.enabled_clusters or self.clustering[self.label_to_index[label2]] not in self.enabled_clusters:
+            label1 = self.table_widget.cellWidget(i, 0).label.text()
+            label2 = self.table_widget.cellWidget(i, 1).label.text()
+            if self.clustering[self.labels.index(label1)] not in self.enabled_clusters or self.clustering[self.labels.index(label2)] not in self.enabled_clusters:
                 self.table_widget.setRowHidden(i, True)
             else:
                 self.table_widget.setRowHidden(i, False)
                 
     def _on_export_button_clicked(self):
         file_ids = set()
-        for i in range(len(self.labels)):
+        for i in range(len(self.ids)):
             if self.clustering[i] not in self.enabled_clusters:
                 continue
-            for j in range(i + 1, len(self.labels)):
+            for j in range(i + 1, len(self.ids)):
                 if self.clustering[j] not in self.enabled_clusters:
                     continue
                 if self.distance_matrix[i][j] <= self.threshold:
-                    file_ids.add(self.labels[i])
-                    file_ids.add(self.labels[j])
+                    file_ids.add(self.ids[i])
+                    file_ids.add(self.ids[j])
         print(file_ids)     
