@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from PyQt5.QtCore import Qt, QDateTime, QFileInfo, pyqtSignal, QRect, QSize, QPoint, QTimer
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QCursor, QColor
 import PyQt5.QtWidgets
@@ -369,7 +370,7 @@ class OneToManyPage(QWidget):
         if thres < 0 or thres > 1:
             QMessageBox.warning(self, 'Warning', 'Please input a number between 0 and 1.', QMessageBox.Ok)
             return
-        # print(thres)
+
         file_ids = []
         for row in range(self.file_table.rowCount()):
             similarity = float(self.file_table.item(row, 4).text())
@@ -377,28 +378,18 @@ class OneToManyPage(QWidget):
                 file_ids.append(int(self.file_table.item(row, 6).text()))
             else:
                 break
-        print(file_ids)
+
         if not file_ids:
             QMessageBox.warning(self, 'Warning', 'No files to export.', QMessageBox.Ok)
             return
-        
+        file_name = f"{time.time()}.zip"
         # dirpath = QFileDialog.getExistingDirectory(self, "代码导出目录", "./", QFileDialog.ShowDirsOnly)
-
-        return
-        for file_id in file_ids:
-            if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
-                _, file_content = self.api_client.download_file(file_id)
-                if _ == ErrorCode.SUCCESS:
-                    with open(dirpath + '/' + self.info_container.get_file_name(file_id), 'wb') as f:
-                        f.write(file_content)
-                else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
-            else:
-                with open(f'src/cache/files/file_{file_id}.py', 'r') as f:
-                    file_content = f.read()
-                with open(dirpath + '/' + self.info_container.get_file_name(file_id), 'w') as f:
-                    f.write(file_content)
-        
+        packpath, _ = QFileDialog.getSaveFileName(self, "代码导出", f"./{file_name}", "Zip (*.zip)")
+        if not packpath:
+            return
+        _, pack_content = self.api_client.download_multiple_files(file_ids)
+        with open(packpath, 'wb') as f:
+            f.write(pack_content)
 
     def select_current_file(self, row, col):
         self.compare_file_input.setText(self.file_table.item(row, 0).text())

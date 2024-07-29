@@ -70,7 +70,7 @@ class ApiClient:
                 return ErrorCode.NETWORK_ERROR
             return ErrorCode.UNKNOWN_ERROR
         
-    def get_login_history(self, limit=1):
+    def get_login_history(self, limit=2):
         try:
             response = self.auth_stub.GetLoginHistory(pb.GetLoginHistoryRequest(token=self.token, limit=limit))
             status = response.status
