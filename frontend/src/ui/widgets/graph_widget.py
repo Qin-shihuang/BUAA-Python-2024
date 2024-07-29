@@ -1,7 +1,7 @@
 import networkx as nx
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QMouseEvent, QPainter, QColor, QPen
-from PyQt5.QtCore import Qt, QPointF, QRectF, pyqtSignal, QObject
+from PyQt5.QtCore import Qt, QPointF, QRectF, pyqtSignal, QObject, QSize
 from random import randint
 
 
@@ -92,9 +92,6 @@ class GraphWidget(QWidget):
             elif e == self.highlighted_edge:
                 painter.setPen(QPen(Qt.green, 3))
             else:
-                # normally the weight would be within the range [0, self.threshold]
-                # weight = self.graph[e[0]][e[1]]['weight']
-                # from 0 to 0.5 red -> yellow, from 0.5 to 1 yellow -> green
                 weight = self.graph[e[0]][e[1]]['weight']
                 if weight < 0.5:
                     color = QColor.fromRgbF(1, 2*weight, 0)
@@ -158,6 +155,9 @@ class GraphWidget(QWidget):
         if len(triggerd_edges) > 0:
             return triggerd_edges[0]
         return None
+
+    def sizeHint(self):
+        return QSize(600, 400)
              
 class EdgeSelectedSignal(QObject):
     edgeClicked = pyqtSignal(tuple)
