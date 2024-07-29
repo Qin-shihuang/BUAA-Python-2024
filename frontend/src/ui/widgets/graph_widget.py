@@ -157,7 +157,9 @@ class GraphWidget(QWidget):
         return None
 
     def sizeHint(self):
-        return QSize(600, 400)
+        return QSize(600, 400).expandedTo(super().sizeHint())
+
+
              
 class EdgeSelectedSignal(QObject):
     edgeClicked = pyqtSignal(tuple)

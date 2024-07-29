@@ -1,5 +1,6 @@
 grpcio==1.64.1
+networkx==3.3
+pandas==1.5.3
 protobuf==5.27.2
-PyQt5==5.15.10
-PyQt5_sip==12.13.0
-
+PyQt5==5.15.11
+PyQt5_sip==12.15.0

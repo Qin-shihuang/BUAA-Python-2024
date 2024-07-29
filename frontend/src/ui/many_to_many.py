@@ -26,7 +26,7 @@ class ManyToManyPage(QWidget):
         
         layout = QVBoxLayout()
         tab_widget = QTabWidget()
-        tab_widget.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        tab_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         
         self.graph_tab = QWidget()
         self._init_graph_tab()
@@ -52,8 +52,8 @@ class ManyToManyPage(QWidget):
         threshold_changed_signal = ThresholdChangedSignal()
         
         layout = QVBoxLayout()
-        mid_layout = QHBoxLayout()
-        mid_layout.setContentsMargins(10, 0, 0, 0)
+        bottom_layout = QHBoxLayout()
+        bottom_layout.setContentsMargins(10, 0, 0, 0)
 
         self.graph_widget = GraphWidget(edgeSelectedSignal=edge_selected_signal)
         self.graph_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
@@ -83,16 +83,16 @@ class ManyToManyPage(QWidget):
             }
         """)
         
-        layout.addWidget(self.graph_widget)
-        layout.addStretch(1)
-        layout.addLayout(mid_layout)
+        layout.addWidget(self.graph_widget, 1)
+        layout.addLayout(bottom_layout)
+        bottom_layout.setAlignment(Qt.AlignBottom)
 
-        mid_layout.addWidget(self.filter_widget, 1)
-        mid_layout.setAlignment(self.filter_widget, Qt.AlignVCenter)
-        mid_layout.addWidget(self.graph_label, 0)
-        mid_layout.addWidget(self.export_button, 0)
-        mid_layout.setAlignment(self.export_button, Qt.AlignVCenter)
-        mid_layout.setStretch(0, 1)
+        bottom_layout.addWidget(self.filter_widget, 1)
+        bottom_layout.setAlignment(self.filter_widget, Qt.AlignVCenter)
+        bottom_layout.addWidget(self.graph_label, 0)
+        bottom_layout.addWidget(self.export_button, 0)
+        bottom_layout.setAlignment(self.export_button, Qt.AlignVCenter)
+        bottom_layout.setStretch(0, 1)
         
         self.graph_tab.setLayout(layout)
 
