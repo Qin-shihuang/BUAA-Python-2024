@@ -10,6 +10,9 @@ from utils.pyac.lexer.PythonLexer import PythonLexer
 from utils.pyac.lexer.PythonParser import PythonParser
 from antlr4.error.ErrorListener import ConsoleErrorListener
 
+dummy_code = "n=1"
+
+
 @dataclass
 class Submission:
     root: ParserRuleContext
@@ -32,7 +35,10 @@ def parse(content):
     parser.removeErrorListener(ConsoleErrorListener.INSTANCE)
     try:
         tree = parser.file_input()
-    except Exception as e:
-        tree = '0'
+    except:
+        lexer = PythonLexer(InputStream(dummy_code))
+        stream = CommonTokenStream(lexer)
+        parser = PythonParser(stream)
+        tree = parser.file_input()
     finally:
         return tree
