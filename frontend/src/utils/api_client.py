@@ -7,12 +7,10 @@ Description:
 
 import hashlib
 import grpc
-import time
 
 import generated.plagiarism_detection_pb2 as pb
 import generated.plagiarism_detection_pb2_grpc as pb_grpc
 
-from utils.file_handler import FileHandler
 from utils.error_codes import ErrorCode
 
 from config import grpc_server_address
@@ -40,7 +38,6 @@ class ApiClient:
         self.check_stub = pb_grpc.CheckServiceStub(channel)
         self.report_stub = pb_grpc.ReportServiceStub(channel)
         self.token = None
-        self.file_handler = None
     
     # MARK: - Ping
     def ping(self):
@@ -56,7 +53,6 @@ class ApiClient:
             response = self.auth_stub.Login(pb.LoginRequest(username=username, password=hash_password(password)))
             if response.status == ErrorCode.SUCCESS.value:
                 self.token = response.token
-                self.file_handler = FileHandler(username)
                 return ErrorCode.SUCCESS
             else:
                 return ErrorCode.from_value(response.status)
@@ -89,8 +85,10 @@ class ApiClient:
         
     # MARK: - File
     def upload_file(self, file_path):
-        content = FileHandler.read_file(file_path)
-        
+        content = b''
+        with open(file_path, 'rb') as file:
+            content = file.read()
+                    
         def request_generator():
             try:
                 CHUNK_SIZE = 4096
@@ -149,7 +147,6 @@ class ApiClient:
     
     def download_multiple_files(self, file_ids):
         try:
-            filename = f"{time.time()}.zip"
             responses = self.file_stub.DownloadMultipleFiles(pb.DownloadMultipleFilesRequest(token=self.token, file_ids=file_ids))
             status = None
             content = b''
@@ -162,7 +159,6 @@ class ApiClient:
                     if status is None:
                         return ErrorCode.UNKNOWN_ERROR, b''
                     content += resp.chunk.data
-            self.file_handler.write_file('pack', filename, content)
             return ErrorCode.SUCCESS, content
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.UNAVAILABLE:
