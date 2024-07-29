@@ -27,7 +27,7 @@ class ProgressWidget(QWidget):
         self.progress_value = multiprocessing.Value('i', 0)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_progress)
-        self.timer.start(100)  # 每100ms更新一次进度
+        self.timer.start(100)
         
     def center(self):
         frameGm = self.frameGeometry()
