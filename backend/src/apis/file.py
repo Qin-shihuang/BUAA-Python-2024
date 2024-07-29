@@ -45,7 +45,7 @@ class FileServiceServicer(pb_grpc.FileServiceServicer):
         if not auth_status:
             return pb.GetUploadedFileListResponse(status=ErrorCode.UNAUTHORIZED.value)
         try:
-            info_list = [pb.FileInfo(id=id, file_path=file_path, size=size, uploaded_at=uploaded_at) for id, file_path, size, uploaded_at in self.storage_service.get_file_list(user_id)]
+            info_list = [pb.FileInfo(id=id, file_path=file_path, size=size, uploaded_at=uploaded_at, deleted=deleted) for id, file_path, size, uploaded_at, deleted in self.storage_service.get_file_list(user_id)]
             return pb.GetUploadedFileListResponse(status=ErrorCode.SUCCESS.value, files=info_list)
         except Exception as e:
             return pb.GetUploadedFileListResponse(status=ErrorCode.UNKNOWN_ERROR.value)
