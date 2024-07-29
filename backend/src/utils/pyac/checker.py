@@ -1,7 +1,7 @@
 from utils.pyac.ncd import ncdTest
 from utils.pyac.submission import Submission
 
-def test_two_lists(list1, list2, t0=0.25):
+def test_two_lists(list1, list2, t0=0.2):
     if list1 == [] or list2 == []:
         return [], list1, list2
     distances = []
@@ -135,7 +135,7 @@ def test_two_files(sub1, sub2, snippet_test=True):
             j = 0
             while j < len(lines):
                 snippet = ''
-                if lines[j].startswith('    def'):
+                if lines[j].startswith('    def') or lines[j].startswith('    while') or lines[j].startswith('    for') or lines[j].startswith('    if'):
                     start = j + r1_seg1_unmatched[i][0]
                     snippet += lines[j][4:] + '\n'
                     j += 1
@@ -153,7 +153,7 @@ def test_two_files(sub1, sub2, snippet_test=True):
             j = 0
             while j < len(lines):
                 snippet = ''
-                if lines[j].startswith('    def'):
+                if lines[j].startswith('    def') or lines[j].startswith('    while') or lines[j].startswith('    for') or lines[j].startswith('    if'):
                     start = j + r1_seg2_unmatched[i][0]
                     snippet += lines[j][4:] + '\n'
                     j += 1
