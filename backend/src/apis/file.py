@@ -77,7 +77,7 @@ class FileServiceServicer(pb_grpc.FileServiceServicer):
         if not auth_status:
             return pb.DeleteFileResponse(status=ErrorCode.UNAUTHORIZED.value)
         file_id = request.file_id
-        owner_status, owner_id = self.storage_service.get_file_owner(file_id)
+        owner_status, owner_id = self.storage_service.get_file_owner(file_id, deleted_ok=False)
         if not owner_status:
             return pb.DeleteFileResponse(status=ErrorCode.FILE_NOT_FOUND.value)
         elif owner_id != user_id:
