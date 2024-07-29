@@ -1,7 +1,7 @@
 from utils.pyac.ncd import ncdTest
 from utils.pyac.submission import Submission
 
-def test_two_lists(list1, list2, t0=0.2):
+def test_two_lists(list1, list2, t0=0.3):
     if list1 == [] or list2 == []:
         return [], list1, list2
     distances = []
@@ -9,7 +9,7 @@ def test_two_lists(list1, list2, t0=0.2):
         row = []
         for r2 in list2:
             sub1 = Submission(r1[1])
-            sub2 = Submission(r1[1])
+            sub2 = Submission(r2[1])
             distance = ncdTest(sub1, sub2)
             row.append(distance)
         distances.append(row)
@@ -50,7 +50,7 @@ def test_two_files(sub1, sub2, snippet_test=True):
     distance = ncdTest(sub1, sub2)
     distance = min(1, max(0, distance))
 
-    if not snippet_test or distance > 0.7:
+    if not snippet_test or distance > 0.6:
         return distance, []
     
     content1 = sub1.content.replace('\t', '    ').replace('\r', '')
