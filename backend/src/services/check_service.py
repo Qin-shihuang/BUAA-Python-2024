@@ -51,9 +51,15 @@ class CheckService:
         result = self.db_service.query(query, args)
         if result:
             task.reportIds.append(result[0][0])
-            with open(f'report/{result[0][0]}.json', 'r') as f:
-                report = ReportModel.fromJson(f.read())
-                return report.distance
+            try:
+                with open(f'report/{result[0][0]}.json', 'r') as f:
+                    report = ReportModel.fromJson(f.read())
+                    return report.distance
+            except FileNotFoundError:
+                task.reportIds.pop()
+                query = "DELETE FROM reports WHERE id = ?"
+                args = (result[0][0],)
+                self.db_service.query(query, args)
         # create a new report
         dist, dup = self.check_plagiarism(file_id1, file_id2)
         query = "INSERT INTO reports (owner_id, file_id1, file_id2, similarity) VALUES (?, ?, ?, ?)"
