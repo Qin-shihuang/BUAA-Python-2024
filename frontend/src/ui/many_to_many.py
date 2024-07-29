@@ -2,7 +2,7 @@ import time
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 import itertools
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, QTableWidgetItem, QTabWidget, QPushButton, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, QTableWidgetItem, QTabWidget, QPushButton, QMessageBox, QFileDialog, QSizePolicy
     
 from models.report_model import ReportModel
 from models.task_model import TaskModel
@@ -23,11 +23,10 @@ class ManyToManyPage(QWidget):
         self.active_comparison_pages = []
 
         self.setWindowTitle("Many to Many Task")
-        self.setGeometry(100, 100, 1000, 800)
         
         layout = QVBoxLayout()
         tab_widget = QTabWidget()
-        tab_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        tab_widget.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         
         self.graph_tab = QWidget()
         self._init_graph_tab()
@@ -57,14 +56,17 @@ class ManyToManyPage(QWidget):
         mid_layout.setContentsMargins(10, 0, 0, 0)
 
         self.graph_widget = GraphWidget(edgeSelectedSignal=edge_selected_signal)
-        self.graph_widget.setMinimumSize(800, 600)
-        self.graph_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.graph_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         
         self.filter_widget = FilterWidget(thresholdChangedSignal=threshold_changed_signal)
-        self.filter_widget.setMinimumSize(650, 100)
-        self.filter_widget.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.filter_widget.setFixedHeight(100)
+        self.filter_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         self.graph_label = QLabel()
         self.graph_label.setAlignment(Qt.AlignVCenter)
+        self.graph_label.setText(f"Selected Edge count: {1000}")
+        label_width = self.graph_label.fontMetrics().boundingRect(self.graph_label.text()).width()
+        self.graph_label.setFixedWidth(label_width)
+        
         self.export_button = QPushButton()
         self.export_button.setFixedSize(100, 50)
         self.export_button.setText("Export")
@@ -85,10 +87,10 @@ class ManyToManyPage(QWidget):
         layout.addStretch(1)
         layout.addLayout(mid_layout)
 
-        mid_layout.addWidget(self.filter_widget)
+        mid_layout.addWidget(self.filter_widget, 1)
         mid_layout.setAlignment(self.filter_widget, Qt.AlignVCenter)
-        mid_layout.addWidget(self.graph_label)
-        mid_layout.addWidget(self.export_button)
+        mid_layout.addWidget(self.graph_label, 0)
+        mid_layout.addWidget(self.export_button, 0)
         mid_layout.setAlignment(self.export_button, Qt.AlignVCenter)
         mid_layout.setStretch(0, 1)
         
