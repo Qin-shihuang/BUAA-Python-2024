@@ -6,7 +6,8 @@ class ProgressWidget(QWidget):
     def __init__(self, desp, total):
         super().__init__()
         self.setWindowTitle("Progress")
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setFixedSize(400, 100)
         self.center()
         

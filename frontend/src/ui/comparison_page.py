@@ -75,6 +75,7 @@ class ComparisonPage(QWidget):
     def setup(self, reportId):
         self.controller.set_report(reportId)
         
+        self.setWindowTitle("Comparison: {} vs {}".format(self.controller.file1_name, self.controller.file2_name))
         self.leftCE.set_text(self.controller.left_content)
         self.rightCE.set_text(self.controller.right_content)
         

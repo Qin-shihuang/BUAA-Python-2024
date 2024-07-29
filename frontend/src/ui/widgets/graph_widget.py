@@ -50,9 +50,9 @@ class GraphWidget(QWidget):
                 if clusters and not clusters[j] in used_clusters:
                     continue
                 if distance_matrix[i][j] <= threshold:
-                    self.graph.add_edge(i, j, weight=distance_matrix[i][j])
+                    self.graph.add_edge(i, j, weight=distance_matrix[i][j], one_minus_weight=1 - distance_matrix[i][j])
         
-        self.pos = nx.spring_layout(self.graph, seed=self.seed, weight='weight', k=1.6)
+        self.pos = nx.spring_layout(self.graph, seed=self.seed, weight='one_minus_weight', k=1.6)
         self._normalize()
         self.update()
 
