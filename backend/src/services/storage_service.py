@@ -89,7 +89,7 @@ class StorageService:
         
         
     def get_file_list(self, userId):
-        query = "SELECT id, original_path, size, uploaded_at FROM uploaded_files WHERE uploader_id = ? AND deleted = FALSE"
+        query = "SELECT id, original_path, size, uploaded_at, deleted FROM uploaded_files WHERE uploader_id = ?"
         args = (userId,)
         return self.db_service.query(query, args)
         
