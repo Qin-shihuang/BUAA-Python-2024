@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
     QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
     QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
 from models.task_model import TaskModel
+from ui.many_to_many import ManyToManyPage
 from ui.one_to_many import OneToManyPage
 from ui.widgets.code_editor_widget import CodeEditor
 from ui.widgets.progress_widget import ProgressSignal, ProgressWidget
@@ -493,11 +494,10 @@ class WelcomePage(QWidget):
         
         if self.check_mode == 0:
             self.check_page = OneToManyPage()
-            self.check_page.init_task(task_name, task)
-            self.check_page.show()
         else:
-            pass
-
+            self.check_page = ManyToManyPage()
+        self.check_page.init_task(self.task_name_input.text(), task)
+        self.check_page.show()
         # switch to check page
             
 
