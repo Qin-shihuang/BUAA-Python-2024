@@ -1,7 +1,7 @@
 from utils.pyac.ncd import ncdTest
 from utils.pyac.submission import Submission
 
-def test_two_lists(list1, list2, t0=0.3):
+def test_two_lists(list1, list2, t0=0.25):
     if list1 == [] or list2 == []:
         return [], list1, list2
     distances = []
