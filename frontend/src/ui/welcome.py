@@ -92,17 +92,17 @@ class WelcomePage(QWidget):
 
         self.task_name_label = QLabel('查重任务名')
         self.task_name_input = QLineEdit()
-        self.task_name_input.setPlaceholderText('请输入本次查重任务名称')
+        self.task_name_input.setPlaceholderText('请输入本次查重任务名称 (默认为 Task_Date_Time)')
         # self.task_name_input.setText(self.get_default_name())
         task_name_layout = QHBoxLayout()
         task_name_layout.addWidget(self.task_name_label)
         task_name_layout.addWidget(self.task_name_input)
 
         self.file_label = QLabel('上传待查文件')
-        self.upload_file_button = QPushButton('上传文件')
+        self.upload_file_button = QPushButton(' 上传文件')
         self.upload_file_button.setIcon(QIcon('assets/Upload.svg'))
         self.upload_file_button.clicked.connect(self.upload_file)
-        delete_file_button = QPushButton('删除已选中文件')
+        delete_file_button = QPushButton(' 删除已选中文件')
         delete_file_button.setIcon(QIcon('assets/del.svg'))
         delete_file_button.clicked.connect(self.clear_selected_files)
         file_layout = QHBoxLayout()
@@ -496,7 +496,7 @@ class WelcomePage(QWidget):
             self.check_page = OneToManyPage()
         else:
             self.check_page = ManyToManyPage()
-        self.check_page.init_task(self.task_name_input.text(), task)
+        self.check_page.init_task(task_name, task)
         self.check_page.show()
         # switch to check page
             

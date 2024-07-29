@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from PyQt5.QtCore import Qt, QDateTime, QFileInfo, pyqtSignal, QRect, QSize, QPoint, QTimer
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QCursor, QColor
 import PyQt5.QtWidgets
@@ -381,8 +382,12 @@ class OneToManyPage(QWidget):
         if not file_ids:
             QMessageBox.warning(self, 'Warning', 'No files to export.', QMessageBox.Ok)
             return
-        
+        file_name = f"{time.time()}.zip"
         # dirpath = QFileDialog.getExistingDirectory(self, "代码导出目录", "./", QFileDialog.ShowDirsOnly)
+        packpath, _ = QFileDialog.getSaveFileName(self, "代码导出", f"./{file_name}", "Zip (*.zip)")
+        _, pack_content = self.api_client.download_multiple_files(file_ids)
+        with open(packpath, 'wb') as f:
+            f.write(pack_content)
 
         return
         for file_id in file_ids:
