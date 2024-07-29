@@ -218,7 +218,9 @@ class WelcomePage(QWidget):
             QMessageBox.critical(self, 'Error', 'Failed to get uploaded files!')
             return
         for file_info in file_list:
-            row = self.file_table.rowCount()
+            # row = self.file_table.rowCount()
+            self.info_container.add_file_info(file_info[0], os.path.basename(file_info[1]), file_info[2], file_info[1], file_info[3])
+            row = 0
             self.file_table.insertRow(row)
 
             checkbox = QTableWidgetItem(os.path.basename(file_info[1])) # no need to exist?
@@ -258,6 +260,7 @@ class WelcomePage(QWidget):
             widget.setLayout(widget_layout)
             widget_layout.setContentsMargins(5, 2, 5, 2)
             self.file_table.setCellWidget(row, 4, widget)
+        self.info_container.update_file_info()
 
 
     def upload_file(self):
@@ -265,7 +268,8 @@ class WelcomePage(QWidget):
         current_time = self.get_current_time()
         for file in self.files:
             info = QFileInfo(file)
-            row = self.file_table.rowCount()
+            # row = self.file_table.rowCount()
+            row = 0
             self.file_table.insertRow(row)
 
             checkbox = QTableWidgetItem(info.fileName())

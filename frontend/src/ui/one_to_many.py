@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
     QDoubleSpinBox, QProgressBar, QFrame, QScrollArea, QScrollBar, QSizePolicy, QAbstractScrollArea, QSlider
 
 from models.report_model import ReportModel
+from ui.comparison_page import ComparisonPage
 from utils.api_client import ApiClient
 from utils.error_codes import ErrorCode
 from utils.info_container import InfoContainer
@@ -24,6 +25,7 @@ class OneToManyPage(QWidget):
 
         self.api_client = ApiClient()
         self.info_container = InfoContainer()
+        self.comparison_page = ComparisonPage()
         
         self.setStyleSheet("""
             QWidget {
@@ -74,6 +76,28 @@ class OneToManyPage(QWidget):
                border-radius: 5px;
                font-size: 13px;
             }
+            QSlider::groove:horizontal {
+                height: 3px;  /* 设置较窄的高度 */
+                background: #b0c4de;
+                border-radius: 1px;  /* 设置滑动槽的圆角 */
+            }
+            QSlider::handle:horizontal {
+                background: white;
+                border: 1px solid #5c5c5c;
+                width: 8px;  /* 设置较窄的手柄宽度 */
+                margin: -4px 0;  /* 使手柄居中 */
+                border-radius: 5px;  /* 设置滑动手柄的圆角 */
+            }
+            QSlider::sub-page:horizontal {
+                background:  #4CAF50;  /* 设置划过区域的颜色 */
+                border-radius: 1px;  /* 圆角匹配槽的圆角 */
+                margin: 0px;  /* 确保没有间隙 */
+            }
+            QSlider::add-page:horizontal {
+                background: white;  /* 设置未划过区域的颜色 */
+                border-radius: 1px;  /* 圆角匹配槽的圆角 */
+                margin: 0px;  /* 确保没有间隙 */
+            }
         """)
 
         layout = QVBoxLayout()
@@ -118,9 +142,10 @@ class OneToManyPage(QWidget):
         self.file_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         # self.file_table.setColumnWidth(0, 60)
 
-        self.file_table.setColumnCount(7)
-        self.file_table.setHorizontalHeaderLabels(('名称', '大小', '上传时间', '路径', '相似距离', '导出', 'ID'))
+        self.file_table.setColumnCount(8)
+        self.file_table.setHorizontalHeaderLabels(('名称', '大小', '上传时间', '路径', '相似距离', '导出', 'FileId', 'ReportId'))
         # self.file_table.setColumnHidden(6, True)
+        # self.file_table.setColumnHidden(7, True)
 
         header_item = QTableWidgetItem('相似距离')
         header_item.setFont(QFont('Arial', 10, QFont.Bold))
@@ -138,12 +163,12 @@ class OneToManyPage(QWidget):
         self.file_table.setAlternatingRowColors(True)
 
         # self.file_table_init()
-        self.compare_file = None
+        self.compare_report = None
         self.file_table.cellClicked.connect(self.select_current_file)
         self.file_table.cellDoubleClicked.connect(self.start_compare)
 
         slider_layout = QHBoxLayout()
-        slider_layout.addWidget(QLabel('                             '))
+        slider_layout.addWidget(QLabel('                              '))
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setRange(0, 100)
         self.slider.setValue(1)
@@ -270,6 +295,7 @@ class OneToManyPage(QWidget):
             self.file_table.setItem(row, 2, QTableWidgetItem(file_info[3]))
             self.file_table.setItem(row, 3, QTableWidgetItem(file_info[2]))
             self.file_table.setItem(row, 6, QTableWidgetItem(str(file_id)))
+            self.file_table.setItem(row, 7, QTableWidgetItem(str(report_id)))
 
             sim_item = QTableWidgetItem(f'{report.distance}')
             sim_item.setTextAlignment(Qt.AlignCenter)
@@ -317,22 +343,37 @@ class OneToManyPage(QWidget):
             with open(filepath, 'w') as f:
                 f.write(file_content)
 
+    def is_float(self, string):
+        try:
+            float(string)
+            return True
+        except ValueError:
+            return False
+    
     def export_files(self):
-        thres = self.lineEdit.value()
-
+        thres = self.lineEdit.text()
+        if self.is_float(thres):
+            thres = float(thres)
+        else:
+            QMessageBox.warning(self, 'Warning', 'Please input a valid number.', QMessageBox.Ok)
+            return
+        if thres < 0 or thres > 1:
+            QMessageBox.warning(self, 'Warning', 'Please input a number between 0 and 1.', QMessageBox.Ok)
+            return
+        # print(thres)
         file_ids = []
-        # for row in range(self.file_table.rowCount()):
-        #     similarity = float(self.file_table.item(row, 4).text()[:-1])
-        #     if similarity > thres:
-        #         file_ids.append(int(self.file_table.item(row, 6).text()))
-        #     else:
-        #         break
-        
+        for row in range(self.file_table.rowCount()):
+            similarity = float(self.file_table.item(row, 4).text())
+            if similarity <= thres:
+                file_ids.append(int(self.file_table.item(row, 6).text()))
+            else:
+                break
+        print(file_ids)
         # if not file_ids:
         #     QMessageBox.warning(self, 'Warning', 'No files to export.', QMessageBox.Ok)
         #     return
         
-        dirpath = QFileDialog.getExistingDirectory(self, "代码导出目录", "./", QFileDialog.ShowDirsOnly)
+        # dirpath = QFileDialog.getExistingDirectory(self, "代码导出目录", "./", QFileDialog.ShowDirsOnly)
 
         return
         for file_id in file_ids:
@@ -351,14 +392,15 @@ class OneToManyPage(QWidget):
         
 
     def select_current_file(self, row, col):
-        self.compare_file = self.file_table.item(row, 3).text()
         self.compare_file_input.setText(self.file_table.item(row, 0).text())
+        self.compare_report = int(self.file_table.item(row, 7).text())
 
     def start_compare(self):
-        if self.compare_file is None:
+        if self.compare_report is None:
             QMessageBox.warning(self, 'Warning', 'Please select a file to compare first.', QMessageBox.Ok)
         else:
-            print(self.compare_file)
+            self.comparison_page.setup(self.compare_report)
+            self.comparison_page.show()
 
 
 if __name__ == "__main__":

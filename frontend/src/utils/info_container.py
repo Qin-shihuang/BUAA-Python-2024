@@ -17,11 +17,11 @@ class InfoContainer:
         super().__init__()
         self._initiated = True
 
-        if not os.path.exists('cache'):
-            os.makedirs('cache')
-            os.makedirs('cache/files')
-            os.makedirs('cache/reports')
-            with open("cache/file_info.csv", "a", newline='') as csvfile:
+        if not os.path.exists('src/cache'):
+            os.makedirs('src/cache')
+            os.makedirs('src/cache/files')
+            os.makedirs('src/cache/reports')
+            with open("src/cache/file_info.csv", "a", newline='') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(["id", "name", "size", "path", "time"])
 
@@ -31,9 +31,11 @@ class InfoContainer:
             writer.writerow([file_id, file_name, file_size, file_path, file_time])
 
     def get_file_info(self, file_id):
-        df = pd.read_csv('src/cache/file_info.csv')
+        df = pd.read_csv('src/cache/file_info.csv', index_col=0)
+        # df = pd.read_csv('src/cache/file_info.csv')
         # return df.iloc[file_id - 1].tolist()
-        return df[df['id'] == file_id].values.tolist()[0][1:]
+        # return df[df['id'] == file_id].values.tolist()[0][1:]
+        return df.loc[file_id].tolist()
     
     def get_file_name(self, file_id):
         return self.get_file_info(file_id)[0]
@@ -45,6 +47,12 @@ class InfoContainer:
     def get_record(self, report_id):
         with open(f'src/cache/reports/report_{report_id}.json', 'r') as f:
             return f.read()
+        
+    def update_file_info(self):
+        df = pd.read_csv('src/cache/file_info.csv', index_col=0)
+        df = df[~df.index.duplicated()]
+        with open(f'src/cache/file_info.csv', 'w') as f:
+            f.write(df.to_csv(lineterminator="\n"))
 
 class FileInfo:
     def __init__(self, file_id, file_name, file_size, file_path, file_time):
