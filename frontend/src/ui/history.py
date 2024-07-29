@@ -219,7 +219,6 @@ class HistoryPage(QWidget):
         self.check_page.init_task(self.task_table.item(row, 1).text(), task)
         self.check_page.show()
         # switch to check page
-        self.hide()  
 
 
 if __name__ == "__main__":

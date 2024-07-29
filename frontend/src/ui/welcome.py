@@ -494,7 +494,6 @@ class WelcomePage(QWidget):
         self.check_page.init_task(self.task_name_input.text(), task)
         self.check_page.show()
         # switch to check page
-        self.hide()
             
 
 
