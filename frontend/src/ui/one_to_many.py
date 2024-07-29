@@ -205,11 +205,9 @@ class OneToManyPage(QWidget):
         start_layout.addWidget(batch_label2)
 
         start_layout.addStretch(1)
-        return_button = QPushButton('Return')
         compare_button = QPushButton('Compare')
 
         compare_button.clicked.connect(self.start_compare)
-        start_layout.addWidget(return_button)
         start_layout.addWidget(compare_button)
 
         layout.addWidget(title_label)

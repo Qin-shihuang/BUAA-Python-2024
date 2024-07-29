@@ -17,7 +17,7 @@ from utils.info_container import InfoContainer
 from ui.login import LoginWindow
 
 class WelcomePage(QWidget):
-    def __init__(self):
+    def __init__(self, main_window):
         super().__init__()
 
         self.setWindowTitle("Welcome")
@@ -29,6 +29,7 @@ class WelcomePage(QWidget):
         self.code_editor = CodeEditor()
         self.code_editor.set_editable(False)
         self.code_editor.resize(800, 600)
+        self.main_window = main_window
 
         self.setStyleSheet("""
             QWidget {
@@ -446,6 +447,7 @@ class WelcomePage(QWidget):
         else:
             task_name = self.task_name_input.text()
         
+        self.main_window.hide()
         if self.check_mode == 0:       
             signal = start_progress_widget("Checking...", len(file_ids))
             main_file = self.target_file_button.text()
@@ -458,6 +460,8 @@ class WelcomePage(QWidget):
             _, task_str = self.api_client.many_to_many_check(task_name, file_ids, signal)
             signal.emit(-1)
 
+        self.main_window.show_for_api()
+        
         if _ != ErrorCode.SUCCESS:
             QMessageBox.critical(self, 'Error', 'Failed to start check!')
             return
@@ -496,9 +500,7 @@ class WelcomePage(QWidget):
         else:
             self.check_page = ManyToManyPage()
         self.check_page.init_task(task_name, task)
-        self.check_page.show()
-        # switch to check page
-            
+        self.check_page.show()            
 
 
 class CheckBoxHeader(QHeaderView):
