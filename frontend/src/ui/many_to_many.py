@@ -26,7 +26,7 @@ class ManyToManyPage(QWidget):
         
         layout = QVBoxLayout()
         tab_widget = QTabWidget()
-        tab_widget.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        tab_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         
         self.graph_tab = QWidget()
         self._init_graph_tab()
@@ -56,7 +56,7 @@ class ManyToManyPage(QWidget):
         mid_layout.setContentsMargins(10, 0, 0, 0)
 
         self.graph_widget = GraphWidget(edgeSelectedSignal=edge_selected_signal)
-        self.graph_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.graph_widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
         
         self.filter_widget = FilterWidget(thresholdChangedSignal=threshold_changed_signal)
         self.filter_widget.setFixedHeight(100)
