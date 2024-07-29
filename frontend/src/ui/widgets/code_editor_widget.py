@@ -9,6 +9,7 @@ from controllers.python_syntax_highlighter import PythonSyntaxHightlighter
 class CodeEditor(QPlainTextEdit):
     def __init__(self):
         super().__init__()
+        self.display_line_numbers = True
         self.setLineWrapMode(QPlainTextEdit.NoWrap)
         self.setStyleSheet("font-size: 12pt; font-family: Consolas;")
         font = self.font()
@@ -28,7 +29,7 @@ class CodeEditor(QPlainTextEdit):
         self.cursorPositionChanged.connect(self.highlight_focused_line)
         self.update_line_number_area_width()
         
-        self.bg_highlight_manager = BackgroungHighlightManager(self)
+        self.bg_highlight_manager = BackgroundHighlightManager(self)
         
     def set_text(self, text):
         self.setPlainText(text)
@@ -36,12 +37,20 @@ class CodeEditor(QPlainTextEdit):
     def set_editable(self, editable):
         self.setReadOnly(not editable)
         
+    def set_highlight(self, areas):
+        self.bg_highlight_manager.set_highlight_areas(areas)
+        
     def clear_highlight(self):
         self.bg_highlight_manager.clear_highlight_areas()
         
-    def add_hightlight_areas(self, areas):
-        for area in areas:
-            self.bg_highlight_manager.add_highlight_area(area)
+    def set_top_highlight(self, area):
+        self.bg_highlight_manager.set_top_highlight_area(area)
+        
+    def get_top_highlight(self):
+        return self.bg_highlight_manager.top_highlight
+        
+    def clear_top_highlight(self):
+        self.bg_highlight_manager.clear_top_highlight_area()
 
     # def set_font_size(self, size):
     #     font = self.font()
@@ -61,6 +70,8 @@ class CodeEditor(QPlainTextEdit):
     #         self.set_font_size(size - 1)
 
     def lineNumberAreaWidth(self):
+        if not self.display_line_numbers:
+            return 0
         digits = 1
         count = max(1, self.blockCount())
         while count >= 10:
@@ -86,6 +97,8 @@ class CodeEditor(QPlainTextEdit):
         self.line_number_area.setGeometry(QRect(cr.left(), cr.top(), self.lineNumberAreaWidth(), cr.height()))
 
     def lineNumberAreaPaintEvent(self, event):
+        if not self.display_line_numbers:
+            return
         painter = QPainter(self.line_number_area)
         painter.fillRect(event.rect(), Qt.lightGray)
         block = self.firstVisibleBlock()
@@ -134,8 +147,8 @@ class LineNumberWidget(QWidget):
 
     def paintEvent(self, event):
         self.editor.lineNumberAreaPaintEvent(event)
-        
-class BackgroungHighlightManager:
+
+class BackgroundHighlightManager:
     def __init__(self, editor):
         self.editor = editor
         self.colors = [
@@ -151,34 +164,56 @@ class BackgroungHighlightManager:
             QColor(210, 240, 255),
         ]
         self.highlights = []
-        
+        self.top_highlight = None
+        self.top_highlight_color = QColor(255, 100, 100, 100)
+       
+    def set_highlight_areas(self, areas):
+        self.highlights = areas
+        self.paint_highlight_areas()
+    
     def add_highlight_area(self, area):
         self.highlights.append(area)
-        self.paint_highlight_area()
-        
+        self.paint_highlight_areas()
+       
+    def set_top_highlight_area(self, area):
+        self.top_highlight = area
+        self.paint_highlight_areas()
+       
     def clear_highlight_areas(self):
         self.highlights = []
         self.editor.setExtraSelections(self.editor.extraSelections()[0:1])
+       
+    def clear_top_highlight_area(self):
+        if self.top_highlight:
+            self.top_highlight = None
+            self.editor.setExtraSelections(self.editor.extraSelections()[0:-1])
         
-    def paint_highlight_area(self):
-        self.editor.setExtraSelections(self.editor.extraSelections()[0:1])
-        for i, (start_row, start_col, end_row, end_col) in enumerate(self.highlights):
-            if start_row < 1 or start_col < 1 or end_row < 1 or end_col < 1:
-                continue
-            if start_row > end_row or (start_row == end_row and start_col > end_col):
-                continue
-            if start_row == end_row and start_col == end_col:
-                continue
-            color = self.colors[i % len(self.colors)]   
-            cursor = QTextCursor(self.editor.document())
-            cursor.movePosition(QTextCursor.Start)
-            cursor.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, start_row - 1)
-            cursor.movePosition(QTextCursor.Right, QTextCursor.MoveAnchor, start_col - 1)
-            cursor.setPosition(cursor.position(), QTextCursor.KeepAnchor)
-            cursor.movePosition(QTextCursor.Down, QTextCursor.KeepAnchor, end_row - start_row)
-            cursor.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor, end_col - start_col)
+    def paint_highlight_areas(self):
+        extra_selections = self.editor.extraSelections()[0:1]
+        
+        for i, area in enumerate(self.highlights):
+            selections = self.create_highlight_selection(area, self.colors[i % len(self.colors)])
+            extra_selections.extend(selections)
+        
+        if self.top_highlight:
+            top_selection = self.create_highlight_selection(self.top_highlight, self.top_highlight_color)
+            extra_selections.extend(top_selection)
+        
+        self.editor.setExtraSelections(extra_selections)
+           
+    def create_highlight_selection(self, area, color):
+        start_line, end_line = area
+        if start_line < 1 or end_line <= start_line:
+            return None
+
+        selections = []
+
+        for i in range(start_line - 1, end_line - 1):        
             selection = QTextEdit.ExtraSelection()
             selection.format.setBackground(color)
-            selection.cursor = cursor
-            self.editor.setExtraSelections(self.editor.extraSelections() + [selection])
-            
+            selection.format.setProperty(QTextFormat.FullWidthSelection, True)
+            block = self.editor.document().findBlockByNumber(i)
+            selection.cursor = QTextCursor(block)
+            selections.append(selection)
+
+        return selections

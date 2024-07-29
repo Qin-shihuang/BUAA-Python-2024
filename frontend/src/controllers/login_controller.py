@@ -16,9 +16,9 @@ class LoginController(QObject):
         
     def try_login(self, username, password):
         if username == "":
-            return ErrorCode.USERNAME_EMPTY, ''
+            return ErrorCode.USERNAME_EMPTY
         if password == "":
-            return ErrorCode.PASSWORD_EMPTY, ''
+            return ErrorCode.PASSWORD_EMPTY
         return self.api_client.login(username, password)
     
     def try_register(self, username, password, confirmPassword) -> ErrorCode:

@@ -69,6 +69,7 @@ class GraphWidget(QWidget):
         painter.setRenderHint(QPainter.Antialiasing)
         
         widget_area = QRectF(0, 0, self.width(), self.height())
+        painter.fillRect(widget_area, QColor(255, 255, 255))
         painter.setPen(QPen(Qt.black, 2))
         painter.drawRect(widget_area)
         
@@ -92,8 +93,13 @@ class GraphWidget(QWidget):
                 painter.setPen(QPen(Qt.green, 3))
             else:
                 # normally the weight would be within the range [0, self.threshold]
-                weight = self.graph[e[0]][e[1]]['weight'] / self.threshold
-                color = QColor(255, int(255 * (1 - weight)), 0)
+                # weight = self.graph[e[0]][e[1]]['weight']
+                # from 0 to 0.5 red -> yellow, from 0.5 to 1 yellow -> green
+                weight = self.graph[e[0]][e[1]]['weight']
+                if weight < 0.5:
+                    color = QColor.fromRgbF(1, 2*weight, 0)
+                else:
+                    color = QColor.fromRgbF(2-2*weight, 1, 0)
                 painter.setPen(QPen(color, 2))
             painter.drawLine(start, end)
             
