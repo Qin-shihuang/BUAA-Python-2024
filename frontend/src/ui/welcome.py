@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
 from models.task_model import TaskModel
 from ui.one_to_many import OneToManyPage
 from ui.widgets.code_editor_widget import CodeEditor
+from ui.widgets.progress_widget import ProgressSignal, ProgressWidget
 from utils.error_codes import ErrorCode
 from utils.api_client import ApiClient
 from utils.info_container import InfoContainer
@@ -90,15 +91,11 @@ class WelcomePage(QWidget):
 
         self.task_name_label = QLabel('查重任务名')
         self.task_name_input = QLineEdit()
-        self.task_name_input.focusOutEvent = self.task_name_lost_focus
         self.task_name_input.setPlaceholderText('请输入本次查重任务名称')
-        self.task_name_input.setText(self.get_default_name())
-        reset_task_name_button = QPushButton('重置任务名')
-        reset_task_name_button.clicked.connect(lambda: self.task_name_input.setText(self.get_default_name()))
+        # self.task_name_input.setText(self.get_default_name())
         task_name_layout = QHBoxLayout()
         task_name_layout.addWidget(self.task_name_label)
         task_name_layout.addWidget(self.task_name_input)
-        task_name_layout.addWidget(reset_task_name_button)
 
         self.file_label = QLabel('上传待查文件')
         self.upload_file_button = QPushButton('上传文件')
@@ -153,6 +150,7 @@ class WelcomePage(QWidget):
 
         self.file_table.itemPressed.connect(self.toggle_current_checkbox)
         self.file_table.cellDoubleClicked.connect(self.open_file_click)
+        self.file_table.cellClicked.connect(self.clear_target_file)
 
         start_layout = QHBoxLayout()
         self.error_label = QLabel()
@@ -175,6 +173,10 @@ class WelcomePage(QWidget):
         upload_layout.addLayout(start_layout)
         self.upload_widget.setLayout(upload_layout)
 
+    def clear_target_file(self, row, col):
+        if col == 0:
+            self.target_file_button.setText('点击选择目标文件')
+    
     def center(self):
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
@@ -197,11 +199,6 @@ class WelcomePage(QWidget):
         month = datetime.date().month()
         day = datetime.date().day()
         return str(year) + '-' + str(month) + '-' + str(day) + ' ' + time
-
-    def task_name_lost_focus(self, event):
-        if self.task_name_input.text() != '':
-            self.task_name_label.setStyleSheet("color: black")
-            self.error_label.clear()
 
     def toggle_current_checkbox(self):
         item = self.file_table.item(self.file_table.currentRow(), 0)
@@ -415,11 +412,7 @@ class WelcomePage(QWidget):
 
     def start_check(self):
         self.error_label.setStyleSheet("color: red")
-        if self.task_name_input.text() == '':
-            self.task_name_label.setStyleSheet("color: red")
-            self.error_label.setText('任务名不能为空')
-            return
-        elif not self.file_table.rowCount() > 0:
+        if not self.file_table.rowCount() > 0:
             self.file_label.setStyleSheet("color: red")
             self.error_label.setText('请上传待查文件')
             return
@@ -445,13 +438,25 @@ class WelcomePage(QWidget):
             self.error_label.setText('请至少选择两个文件')
             return
         
+        if self.task_name_input.text() == '':
+            task_name = self.get_default_name()
+        else:
+            task_name = self.task_name_input.text()
+        
         if self.check_mode == 0:
             main_file = self.target_file_button.text()
             main_file_id = int(self.target_files[int(main_file[:main_file.find(':')])-1])
             file_ids.remove(main_file_id)
-            _, task_str = self.api_client.one_to_many_check(self.task_name_input.text(), main_file_id, file_ids, None) # api signal none!
+
+            # self.progress_window = ProgressWidget("One to Many Checking...", cnt-1)
+            # signal = ProgressSignal()
+            # signal.connect(self.progress_window.update_progress)
+            # self.progress_window.show()
+            _, task_str = self.api_client.one_to_many_check(task_name, main_file_id, file_ids, None)
         else:
-            _, task_str = self.api_client.many_to_many_check(self.task_name_input.text(), file_ids, None) # api signal none!
+            _, task_str = self.api_client.many_to_many_check(task_name, file_ids, None) # api signal none!
+          # self.progress_window.signal.connect(lambda progress: self.progress_window.update_progress(99))
+        # self.progress_window.close()
 
         if _ != ErrorCode.SUCCESS:
             QMessageBox.critical(self, 'Error', 'Failed to start check!')
@@ -488,7 +493,7 @@ class WelcomePage(QWidget):
         
         if self.check_mode == 0:
             self.check_page = OneToManyPage()
-            self.check_page.init_task(self.task_name_input.text(), task)
+            self.check_page.init_task(task_name, task)
             self.check_page.show()
         else:
             pass

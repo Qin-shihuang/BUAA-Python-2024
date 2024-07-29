@@ -19,7 +19,7 @@ class OneToManyPage(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Welcome")
+        self.setWindowTitle("One to Many Task")
         self.resize(900, 600)
         self.center()
 
@@ -188,6 +188,7 @@ class OneToManyPage(QWidget):
         self.lineEdit.setFixedSize(60, 30)
         self.lineEdit.setStyleSheet("padding: 1px;")
         self.lineEdit.setFont(QFont('Arial', 10))
+        self.lineEdit.textChanged.connect(self.updateSlider)
         batch_label2 = QLabel('的代码')
 
         self.lineEdit.installEventFilter(self)
@@ -216,6 +217,14 @@ class OneToManyPage(QWidget):
         layout.addWidget(self.file_table)
         layout.addLayout(slider_layout)
         layout.addLayout(start_layout)
+
+    def updateSlider(self):
+        try:
+            value = float(self.lineEdit.text())
+            if 0 <= value <= 1:
+                self.slider.setValue(int(value*100))
+        except ValueError:
+            pass
 
     def eventFilter(self, source, event):
         if source == self.lineEdit or source == self.slider:
@@ -369,9 +378,9 @@ class OneToManyPage(QWidget):
             else:
                 break
         print(file_ids)
-        # if not file_ids:
-        #     QMessageBox.warning(self, 'Warning', 'No files to export.', QMessageBox.Ok)
-        #     return
+        if not file_ids:
+            QMessageBox.warning(self, 'Warning', 'No files to export.', QMessageBox.Ok)
+            return
         
         # dirpath = QFileDialog.getExistingDirectory(self, "代码导出目录", "./", QFileDialog.ShowDirsOnly)
 
