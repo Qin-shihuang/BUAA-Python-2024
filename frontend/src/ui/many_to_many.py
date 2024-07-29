@@ -1,7 +1,8 @@
+import time
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 import itertools
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, QTableWidgetItem, QTabWidget, QPushButton
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, QTableWidgetItem, QTabWidget, QPushButton, QMessageBox, QFileDialog
     
 from models.report_model import ReportModel
 from models.task_model import TaskModel
@@ -215,4 +216,14 @@ class ManyToManyPage(QWidget):
                 if self.distance_matrix[i][j] <= self.threshold:
                     file_ids.add(self.ids[i])
                     file_ids.add(self.ids[j])
-        print(file_ids)     
+        # print(file_ids)
+        if not file_ids:
+            QMessageBox.warning(self, 'Warning', 'No files to export.', QMessageBox.Ok)
+            return
+        file_name = f"{time.time()}.zip"
+        packpath, _ = QFileDialog.getSaveFileName(self, "代码导出", f"./{file_name}", "Zip (*.zip)")
+        if not packpath:
+            return
+        _, pack_content = self.api_client.download_multiple_files(file_ids)
+        with open(packpath, 'wb') as f:
+            f.write(pack_content)

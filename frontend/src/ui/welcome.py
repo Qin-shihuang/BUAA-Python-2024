@@ -455,7 +455,6 @@ class WelcomePage(QWidget):
             signal = start_progress_widget("Checking...", len(file_ids) * (len(file_ids) - 1) // 2)
             _, task_str = self.api_client.many_to_many_check(task_name, file_ids, signal)
             signal.emit(-1)
-          # self.progress_window.signal.connect(lambda progress: self.progress_window.update_progress(99))
 
         if _ != ErrorCode.SUCCESS:
             QMessageBox.critical(self, 'Error', 'Failed to start check!')
