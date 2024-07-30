@@ -111,6 +111,7 @@ class ManyToManyPage(QWidget):
         self.table_widget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.table_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table_widget.cellDoubleClicked.connect(self._on_table_row_selected)
+        self.table_widget.setStyleSheet("selection-background-color: #A3DFF5")
         
     
     def init_task(self, task_name, task: TaskModel):
