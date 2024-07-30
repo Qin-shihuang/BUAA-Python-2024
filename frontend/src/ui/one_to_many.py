@@ -343,9 +343,9 @@ class OneToManyPage(QWidget):
             else:
                 QMessageBox.critical(self, 'Error', 'Failed to get file!')
         else:
-            with open(f'cache/files/file_{file_id}.py', 'r') as f:
+            with open(f'cache/files/file_{file_id}.py', 'r', encoding='utf-8') as f:
                 file_content = f.read()
-            with open(filepath, 'w') as f:
+            with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(file_content)
 
     def is_float(self, string):

@@ -341,7 +341,7 @@ class WelcomePage(QWidget):
                     f.write(file_content)
             else:
                 QMessageBox.critical(self, 'Error', 'Failed to get file!')
-        with open(f'cache/files/file_{file_id}.py', 'r') as f:
+        with open(f'cache/files/file_{file_id}.py', 'r', encoding='utf-8') as f:
             content = f.read()
         self.code_editor.set_text(content)
         self.code_editor.show()
