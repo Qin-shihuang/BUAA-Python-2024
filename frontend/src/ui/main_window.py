@@ -109,7 +109,6 @@ class MainWindow(QMainWindow):
         self.login_window.show()
 
     def switch_to_history_page(self):
-        self.welcome_page.task_name_label.setStyleSheet("color: black")
         self.welcome_page.file_label.setStyleSheet("color: black")
         self.welcome_page.mode_select_label.setStyleSheet("color: black")
         self.welcome_page.target_file_label.setStyleSheet("color: black")

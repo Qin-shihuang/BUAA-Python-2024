@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import sys
 from PyQt5.QtCore import Qt, QDateTime, QFileInfo, pyqtSignal, QRect, QSize, QPoint
@@ -195,12 +196,8 @@ class WelcomePage(QWidget):
         return 'Task_' + str(year) + '-' + str(month) + '-' + str(day) + '_' + time
 
     def get_current_time(self):
-        datetime = QDateTime.currentDateTime()
-        time = list(datetime.toString().split())[3]
-        year = datetime.date().year()
-        month = datetime.date().month()
-        day = datetime.date().day()
-        return str(year) + '-' + str(month) + '-' + str(day) + ' ' + time
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        return current_time
 
     def toggle_current_checkbox(self):
         item = self.file_table.item(self.file_table.currentRow(), 0)
@@ -235,7 +232,9 @@ class WelcomePage(QWidget):
                 size_str = f"{size / 1024:.2f} KB"
             else:
                 size_str = f"{size / 1024 / 1024:.2f} MB"
-            self.file_table.setItem(row, 1, QTableWidgetItem(size_str))
+            size_item = QTableWidgetItem(size_str)
+            size_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            self.file_table.setItem(row, 1, size_item)
             self.file_table.setItem(row, 2, QTableWidgetItem(file_info[3]))
             self.file_table.setItem(row, 3, QTableWidgetItem(file_info[1]))
             self.file_table.setItem(row, 5, QTableWidgetItem(str(file_info[0])))
@@ -284,10 +283,12 @@ class WelcomePage(QWidget):
                 size_str = f"{size / 1024:.2f} KB"
             else:
                 size_str = f"{size / 1024 / 1024:.2f} MB"
-            self.file_table.setItem(row, 1, QTableWidgetItem(size_str))
+            size_item = QTableWidgetItem(size_str)
+            size_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            self.file_table.setItem(row, 1, size_item)
             self.file_table.setItem(row, 2, QTableWidgetItem(current_time))
             self.file_table.setItem(row, 3, QTableWidgetItem(info.filePath()))
-            
+
             widget = QWidget()
             widget_layout = QHBoxLayout()
 
