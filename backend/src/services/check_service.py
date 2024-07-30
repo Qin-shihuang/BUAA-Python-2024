@@ -1,3 +1,5 @@
+import os
+
 from config import DB_NAME
 from models.task_model import TaskModel
 from models.report_model import ReportModel
@@ -15,6 +17,10 @@ class CheckService:
             cls._instance = super().__new__(cls)
             cls._instance.db_service = DatabaseService(DB_NAME)
             cls._instance.storage_service = StorageService()
+            if not os.path.exists('report'):
+                os.makedirs('report')
+            if not os.path.exists('task'):
+                os.makedirs('task')
         return cls._instance
     
     def __del__(self):
