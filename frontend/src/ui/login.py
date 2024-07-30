@@ -154,9 +154,6 @@ class LoginWindow(QWidget):
         self.register_password_repeat_input.focusOutEvent = self.register_password_repeat_lost_focus
         self.update_password_requirements()
         
-        self.login_username_input.setText("a123")
-        self.login_password_input.setText("Aa123456")
-        
     def center(self):
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
