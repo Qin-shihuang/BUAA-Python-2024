@@ -2,6 +2,8 @@ import os
 import csv
 import pandas as pd
 
+from utils.api_client import ApiClient
+
 class InfoContainer:
     _instance = None
 
@@ -16,6 +18,7 @@ class InfoContainer:
             return
         super().__init__()
         self._initiated = True
+        self.api_client = ApiClient()
 
         if not os.path.exists('cache'):
             os.makedirs('cache')
@@ -38,12 +41,24 @@ class InfoContainer:
         return self.get_file_info(file_id)[0]
     
     def get_file_content(self, file_id):
-        with open(f'cache/files/file_{file_id}.py', 'r', encoding='utf-8') as f:
-            return f.read()
-        
+        try:
+            with open(f'cache/files/file_{file_id}.py', 'r', encoding='utf-8') as f:
+                return f.read()
+        except FileNotFoundError:
+            _, file_content = self.api_client.download_file(file_id)
+            with open(f'cache/files/file_{file_id}.py', 'wb') as f:
+                f.write(file_content)
+            return file_content.decode('utf-8')
+    
     def get_report(self, report_id):
-        with open(f'cache/reports/report_{report_id}.json', 'r') as f:
-            return f.read()
+        try:
+            with open(f'cache/reports/report_{report_id}.json', 'r') as f:
+                return f.read()
+        except FileNotFoundError:
+            _, report_content = self.api_client.GetReport(report_id)
+            with open(f'cache/reports/report_{report_id}.json', 'w') as f:
+                f.write(report_content)
+            return report_content
         
     def update_report(self,  report_id, new_report):
         with open(f'cache/reports/report_{report_id}.json', 'w') as f:
