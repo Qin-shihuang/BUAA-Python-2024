@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
     QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
     QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
 from models.task_model import TaskModel
+from ui.many_to_many import ManyToManyPage
 from ui.one_to_many import OneToManyPage
 from utils.error_codes import ErrorCode
 from utils.api_client import ApiClient
@@ -16,7 +17,7 @@ class HistoryPage(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("History")
+        self.setWindowTitle("History Tasks")
         # self.resize(900, 600)
         # self.center()
         self.api_client = ApiClient()
@@ -77,7 +78,7 @@ class HistoryPage(QWidget):
         self.setLayout(layout)
 
         self.history_widget = QWidget()
-        history_title_label = QLabel('<p style="color: green">历史查重任务</p>')
+        history_title_label = QLabel('<p style="color: green">History Tasks</p>')
         history_title_label.setFont(QFont('Arial', 20, QFont.Bold))
 
         history_layout = QVBoxLayout()
@@ -87,7 +88,7 @@ class HistoryPage(QWidget):
         self.task_table = QTableWidget()
         self.task_table.setColumnCount(7)
         self.task_table.setHorizontalHeaderLabels(
-            ['任务ID', '任务名称', '任务类型', '目标文件', '数量', '任务提交时间', '查看'])
+            ['Task ID', 'Name', 'Mode', 'Target File', 'Amount', 'Created at', 'View'])
         self.task_table.verticalHeader().setVisible(False)
         self.task_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.task_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -99,12 +100,10 @@ class HistoryPage(QWidget):
         self.task_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
         self.task_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeToContents)
         self.task_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        # self.task_table.setColumnHidden(0, True)
+        self.task_table.setColumnHidden(0, True)
 
         self.task_table.cellDoubleClicked.connect(self.view_task)
         history_layout.addWidget(self.task_table)
-
-        # self.demo()
 
         return_layout = QHBoxLayout()
         return_layout.addStretch(1)
@@ -142,7 +141,7 @@ class HistoryPage(QWidget):
         self.task_table.setRowCount(0)
         status, tasks = self.api_client.GetTaskList()
         if status != ErrorCode.SUCCESS:
-            QMessageBox.critical(self, 'Error', 'Failed to get history tasks')
+            QMessageBox.critical(self, 'Error', f'Failed to get history tasks: {ErrorCode.get_error_message(status)}')
             return
         for task in tasks:
             row = self.task_table.rowCount()
@@ -179,46 +178,44 @@ class HistoryPage(QWidget):
         _, task_str = self.api_client.GetTask(task_id)
         
         if _ != ErrorCode.SUCCESS:
-            QMessageBox.critical(self, 'Error', 'Failed to get task!')
+            QMessageBox.critical(self, 'Error', f'Failed to get task: {ErrorCode.get_error_message(_)}')
             return
         task = TaskModel.fromJson(task_str)
 
         for file_id in task.fileIds:
-            if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+            if not os.path.exists(f'cache/files/file_{file_id}.py'):
                 _, file_content = self.api_client.download_file(file_id)
                 if _ == ErrorCode.SUCCESS:
-                    with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
+                    with open(f'cache/files/file_{file_id}.py', 'wb') as f:
                         f.write(file_content)
                 else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
+                    QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
         
         for report_id in task.reportIds:
-            if not os.path.exists(f'src/cache/reports/report_{report_id}.json'):
+            if not os.path.exists(f'cache/reports/report_{report_id}.json'):
                 _, report_content = self.api_client.GetReport(report_id)
                 if _ == ErrorCode.SUCCESS:
-                    with open(f'src/cache/reports/report_{report_id}.json', 'w') as f:
+                    with open(f'cache/reports/report_{report_id}.json', 'w') as f:
                         f.write(report_content)
                 else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get report!')
+                    QMessageBox.critical(self, 'Error', f'Failed to get report: {ErrorCode.get_error_message(_)}')
 
         if task.taskType == 0:
             main_file_id = task.mainFileId
-            if not os.path.exists(f'src/cache/files/file_{main_file_id}.py'):
+            if not os.path.exists(f'cache/files/file_{main_file_id}.py'):
                 _, file_content = self.api_client.download_file(main_file_id)
                 if _ == ErrorCode.SUCCESS:
-                    with open(f'src/cache/files/file_{main_file_id}.py', 'wb') as f:
+                    with open(f'cache/files/file_{main_file_id}.py', 'wb') as f:
                         f.write(file_content)
                 else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
+                    QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
         
         if self.task_table.item(row, 2).text() == 'one-to-many':
             self.check_page = OneToManyPage()
-            self.check_page.init_task(self.task_table.item(row, 1).text(), task)
-            self.check_page.show()
         else:
-            pass
-        # switch to check page
-            
+            self.check_page = ManyToManyPage()
+        self.check_page.init_task(self.task_table.item(row, 1).text(), task)
+        self.check_page.show()
 
 
 if __name__ == "__main__":

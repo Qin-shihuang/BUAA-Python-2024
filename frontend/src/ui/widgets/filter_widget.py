@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import Qt, QRectF, pyqtSignal, QObject
+from PyQt5.QtCore import Qt, QRectF, pyqtSignal, QObject, QSize
 from PyQt5.QtGui import QPainter, QColor, QBrush, QPen, QPainterPath
 
 class FilterWidget(QWidget):
@@ -26,6 +26,8 @@ class FilterWidget(QWidget):
     def update_data(self, values):
         self.values = values
         self.update()
+        if self.signal:
+            self.signal.emit(self.threshold, self._filter_statistics())
         
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -102,6 +104,9 @@ class FilterWidget(QWidget):
             return len([v for _, _, v in self.values if v <= self.threshold])
         else:
             return len([v for _, _, v in self.values if v > self.threshold])
+    
+    def SizeHint(self):
+        return QSize(400, 100)
 
 class ThresholdChangedSignal(QObject):
     update = pyqtSignal(float, int)

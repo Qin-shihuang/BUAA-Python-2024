@@ -1,3 +1,7 @@
+from datetime import datetime
+
+import pytz
+from config import TIME_ZONE
 from generated import plagiarism_detection_pb2 as pb
 from generated import plagiarism_detection_pb2_grpc as pb_grpc
 
@@ -17,10 +21,10 @@ class ReportServiceServicer(pb_grpc.ReportServiceServicer):
             return pb.GetTaskListResponse(status=ErrorCode.UNAUTHORIZED.value)
         task_previews = []
         for task in self.report_service.get_task_list(user_id):
-            if task[1] == 0:
-                task_previews.append(pb.TaskPreview(id=task[0], task_name=task[1], type=task[2], main_file_id=task[3], file_count=task[4], created_at=task[5]))
+            if task[2] == 0:
+                task_previews.append(pb.TaskPreview(id=task[0], task_name=task[1], type=task[2], main_file_id=task[3], file_count=task[4], created_at=datetime.strptime(task[5], "%Y-%m-%d %H:%M:%S").replace(tzinfo=pytz.utc).astimezone(pytz.timezone(TIME_ZONE)).strftime("%Y-%m-%d %H:%M:%S")))
             else:
-                task_previews.append(pb.TaskPreview(id=task[0], task_name=task[1], type=task[2], file_count=task[4], created_at=task[5]))
+                task_previews.append(pb.TaskPreview(id=task[0], task_name=task[1], type=task[2], file_count=task[4], created_at=datetime.strptime(task[5], "%Y-%m-%d %H:%M:%S").replace(tzinfo=pytz.utc).astimezone(pytz.timezone(TIME_ZONE)).strftime("%Y-%m-%d %H:%M:%S")))
         return pb.GetTaskListResponse(status=ErrorCode.SUCCESS.value, task_previews=task_previews)
     
     def GetTask(self, request, context):
@@ -34,7 +38,7 @@ class ReportServiceServicer(pb_grpc.ReportServiceServicer):
             return pb.GetTaskResponse(status=ErrorCode.TASK_NOT_FOUND.value)
         if owner_id != user_id:
             return pb.GetTaskResponse(status=ErrorCode.UNAUTHORIZED.value)
-        file_path = f"tasks/{task_id}.json"
+        file_path = f"task/{task_id}.json"
         try:
             with open(file_path, "r") as f:
                 task = f.read()
@@ -53,7 +57,7 @@ class ReportServiceServicer(pb_grpc.ReportServiceServicer):
             return pb.GetReportResponse(status=ErrorCode.REPORT_NOT_FOUND.value)
         if owner_id != user_id:
             return pb.GetReportResponse(status=ErrorCode.UNAUTHORIZED.value)
-        file_path = f"reports/{report_id}.json"
+        file_path = f"report/{report_id}.json"
         try:
             with open(file_path, "r") as f:
                 report = f.read()
@@ -73,7 +77,7 @@ class ReportServiceServicer(pb_grpc.ReportServiceServicer):
             return pb.UpdateReportResponse(status=ErrorCode.REPORT_NOT_FOUND.value)
         if owner_id != user_id:
             return pb.UpdateReportResponse(status=ErrorCode.UNAUTHORIZED.value)
-        file_path = f"reports/{report_id}.json"
+        file_path = f"report/{report_id}.json"
         try:
             with open(file_path, "w") as f:
                 f.write(report)

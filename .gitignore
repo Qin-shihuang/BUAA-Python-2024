@@ -3,9 +3,14 @@ venv/
 # all __pycache__ directories
 __pycache__/
 
-frontend/download/
+test/
+
+frontend/cache/
 backend/data/
 backend/uploads/
+backend/report/
+backend/task/
+
 
 .vscode/
 .idea/

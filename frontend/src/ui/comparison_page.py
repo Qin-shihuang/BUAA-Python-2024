@@ -70,14 +70,12 @@ class ComparisonPage(QWidget):
         self.show_action.triggered.connect(self._on_show_changed)
         self.flag_action.triggered.connect(self._on_flag_button_clicked)
         self.clear_action.triggered.connect(self._on_clear_button_clicked)
-        self.submit_action.triggered.connect(self._on_submit_button_clicked)
-        
-        self.setup(18)
-        
+        self.submit_action.triggered.connect(self._on_submit_button_clicked)   
         
     def setup(self, reportId):
         self.controller.set_report(reportId)
         
+        self.setWindowTitle("Comparison: {} vs {}".format(self.controller.file1_name, self.controller.file2_name))
         self.leftCE.set_text(self.controller.left_content)
         self.rightCE.set_text(self.controller.right_content)
         

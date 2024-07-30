@@ -35,10 +35,10 @@ class CheckServiceServicer(pb_grpc.CheckServiceServicer):
         def generate_responses():
             yield pb.OneToManyCheckResponse(status=ErrorCode.SUCCESS.value)
             for file_id in file_ids:
-                self.check_service.do_single_check(task, main_file_id, file_id)
+                self.check_service.do_single_check(task, user_id, main_file_id, file_id)
                 yield pb.OneToManyCheckResponse(empty=pb.Empty())
             self.check_service.finish_task(task)
-            yield pb.OneToManyCheckResponse(task=task.taskId)
+            yield pb.OneToManyCheckResponse(task=task.toJson())
         return generate_responses()
             
     def ManyToManyCheck(self, request, context):
@@ -47,7 +47,7 @@ class CheckServiceServicer(pb_grpc.CheckServiceServicer):
         if not auth_status:
             return pb.ManyToManyCheckResponse(status=ErrorCode.UNAUTHORIZED.value)
         file_ids = []
-        task_name = request.task_name
+        task_name = request.task_name   
         for file_id in request.file_ids:
             file_status, owner_id = self.storage_service.get_file_owner(file_id)
             if not file_status:
@@ -61,9 +61,11 @@ class CheckServiceServicer(pb_grpc.CheckServiceServicer):
             matrix = [[0.0 for _ in range(len(file_ids))] for _ in range(len(file_ids))]
             for i in range(len(file_ids)):
                 for j in range(i + 1, len(file_ids)):
-                    matrix[i][j] = self.check_service.do_single_check(task, user_id, file_ids[i], file_ids[j])
+                    result = self.check_service.do_single_check(task, user_id, file_ids[i], file_ids[j])
+                    matrix[i][j] = result
+                    matrix[j][i] = result
                     yield pb.ManyToManyCheckResponse(empty=pb.Empty())
-            self.check_service.finish_task(task.taskId, file_ids=file_ids, matrix=matrix)
-            yield pb.ManyToManyCheckResponse(task=task.taskId)
+            self.check_service.finish_task(task, file_ids=file_ids, matrix=matrix)
+            yield pb.ManyToManyCheckResponse(task=task.toJson())
         return generate_responses()
         

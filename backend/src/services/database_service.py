@@ -25,7 +25,7 @@ class DatabaseService:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("PRAGMA foreign_keys = ON")
-        
+
         while True:
             query, result_queue, args = self.queue.get()
             if query is None:

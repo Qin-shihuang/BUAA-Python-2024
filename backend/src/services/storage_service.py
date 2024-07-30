@@ -6,6 +6,7 @@ import zipfile
 
 from config import DB_NAME, UPLOAD_FOLDER
 from services.database_service import DatabaseService
+from utils.pyac.submission import Submission
 
 class StorageService:
     _instance = None
@@ -14,10 +15,10 @@ class StorageService:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance.db_service = DatabaseService(DB_NAME)
+            cls._instance.submissions = {}
             if not os.path.exists(UPLOAD_FOLDER):
                 os.makedirs(UPLOAD_FOLDER)
         return cls._instance
-    
         
     def __del__(self):
         self.db_service.close()
@@ -48,10 +49,16 @@ class StorageService:
             print(e)
             return False, -1
     
-    def get_file_owner(self, fileId):
-        query = "SELECT (uploader_id) FROM uploaded_files WHERE id = ?"
-        args = (fileId,)
-        result = self.db_service.query(query, args)
+    def get_file_owner(self, fileId, deleted_ok=True):
+        result = -1
+        if deleted_ok:
+            query = "SELECT (uploader_id) FROM uploaded_files WHERE id = ?"
+            args = (fileId,)
+            result = self.db_service.query(query, args)
+        else:
+            query = "SELECT (uploader_id) FROM uploaded_files WHERE id = ? AND deleted = FALSE"
+            args = (fileId,)
+            result = self.db_service.query(query, args)
         if not result:
             return False, None
         return True, result[0][0]
@@ -72,16 +79,7 @@ class StorageService:
     
     def delete_file(self, fileId):
         try:
-            query = "SELECT (storage_name) FROM uploaded_files WHERE id = ?"
-            args = (fileId,)
-            result = self.db_service.query(query, args)
-            query = "SELECT COUNT(*) FROM uploaded_files WHERE storage_name = ?"
-            args = (result[0][0],)
-            count = self.db_service.query(query, args)[0][0]
-            if count == 1:
-                file_path = os.path.join(UPLOAD_FOLDER, result[0][0])
-                os.remove(file_path)
-            query = "DELETE FROM uploaded_files WHERE id = ?"
+            query = "UPDATE uploaded_files SET deleted = TRUE WHERE id = ?"
             args = (fileId,)
             self.db_service.query(query, args)
             return True
@@ -91,7 +89,7 @@ class StorageService:
         
         
     def get_file_list(self, userId):
-        query = "SELECT id, original_path, size, uploaded_at FROM uploaded_files WHERE uploader_id = ?"
+        query = "SELECT id, original_path, size, uploaded_at, deleted FROM uploaded_files WHERE uploader_id = ?"
         args = (userId,)
         return self.db_service.query(query, args)
         
@@ -108,6 +106,14 @@ class StorageService:
                 z.write(file_path, f"{id}_{original_name}")
         zip_buffer.seek(0)
         return zip_buffer.read()
+    
+    def get_submission(self, file_id):
+        if file_id not in self.submissions:
+            status, content = self.get_file(file_id)
+            if not status:
+                return None
+            self.submissions[file_id] = Submission(content.decode('utf-8').rstrip())
+        return self.submissions[file_id]
     
 def generate_filename(user_id, file_path, content):
     original_extension = file_path.split('.')[-1]

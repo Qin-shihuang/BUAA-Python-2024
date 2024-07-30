@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS user_logins (
     user_id INTEGER NOT NULL,
     login_time DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     success BOOLEAN NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 """,
 """
@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS uploaded_files (
     hash VARCHAR(255) NOT NULL,
     uploader_id INTEGER NOT NULL,
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    FOREIGN KEY (uploader_id) REFERENCES users(id) ON DELETE CASCADE
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
+    FOREIGN KEY (uploader_id) REFERENCES users(id)
 )
 """,
 """
@@ -41,8 +42,8 @@ CREATE TABLE IF NOT EXISTS tasks (
     main_file_id INTEGER,
     file_count INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (main_file_id) REFERENCES uploaded_files(id) ON DELETE CASCADE
+    FOREIGN KEY (owner_id) REFERENCES users(id),
+    FOREIGN KEY (main_file_id) REFERENCES uploaded_files(id)
 );
 """,
 """
@@ -53,9 +54,9 @@ CREATE TABLE IF NOT EXISTS reports (
     file_id2 INTEGER NOT NULL,
     similarity FLOAT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (file_id1) REFERENCES uploaded_files(id) ON DELETE CASCADE,
-    FOREIGN KEY (file_id2) REFERENCES uploaded_files(id) ON DELETE CASCADE
+    FOREIGN KEY (owner_id) REFERENCES users(id),
+    FOREIGN KEY (file_id1) REFERENCES uploaded_files(id),
+    FOREIGN KEY (file_id2) REFERENCES uploaded_files(id)
 
 ); 
 """

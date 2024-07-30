@@ -1,11 +1,15 @@
+from datetime import datetime
+
+import pytz
 from generated import plagiarism_detection_pb2 as pb
 from generated import plagiarism_detection_pb2_grpc as pb_grpc
 
 from services.auth_service import verify_token
 from services.storage_service import StorageService
 
-from config import CHUNK_SIZE
+from config import CHUNK_SIZE, TIME_ZONE
 from utils.error_codes import ErrorCode
+
 class FileServiceServicer(pb_grpc.FileServiceServicer):
     def __init__(self):
         self.storage_service = StorageService()
@@ -44,7 +48,7 @@ class FileServiceServicer(pb_grpc.FileServiceServicer):
         if not auth_status:
             return pb.GetUploadedFileListResponse(status=ErrorCode.UNAUTHORIZED.value)
         try:
-            info_list = [pb.FileInfo(id=id, file_path=file_path, size=size, uploaded_at=uploaded_at) for id, file_path, size, uploaded_at in self.storage_service.get_file_list(user_id)]
+            info_list = [pb.FileInfo(id=id, file_path=file_path, size=size, uploaded_at=datetime.strptime(uploaded_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=pytz.utc).astimezone(pytz.timezone(TIME_ZONE)).strftime("%Y-%m-%d %H:%M:%S"), deleted=deleted) for id, file_path, size, uploaded_at, deleted in self.storage_service.get_file_list(user_id)]
             return pb.GetUploadedFileListResponse(status=ErrorCode.SUCCESS.value, files=info_list)
         except Exception as e:
             return pb.GetUploadedFileListResponse(status=ErrorCode.UNKNOWN_ERROR.value)
@@ -77,7 +81,7 @@ class FileServiceServicer(pb_grpc.FileServiceServicer):
         if not auth_status:
             return pb.DeleteFileResponse(status=ErrorCode.UNAUTHORIZED.value)
         file_id = request.file_id
-        owner_status, owner_id = self.storage_service.get_file_owner(file_id)
+        owner_status, owner_id = self.storage_service.get_file_owner(file_id, deleted_ok=False)
         if not owner_status:
             return pb.DeleteFileResponse(status=ErrorCode.FILE_NOT_FOUND.value)
         elif owner_id != user_id:
