@@ -13,6 +13,7 @@ from ui.widgets.dynamic_checkbox_widget import DynamicCheckboxWidget, CheckboxCh
 from ui.widgets.color_hint_text_widget import ColorHintTextWidget
 
 from utils.api_client import ApiClient
+from utils.error_codes import ErrorCode
 from utils.info_container import InfoContainer
 
 class ManyToManyPage(QWidget):
@@ -107,6 +108,7 @@ class ManyToManyPage(QWidget):
         self.table_widget.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.table_widget.setAlternatingRowColors(True)
         self.table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table_widget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.table_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table_widget.cellDoubleClicked.connect(self._on_table_row_selected)
         
@@ -230,5 +232,7 @@ class ManyToManyPage(QWidget):
         if not packpath:
             return
         _, pack_content = self.api_client.download_multiple_files(file_ids)
+        if _ != ErrorCode.SUCCESS:
+            QMessageBox.critical(self, 'Error', f'{ErrorCode.get_error_message(_)}')
         with open(packpath, 'wb') as f:
             f.write(pack_content)

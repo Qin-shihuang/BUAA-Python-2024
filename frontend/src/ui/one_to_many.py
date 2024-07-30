@@ -341,7 +341,7 @@ class OneToManyPage(QWidget):
                 with open(filepath, 'wb') as f:
                     f.write(file_content)
             else:
-                QMessageBox.critical(self, 'Error', 'Failed to get file!')
+                QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
         else:
             with open(f'cache/files/file_{file_id}.py', 'r', encoding='utf-8') as f:
                 file_content = f.read()
@@ -383,6 +383,8 @@ class OneToManyPage(QWidget):
         if not packpath:
             return
         _, pack_content = self.api_client.download_multiple_files(file_ids)
+        if _ != ErrorCode.SUCCESS:
+            QMessageBox.critical(self, 'Error', f'{ErrorCode.get_error_message(_)}')
         with open(packpath, 'wb') as f:
             f.write(pack_content)
 

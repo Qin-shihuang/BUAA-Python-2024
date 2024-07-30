@@ -114,7 +114,7 @@ class WelcomePage(QWidget):
         self.mode_select_label = QLabel('Checking Mode')
         self.check_mode = None
         one2many_button = QRadioButton('One-to-Many')
-        group_button = QRadioButton('Many-to-Many')
+        group_button = QRadioButton('Many-to-Many (Max 20 files)')
         one2many_button.toggled.connect(self.switch_mode)
         group_button.toggled.connect(self.switch_mode)
         mode_layout = QHBoxLayout()
@@ -212,9 +212,10 @@ class WelcomePage(QWidget):
 
 
     def get_uploaded_files(self):
+        self.info_container.clear_file_info()
         _, file_list = self.api_client.get_uploaded_file_list()
         if _ != ErrorCode.SUCCESS:
-            QMessageBox.critical(self, 'Error', 'Failed to get uploaded files!')
+            QMessageBox.critical(self, 'Error', f'Failed to get uploaded files: {ErrorCode.get_error_message(_)}')
             return
         for file_info in file_list:
             # row = self.file_table.rowCount()
@@ -261,7 +262,7 @@ class WelcomePage(QWidget):
             widget.setLayout(widget_layout)
             widget_layout.setContentsMargins(5, 2, 5, 2)
             self.file_table.setCellWidget(row, 4, widget)
-        self.info_container.update_file_info()
+        # self.info_container.update_file_info()
 
 
     def upload_file(self):
@@ -312,7 +313,7 @@ class WelcomePage(QWidget):
 
             _, file_id = self.api_client.upload_file(file)
             if _ != ErrorCode.SUCCESS:
-                QMessageBox.critical(self, 'Error', 'Failed to upload files!')
+                QMessageBox.critical(self, 'Error', f'Failed to upload files: {ErrorCode.get_error_message(_)}')
                 self.file_table.removeRow(row)
                 return
             self.file_table.setItem(row, 5, QTableWidgetItem(str(file_id)))
@@ -340,7 +341,7 @@ class WelcomePage(QWidget):
                 with open(f'cache/files/file_{file_id}.py', 'wb') as f:
                     f.write(file_content)
             else:
-                QMessageBox.critical(self, 'Error', 'Failed to get file!')
+                QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
         with open(f'cache/files/file_{file_id}.py', 'r', encoding='utf-8') as f:
             content = f.read()
         self.code_editor.set_text(content)
@@ -366,14 +367,16 @@ class WelcomePage(QWidget):
         self.target_file_button.setText('Click to select the target file')
 
     def delete_file_cache(self, file_id):
-        if not os.path.exists(f'cache/files/file_{file_id}.py'):
-            _, file_content = self.api_client.download_file(file_id)
-            if _ == ErrorCode.SUCCESS:
-                with open(f'cache/files/file_{file_id}.py', 'wb') as f:
-                    f.write(file_content)
-            else:
-                QMessageBox.critical(self, 'Error', 'Failed to delete file!')
+        # if not os.path.exists(f'cache/files/file_{file_id}.py'):
+        #     _, file_content = self.api_client.download_file(file_id)
+        #     if _ == ErrorCode.SUCCESS:
+        #         with open(f'cache/files/file_{file_id}.py', 'wb') as f:
+        #             f.write(file_content)
+        #     else:
+        #         QMessageBox.critical(self, 'Error', f'Failed to delete file: {ErrorCode.get_error_message(_)}')
         _ = self.api_client.delete_file(file_id)
+        if _ != ErrorCode.SUCCESS:
+            QMessageBox.critical(self, 'Error', f'Failed to delete file: {ErrorCode.get_error_message(_)}')
     
     def switch_mode(self):
         sender = self.sender()
@@ -389,7 +392,7 @@ class WelcomePage(QWidget):
                 self.target_file_button.hide()
                 self.target_file_label.hide()
                 self.upload_widget.layout().removeItem(self.target_layout)
-        elif sender.text() == 'Many-to-Many':
+        elif sender.text() == 'Many-to-Many (Max 20 files)':
             if sender.isChecked():
                 self.check_mode = 1
 
@@ -428,8 +431,6 @@ class WelcomePage(QWidget):
             self.target_file_label.setStyleSheet("color: red")
             self.error_label.setText('Please select the target file')
             return
-        self.error_label.setStyleSheet("color: green")
-        self.error_label.setText('Success!')
 
         file_ids = []
         cnt = 0
@@ -442,6 +443,14 @@ class WelcomePage(QWidget):
             self.error_label.setText('Please select at least two files')
             return
         
+        if cnt > 20 and self.check_mode == 1:
+            self.error_label.setStyleSheet("color: red")
+            self.error_label.setText('Many-to-Many mode can only select up to 20 files')
+            return
+        
+        self.error_label.setStyleSheet("color: green")
+        self.error_label.setText('Success!')
+
         if self.task_name_input.text() == '':
             task_name = self.get_default_name()
         else:
@@ -463,7 +472,7 @@ class WelcomePage(QWidget):
         self.main_window.show_for_api()
         
         if _ != ErrorCode.SUCCESS:
-            QMessageBox.critical(self, 'Error', 'Failed to start check!')
+            QMessageBox.critical(self, 'Error', f'Failed to start check: {ErrorCode.get_error_message(_)}')
             return
         
         task = TaskModel.fromJson(task_str)
@@ -474,7 +483,7 @@ class WelcomePage(QWidget):
                     with open(f'cache/files/file_{file_id}.py', 'wb') as f:
                         f.write(file_content)
                 else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
+                    QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
         
         for report_id in task.reportIds:
             if not os.path.exists(f'cache/reports/report_{report_id}.json'):
@@ -483,7 +492,7 @@ class WelcomePage(QWidget):
                     with open(f'cache/reports/report_{report_id}.json', 'w') as f:
                         f.write(report_content)
                 else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get report!')
+                    QMessageBox.critical(self, 'Error', f'Failed to get report: {ErrorCode.get_error_message(_)}')
 
         if task.taskType == 0:
             main_file_id = task.mainFileId
@@ -493,7 +502,7 @@ class WelcomePage(QWidget):
                     with open(f'cache/files/file_{main_file_id}.py', 'wb') as f:
                         f.write(file_content)
                 else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
+                    QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
         
         if self.check_mode == 0:
             self.check_page = OneToManyPage()

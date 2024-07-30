@@ -141,7 +141,7 @@ class HistoryPage(QWidget):
         self.task_table.setRowCount(0)
         status, tasks = self.api_client.GetTaskList()
         if status != ErrorCode.SUCCESS:
-            QMessageBox.critical(self, 'Error', 'Failed to get history tasks')
+            QMessageBox.critical(self, 'Error', f'Failed to get history tasks: {ErrorCode.get_error_message(status)}')
             return
         for task in tasks:
             row = self.task_table.rowCount()
@@ -178,7 +178,7 @@ class HistoryPage(QWidget):
         _, task_str = self.api_client.GetTask(task_id)
         
         if _ != ErrorCode.SUCCESS:
-            QMessageBox.critical(self, 'Error', 'Failed to get task!')
+            QMessageBox.critical(self, 'Error', f'Failed to get task: {ErrorCode.get_error_message(_)}')
             return
         task = TaskModel.fromJson(task_str)
 
@@ -189,7 +189,7 @@ class HistoryPage(QWidget):
                     with open(f'cache/files/file_{file_id}.py', 'wb') as f:
                         f.write(file_content)
                 else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
+                    QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
         
         for report_id in task.reportIds:
             if not os.path.exists(f'cache/reports/report_{report_id}.json'):
@@ -198,7 +198,7 @@ class HistoryPage(QWidget):
                     with open(f'cache/reports/report_{report_id}.json', 'w') as f:
                         f.write(report_content)
                 else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get report!')
+                    QMessageBox.critical(self, 'Error', f'Failed to get report: {ErrorCode.get_error_message(_)}')
 
         if task.taskType == 0:
             main_file_id = task.mainFileId
@@ -208,7 +208,7 @@ class HistoryPage(QWidget):
                     with open(f'cache/files/file_{main_file_id}.py', 'wb') as f:
                         f.write(file_content)
                 else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
+                    QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
         
         if self.task_table.item(row, 2).text() == 'one-to-many':
             self.check_page = OneToManyPage()

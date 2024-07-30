@@ -24,9 +24,9 @@ class InfoContainer:
             os.makedirs('cache')
             os.makedirs('cache/files')
             os.makedirs('cache/reports')
-            with open("cache/file_info.csv", "a", newline='') as csvfile:
-                writer = csv.writer(csvfile)
-                writer.writerow(["id", "name", "size", "path", "time"])
+            # with open("cache/file_info.csv", "a", newline='') as csvfile:
+            #     writer = csv.writer(csvfile)
+            #     writer.writerow(["id", "name", "size", "path", "time"])
 
     def add_file_info(self, file_id, file_name, file_size, file_path, file_time):
         with open("cache/file_info.csv", "a", newline='', encoding='utf-8') as csvfile:
@@ -69,3 +69,8 @@ class InfoContainer:
         df = df[~df.index.duplicated()]
         with open(f'cache/file_info.csv', 'w', encoding='utf-8') as f:
             f.write(df.to_csv(lineterminator="\n"))
+
+    def clear_file_info(self):
+        with open("cache/file_info.csv", "w", newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow(["id", "name", "size", "path", "time"])
