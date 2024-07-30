@@ -7,15 +7,17 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
     QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
     QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
 from models.task_model import TaskModel
+from ui.many_to_many import ManyToManyPage
 from ui.one_to_many import OneToManyPage
 from ui.widgets.code_editor_widget import CodeEditor
+from ui.widgets.progress_widget import ProgressSignal, ProgressWidget, start_progress_widget
 from utils.error_codes import ErrorCode
 from utils.api_client import ApiClient
 from utils.info_container import InfoContainer
 from ui.login import LoginWindow
 
 class WelcomePage(QWidget):
-    def __init__(self):
+    def __init__(self, main_window):
         super().__init__()
 
         self.setWindowTitle("Welcome")
@@ -27,6 +29,7 @@ class WelcomePage(QWidget):
         self.code_editor = CodeEditor()
         self.code_editor.set_editable(False)
         self.code_editor.resize(800, 600)
+        self.main_window = main_window
 
         self.setStyleSheet("""
             QWidget {
@@ -85,26 +88,22 @@ class WelcomePage(QWidget):
         self.upload_widget = QWidget()
         layout.addWidget(self.upload_widget)
 
-        title_label = QLabel('<p style="color: green">上传待查代码</p>')
+        title_label = QLabel('<p style="color: green">New Task</p>')
         title_label.setFont(QFont('Arial', 20, QFont.Bold))
 
-        self.task_name_label = QLabel('查重任务名')
+        self.task_name_label = QLabel('Task Name')
         self.task_name_input = QLineEdit()
-        self.task_name_input.focusOutEvent = self.task_name_lost_focus
-        self.task_name_input.setPlaceholderText('请输入本次查重任务名称')
-        self.task_name_input.setText(self.get_default_name())
-        reset_task_name_button = QPushButton('重置任务名')
-        reset_task_name_button.clicked.connect(lambda: self.task_name_input.setText(self.get_default_name()))
+        self.task_name_input.setPlaceholderText('Please enter the task name (Default: Task_Date_Time)')
+        # self.task_name_input.setText(self.get_default_name())
         task_name_layout = QHBoxLayout()
         task_name_layout.addWidget(self.task_name_label)
         task_name_layout.addWidget(self.task_name_input)
-        task_name_layout.addWidget(reset_task_name_button)
 
-        self.file_label = QLabel('上传待查文件')
-        self.upload_file_button = QPushButton('上传文件')
+        self.file_label = QLabel('Upload/Delete Files')
+        self.upload_file_button = QPushButton(' Upload Files')
         self.upload_file_button.setIcon(QIcon('assets/Upload.svg'))
         self.upload_file_button.clicked.connect(self.upload_file)
-        delete_file_button = QPushButton('删除已选中文件')
+        delete_file_button = QPushButton(' Clear Selected Files')
         delete_file_button.setIcon(QIcon('assets/del.svg'))
         delete_file_button.clicked.connect(self.clear_selected_files)
         file_layout = QHBoxLayout()
@@ -112,10 +111,10 @@ class WelcomePage(QWidget):
         file_layout.addWidget(self.upload_file_button)
         file_layout.addWidget(delete_file_button)
 
-        self.mode_select_label = QLabel('选择查重模式')
+        self.mode_select_label = QLabel('Checking Mode')
         self.check_mode = None
-        one2many_button = QRadioButton('一对多查重')
-        group_button = QRadioButton('组内自查')
+        one2many_button = QRadioButton('One-to-Many')
+        group_button = QRadioButton('Many-to-Many (Max 20 files)')
         one2many_button.toggled.connect(self.switch_mode)
         group_button.toggled.connect(self.switch_mode)
         mode_layout = QHBoxLayout()
@@ -124,9 +123,9 @@ class WelcomePage(QWidget):
         mode_layout.addWidget(group_button)
 
         self.target_layout = QHBoxLayout()
-        self.target_file_label = QLabel('选择目标文件(仅一对多查重模式)')
+        self.target_file_label = QLabel('Target File (one-to-many mode only)')
 
-        self.target_file_button = QPushButton('点击选择目标文件')
+        self.target_file_button = QPushButton('Click to select the target file')
         self.target_file_button.setStyleSheet("QPushButton::menu-indicator{image:none}")
         self.target_file_button.clicked.connect(self.select_target_file)
         self.target_layout.addWidget(self.target_file_label)
@@ -140,7 +139,7 @@ class WelcomePage(QWidget):
         self.file_table.setHorizontalHeader(CheckBoxHeader())
 
         self.file_table.setColumnCount(6)
-        self.file_table.setHorizontalHeaderLabels(('     名称 ', '大小', '上传时间', '路径', '操作', 'ID'))
+        self.file_table.setHorizontalHeaderLabels(('     Name ', 'Size', 'Uploaded at', 'Path', 'Op', 'ID'))
         self.file_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.file_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.file_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
@@ -153,6 +152,7 @@ class WelcomePage(QWidget):
 
         self.file_table.itemPressed.connect(self.toggle_current_checkbox)
         self.file_table.cellDoubleClicked.connect(self.open_file_click)
+        self.file_table.cellClicked.connect(self.clear_target_file)
 
         start_layout = QHBoxLayout()
         self.error_label = QLabel()
@@ -160,8 +160,8 @@ class WelcomePage(QWidget):
         self.error_label.setStyleSheet("color: red")
         start_layout.addWidget(self.error_label)
         start_layout.addStretch(1)
-        self.history_button = QPushButton('查看历史查重任务')
-        start_button = QPushButton('开始查重')
+        self.history_button = QPushButton('History Tasks')
+        start_button = QPushButton('START')
         start_button.clicked.connect(self.start_check)
         start_layout.addWidget(self.history_button)
         start_layout.addWidget(start_button)
@@ -175,6 +175,10 @@ class WelcomePage(QWidget):
         upload_layout.addLayout(start_layout)
         self.upload_widget.setLayout(upload_layout)
 
+    def clear_target_file(self, row, col):
+        if col == 0:
+            self.target_file_button.setText('Click to select the target file')
+    
     def center(self):
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
@@ -198,30 +202,30 @@ class WelcomePage(QWidget):
         day = datetime.date().day()
         return str(year) + '-' + str(month) + '-' + str(day) + ' ' + time
 
-    def task_name_lost_focus(self, event):
-        if self.task_name_input.text() != '':
-            self.task_name_label.setStyleSheet("color: black")
-            self.error_label.clear()
-
     def toggle_current_checkbox(self):
         item = self.file_table.item(self.file_table.currentRow(), 0)
         if item.checkState() == Qt.Checked:
             item.setCheckState(Qt.Unchecked)
         else:
             item.setCheckState(Qt.Checked)
-        self.target_file_button.setText('点击选择目标文件')
+        self.target_file_button.setText('Click to select the target file')
 
 
     def get_uploaded_files(self):
+        self.info_container.clear_file_info()
         _, file_list = self.api_client.get_uploaded_file_list()
         if _ != ErrorCode.SUCCESS:
-            QMessageBox.critical(self, 'Error', 'Failed to get uploaded files!')
+            QMessageBox.critical(self, 'Error', f'Failed to get uploaded files: {ErrorCode.get_error_message(_)}')
             return
         for file_info in file_list:
-            row = self.file_table.rowCount()
+            # row = self.file_table.rowCount()
+            self.info_container.add_file_info(file_info[0], os.path.basename(file_info[1]), file_info[2], file_info[1], file_info[3])
+            if file_info[4] == 1:
+                continue
+            row = 0
             self.file_table.insertRow(row)
 
-            checkbox = QTableWidgetItem(os.path.basename(file_info[1])) # no need to exist?
+            checkbox = QTableWidgetItem(os.path.basename(file_info[1]))
             checkbox.setCheckState(Qt.Unchecked)
             self.file_table.setItem(row, 0, checkbox)
             size = file_info[2]
@@ -258,14 +262,16 @@ class WelcomePage(QWidget):
             widget.setLayout(widget_layout)
             widget_layout.setContentsMargins(5, 2, 5, 2)
             self.file_table.setCellWidget(row, 4, widget)
+        # self.info_container.update_file_info()
 
 
     def upload_file(self):
-        self.files, _ = QFileDialog.getOpenFileNames(self, "请选择待查重代码", "./", "Python (*.py)")
+        self.files, _ = QFileDialog.getOpenFileNames(self, "Upload Files", "./", "Python (*.py)")
         current_time = self.get_current_time()
         for file in self.files:
             info = QFileInfo(file)
-            row = self.file_table.rowCount()
+            # row = self.file_table.rowCount()
+            row = 0
             self.file_table.insertRow(row)
 
             checkbox = QTableWidgetItem(info.fileName())
@@ -307,7 +313,7 @@ class WelcomePage(QWidget):
 
             _, file_id = self.api_client.upload_file(file)
             if _ != ErrorCode.SUCCESS:
-                QMessageBox.critical(self, 'Error', 'Failed to upload files!')
+                QMessageBox.critical(self, 'Error', f'Failed to upload files: {ErrorCode.get_error_message(_)}')
                 self.file_table.removeRow(row)
                 return
             self.file_table.setItem(row, 5, QTableWidgetItem(str(file_id)))
@@ -329,14 +335,14 @@ class WelcomePage(QWidget):
         self.open_file(file_id)
     
     def open_file(self, file_id):
-        if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+        if not os.path.exists(f'cache/files/file_{file_id}.py'):
             _, file_content = self.api_client.download_file(file_id)
             if _ == ErrorCode.SUCCESS:
-                with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
+                with open(f'cache/files/file_{file_id}.py', 'wb') as f:
                     f.write(file_content)
             else:
-                QMessageBox.critical(self, 'Error', 'Failed to get file!')
-        with open(f'src/cache/files/file_{file_id}.py', 'r') as f:
+                QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
+        with open(f'cache/files/file_{file_id}.py', 'r', encoding='utf-8') as f:
             content = f.read()
         self.code_editor.set_text(content)
         self.code_editor.show()
@@ -346,7 +352,7 @@ class WelcomePage(QWidget):
         y = self.sender().parentWidget().frameGeometry().y()
         row = self.file_table.indexAt(QPoint(x, y)).row()
         if self.file_table.item(row, 0).checkState() == Qt.Checked:
-            self.target_file_button.setText('点击选择目标文件')
+            self.target_file_button.setText('Click to select the target file')
         
         file_id = int(self.file_table.item(row, 5).text())
         self.delete_file_cache(file_id)
@@ -358,23 +364,25 @@ class WelcomePage(QWidget):
                 file_id = int(self.file_table.item(row, 5).text())
                 self.delete_file_cache(file_id)
                 self.file_table.removeRow(row)
-        self.target_file_button.setText('点击选择目标文件')
+        self.target_file_button.setText('Click to select the target file')
 
     def delete_file_cache(self, file_id):
-        if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
-            _, file_content = self.api_client.download_file(file_id)
-            if _ == ErrorCode.SUCCESS:
-                with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
-                    f.write(file_content)
-            else:
-                QMessageBox.critical(self, 'Error', 'Failed to delete file!')
+        # if not os.path.exists(f'cache/files/file_{file_id}.py'):
+        #     _, file_content = self.api_client.download_file(file_id)
+        #     if _ == ErrorCode.SUCCESS:
+        #         with open(f'cache/files/file_{file_id}.py', 'wb') as f:
+        #             f.write(file_content)
+        #     else:
+        #         QMessageBox.critical(self, 'Error', f'Failed to delete file: {ErrorCode.get_error_message(_)}')
         _ = self.api_client.delete_file(file_id)
+        if _ != ErrorCode.SUCCESS:
+            QMessageBox.critical(self, 'Error', f'Failed to delete file: {ErrorCode.get_error_message(_)}')
     
     def switch_mode(self):
         sender = self.sender()
         self.mode_select_label.setStyleSheet("color: black")
         self.error_label.clear()
-        if sender.text() == '一对多查重':
+        if sender.text() == 'One-to-Many':
             if sender.isChecked():
                 self.check_mode = 0
                 self.upload_widget.layout().insertLayout(5, self.target_layout)
@@ -384,7 +392,7 @@ class WelcomePage(QWidget):
                 self.target_file_button.hide()
                 self.target_file_label.hide()
                 self.upload_widget.layout().removeItem(self.target_layout)
-        elif sender.text() == '组内自查':
+        elif sender.text() == 'Many-to-Many (Max 20 files)':
             if sender.isChecked():
                 self.check_mode = 1
 
@@ -403,7 +411,7 @@ class WelcomePage(QWidget):
         if flag:
             menu.exec_(QPoint(QCursor.pos().x(), QCursor.pos().y()))
         else:
-            QMessageBox.warning(self, '提示', '请先选中所有待查文件')
+            QMessageBox.warning(self, 'Prompt', 'Please check all the files to be checked first.')
 
     def set_target_file(self):
         self.target_file_button.setText(self.sender().text())
@@ -411,24 +419,18 @@ class WelcomePage(QWidget):
 
     def start_check(self):
         self.error_label.setStyleSheet("color: red")
-        if self.task_name_input.text() == '':
-            self.task_name_label.setStyleSheet("color: red")
-            self.error_label.setText('任务名不能为空')
-            return
-        elif not self.file_table.rowCount() > 0:
+        if not self.file_table.rowCount() > 0:
             self.file_label.setStyleSheet("color: red")
-            self.error_label.setText('请上传待查文件')
+            self.error_label.setText('Please upload files to be checked')
             return
         elif self.check_mode is None:
             self.mode_select_label.setStyleSheet("color: red")
-            self.error_label.setText('请选择查重模式')
+            self.error_label.setText('Please select the checking mode')
             return
-        elif self.check_mode == 0 and self.target_file_button.text() == '点击选择目标文件':
+        elif self.check_mode == 0 and self.target_file_button.text() == 'Click to select the target file':
             self.target_file_label.setStyleSheet("color: red")
-            self.error_label.setText('请选择目标文件')
+            self.error_label.setText('Please select the target file')
             return
-        self.error_label.setStyleSheet("color: green")
-        self.error_label.setText('Success!')
 
         file_ids = []
         cnt = 0
@@ -438,59 +440,76 @@ class WelcomePage(QWidget):
                 cnt += 1
         if cnt < 2:
             self.error_label.setStyleSheet("color: red")
-            self.error_label.setText('请至少选择两个文件')
+            self.error_label.setText('Please select at least two files')
             return
         
-        if self.check_mode == 0:
+        if cnt > 20 and self.check_mode == 1:
+            self.error_label.setStyleSheet("color: red")
+            self.error_label.setText('Many-to-Many mode can only select up to 20 files')
+            return
+        
+        self.error_label.setStyleSheet("color: green")
+        self.error_label.setText('Success!')
+
+        if self.task_name_input.text() == '':
+            task_name = self.get_default_name()
+        else:
+            task_name = self.task_name_input.text()
+        
+        self.main_window.hide()
+        if self.check_mode == 0:       
+            signal = start_progress_widget("Checking...", len(file_ids))
             main_file = self.target_file_button.text()
             main_file_id = int(self.target_files[int(main_file[:main_file.find(':')])-1])
             file_ids.remove(main_file_id)
-            _, task_str = self.api_client.one_to_many_check(self.task_name_input.text(), main_file_id, file_ids, None) # api signal none!
+            _, task_str = self.api_client.one_to_many_check(task_name, main_file_id, file_ids, signal)
+            signal.emit(-1)
         else:
-            _, task_str = self.api_client.many_to_many_check(self.task_name_input.text(), file_ids, None) # api signal none!
+            signal = start_progress_widget("Checking...", len(file_ids) * (len(file_ids) - 1) // 2)
+            _, task_str = self.api_client.many_to_many_check(task_name, file_ids, signal)
+            signal.emit(-1)
 
+        self.main_window.show_for_api()
+        
         if _ != ErrorCode.SUCCESS:
-            QMessageBox.critical(self, 'Error', 'Failed to start check!')
+            QMessageBox.critical(self, 'Error', f'Failed to start check: {ErrorCode.get_error_message(_)}')
             return
         
         task = TaskModel.fromJson(task_str)
         for file_id in task.fileIds:
-            if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+            if not os.path.exists(f'cache/files/file_{file_id}.py'):
                 _, file_content = self.api_client.download_file(file_id)
                 if _ == ErrorCode.SUCCESS:
-                    with open(f'src/cache/files/file_{file_id}.py', 'wb') as f:
+                    with open(f'cache/files/file_{file_id}.py', 'wb') as f:
                         f.write(file_content)
                 else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
+                    QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
         
         for report_id in task.reportIds:
-            if not os.path.exists(f'src/cache/reports/report_{report_id}.json'):
+            if not os.path.exists(f'cache/reports/report_{report_id}.json'):
                 _, report_content = self.api_client.GetReport(report_id)
                 if _ == ErrorCode.SUCCESS:
-                    with open(f'src/cache/reports/report_{report_id}.json', 'w') as f:
+                    with open(f'cache/reports/report_{report_id}.json', 'w') as f:
                         f.write(report_content)
                 else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get report!')
+                    QMessageBox.critical(self, 'Error', f'Failed to get report: {ErrorCode.get_error_message(_)}')
 
         if task.taskType == 0:
             main_file_id = task.mainFileId
-            if not os.path.exists(f'src/cache/files/file_{main_file_id}.py'):
+            if not os.path.exists(f'cache/files/file_{main_file_id}.py'):
                 _, file_content = self.api_client.download_file(main_file_id)
                 if _ == ErrorCode.SUCCESS:
-                    with open(f'src/cache/files/file_{main_file_id}.py', 'wb') as f:
+                    with open(f'cache/files/file_{main_file_id}.py', 'wb') as f:
                         f.write(file_content)
                 else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
+                    QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
         
         if self.check_mode == 0:
             self.check_page = OneToManyPage()
-            self.check_page.init_task(self.task_name_input.text(), task)
-            self.check_page.show()
         else:
-            pass
-
-        # switch to check page
-            
+            self.check_page = ManyToManyPage()
+        self.check_page.init_task(task_name, task)
+        self.check_page.show()            
 
 
 class CheckBoxHeader(QHeaderView):

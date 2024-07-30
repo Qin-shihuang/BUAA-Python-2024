@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from PyQt5.QtCore import Qt, QDateTime, QFileInfo, pyqtSignal, QRect, QSize, QPoint, QTimer
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QCursor, QColor
 import PyQt5.QtWidgets
@@ -9,6 +10,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
     QDoubleSpinBox, QProgressBar, QFrame, QScrollArea, QScrollBar, QSizePolicy, QAbstractScrollArea, QSlider
 
 from models.report_model import ReportModel
+from ui.comparison_page import ComparisonPage
 from utils.api_client import ApiClient
 from utils.error_codes import ErrorCode
 from utils.info_container import InfoContainer
@@ -18,12 +20,13 @@ class OneToManyPage(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Welcome")
+        self.setWindowTitle("One to Many Task")
         self.resize(900, 600)
         self.center()
 
         self.api_client = ApiClient()
         self.info_container = InfoContainer()
+        self.comparison_page = ComparisonPage()
         
         self.setStyleSheet("""
             QWidget {
@@ -74,15 +77,37 @@ class OneToManyPage(QWidget):
                border-radius: 5px;
                font-size: 13px;
             }
+            QSlider::groove:horizontal {
+                height: 3px;
+                background: #b0c4de;
+                border-radius: 1px;
+            }
+            QSlider::handle:horizontal {
+                background: white;
+                border: 1px solid #5c5c5c;
+                width: 8px;
+                margin: -4px 0;
+                border-radius: 5px;
+            }
+            QSlider::sub-page:horizontal {
+                background:  #4CAF50;
+                border-radius: 1px;
+                margin: 0px;
+            }
+            QSlider::add-page:horizontal {
+                background: white;
+                border-radius: 1px;
+                margin: 0px;
+            }
         """)
 
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        title_label = QLabel('<p style="color: green">一对多查重</p>')
+        title_label = QLabel('<p style="color: green">One to Many Task</p>')
         title_label.setFont(QFont('Arial', 20, QFont.Bold))
         
-        task_name_label = QLabel('任务名称')
+        task_name_label = QLabel('Task Name')
         task_name_label.setFont(QFont('Arial', 13, QFont.Bold))
         self.task_name_input = QLineEdit()
         self.task_name_input.setReadOnly(True)
@@ -92,13 +117,13 @@ class OneToManyPage(QWidget):
         task_name_layout.addWidget(task_name_label)
         task_name_layout.addWidget(self.task_name_input)
 
-        self.target_file_label = QLabel('目标文件')
+        self.target_file_label = QLabel('Target File')
         self.target_file_label.setFont(QFont('Arial', 13, QFont.Bold))
         self.target_file_input = QLineEdit()
         self.target_file_input.setReadOnly(True)
         self.target_file_input.setFont(QFont('Arial', 10, QFont.Bold))
 
-        self.compare_file_label = QLabel('待比较文件')
+        self.compare_file_label = QLabel('Compared File')
         self.compare_file_label.setFont(QFont('Arial', 13, QFont.Bold))
         self.compare_file_input = QLineEdit()
         self.compare_file_input.setText('Please select a file to compare below.')
@@ -118,11 +143,12 @@ class OneToManyPage(QWidget):
         self.file_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         # self.file_table.setColumnWidth(0, 60)
 
-        self.file_table.setColumnCount(7)
-        self.file_table.setHorizontalHeaderLabels(('名称', '大小', '上传时间', '路径', '相似距离', '导出', 'ID'))
-        # self.file_table.setColumnHidden(6, True)
+        self.file_table.setColumnCount(8)
+        self.file_table.setHorizontalHeaderLabels(('Name', 'Size', 'Uploaded at', 'Path', 'Sim Distance', 'Export', 'FileId', 'ReportId'))
+        self.file_table.setColumnHidden(6, True)
+        self.file_table.setColumnHidden(7, True)
 
-        header_item = QTableWidgetItem('相似距离')
+        header_item = QTableWidgetItem('Sim Distance')
         header_item.setFont(QFont('Arial', 10, QFont.Bold))
         self.file_table.setHorizontalHeaderItem(4, header_item)
         self.file_table.setStyleSheet("selection-background-color: #66BB6A")
@@ -138,12 +164,12 @@ class OneToManyPage(QWidget):
         self.file_table.setAlternatingRowColors(True)
 
         # self.file_table_init()
-        self.compare_file = None
+        self.compare_report = None
         self.file_table.cellClicked.connect(self.select_current_file)
         self.file_table.cellDoubleClicked.connect(self.start_compare)
 
         slider_layout = QHBoxLayout()
-        slider_layout.addWidget(QLabel('                             '))
+        slider_layout.addWidget(QLabel('                                                              '))
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setRange(0, 100)
         self.slider.setValue(1)
@@ -156,14 +182,14 @@ class OneToManyPage(QWidget):
 
         start_layout = QHBoxLayout()
 
-        batch_export_button = QPushButton('批量导出')
+        batch_export_button = QPushButton('Batch Export')
         batch_export_button.clicked.connect(self.export_files)
-        batch_label1 = QLabel('相似距离低于')
+        batch_label = QLabel('Files with Sim Distance below')
         self.lineEdit = QLineEdit()
         self.lineEdit.setFixedSize(60, 30)
         self.lineEdit.setStyleSheet("padding: 1px;")
         self.lineEdit.setFont(QFont('Arial', 10))
-        batch_label2 = QLabel('的代码')
+        self.lineEdit.textChanged.connect(self.updateSlider)
 
         self.lineEdit.installEventFilter(self)
         self.slider.installEventFilter(self)
@@ -173,16 +199,13 @@ class OneToManyPage(QWidget):
         self.timer.timeout.connect(self.checkMousePosition)
 
         start_layout.addWidget(batch_export_button)
-        start_layout.addWidget(batch_label1)
+        start_layout.addWidget(batch_label)
         start_layout.addWidget(self.lineEdit)
-        start_layout.addWidget(batch_label2)
 
         start_layout.addStretch(1)
-        return_button = QPushButton('Return')
         compare_button = QPushButton('Compare')
 
         compare_button.clicked.connect(self.start_compare)
-        start_layout.addWidget(return_button)
         start_layout.addWidget(compare_button)
 
         layout.addWidget(title_label)
@@ -192,19 +215,26 @@ class OneToManyPage(QWidget):
         layout.addLayout(slider_layout)
         layout.addLayout(start_layout)
 
+    def updateSlider(self):
+        try:
+            value = float(self.lineEdit.text())
+            if 0 <= value <= 1:
+                self.slider.setValue(int(value*100))
+        except ValueError:
+            pass
+
     def eventFilter(self, source, event):
         if source == self.lineEdit or source == self.slider:
             if event.type() == event.Enter:
                 self.slider.setVisible(True)
                 self.sliderHovered = True
-                self.timer.stop()  # 停止隐藏定时器
+                self.timer.stop()
             elif event.type() == event.Leave:
                 self.sliderHovered = False
-                self.timer.start(500)  # 设定一个短暂的延迟时间以判断鼠标是否离开组件
+                self.timer.start(500)
         return super(QWidget, self).eventFilter(source, event)
 
     def checkMousePosition(self):
-        # 检查鼠标是否在lineEdit或slider区域内
         if not (self.lineEdit.underMouse() or self.slider.underMouse()):
             self.slider.setVisible(False)
     
@@ -216,8 +246,8 @@ class OneToManyPage(QWidget):
         self.move(frameGm.topLeft())
 
     def file_table_init(self):
-        # TODO: SORT BY SIMILARITY
-        # TODO: color for different similarity level
+        # SORT BY SIMILARITY
+        # color for different similarity level
         self.file_table.setRowCount(5)
         for row in range(self.file_table.rowCount()):
             self.file_table.setItem(row, 0, QTableWidgetItem(f'test{row}.py'))
@@ -246,7 +276,7 @@ class OneToManyPage(QWidget):
         self.task_name_input.setText(task_name)
         self.target_file_input.setText(self.info_container.get_file_name(task.mainFileId))
         for report_id in task.reportIds:
-            with open(f'src/cache/reports/report_{report_id}.json', 'r') as f:
+            with open(f'cache/reports/report_{report_id}.json', 'r') as f:
                 report = ReportModel.fromJson(f.read())
 
             if report.file1Id == task.mainFileId:
@@ -270,6 +300,7 @@ class OneToManyPage(QWidget):
             self.file_table.setItem(row, 2, QTableWidgetItem(file_info[3]))
             self.file_table.setItem(row, 3, QTableWidgetItem(file_info[2]))
             self.file_table.setItem(row, 6, QTableWidgetItem(str(file_id)))
+            self.file_table.setItem(row, 7, QTableWidgetItem(str(report_id)))
 
             sim_item = QTableWidgetItem(f'{report.distance}')
             sim_item.setTextAlignment(Qt.AlignCenter)
@@ -300,65 +331,73 @@ class OneToManyPage(QWidget):
         row = self.file_table.indexAt(QPoint(x, y)).row()
         file_id = int(self.file_table.item(row, 6).text())
         file_name = self.file_table.item(row, 0).text()
-        filepath, _ = QFileDialog.getSaveFileName(self, "代码导出", f"./{file_name}", "Python (*.py)")
+        filepath, _ = QFileDialog.getSaveFileName(self, "Export Files", f"./{file_name}", "Python (*.py)")
 
         if not filepath:
             return
-        if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
+        if not os.path.exists(f'cache/files/file_{file_id}.py'):
             _, file_content = self.api_client.download_file(file_id)
             if _ == ErrorCode.SUCCESS:
                 with open(filepath, 'wb') as f:
                     f.write(file_content)
             else:
-                QMessageBox.critical(self, 'Error', 'Failed to get file!')
+                QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
         else:
-            with open(f'src/cache/files/file_{file_id}.py', 'r') as f:
+            with open(f'cache/files/file_{file_id}.py', 'r', encoding='utf-8') as f:
                 file_content = f.read()
-            with open(filepath, 'w') as f:
+            with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(file_content)
 
+    def is_float(self, string):
+        try:
+            float(string)
+            return True
+        except ValueError:
+            return False
+    
     def export_files(self):
-        thres = self.lineEdit.value()
+        thres = self.lineEdit.text()
+        if self.is_float(thres):
+            thres = float(thres)
+        else:
+            QMessageBox.warning(self, 'Warning', 'Please input a valid number.', QMessageBox.Ok)
+            return
+        if thres < 0 or thres > 1:
+            QMessageBox.warning(self, 'Warning', 'Please input a number between 0 and 1.', QMessageBox.Ok)
+            return
 
         file_ids = []
-        # for row in range(self.file_table.rowCount()):
-        #     similarity = float(self.file_table.item(row, 4).text()[:-1])
-        #     if similarity > thres:
-        #         file_ids.append(int(self.file_table.item(row, 6).text()))
-        #     else:
-        #         break
-        
-        # if not file_ids:
-        #     QMessageBox.warning(self, 'Warning', 'No files to export.', QMessageBox.Ok)
-        #     return
-        
-        dirpath = QFileDialog.getExistingDirectory(self, "代码导出目录", "./", QFileDialog.ShowDirsOnly)
-
-        return
-        for file_id in file_ids:
-            if not os.path.exists(f'src/cache/files/file_{file_id}.py'):
-                _, file_content = self.api_client.download_file(file_id)
-                if _ == ErrorCode.SUCCESS:
-                    with open(dirpath + '/' + self.info_container.get_file_name(file_id), 'wb') as f:
-                        f.write(file_content)
-                else:
-                    QMessageBox.critical(self, 'Error', 'Failed to get file!')
+        for row in range(self.file_table.rowCount()):
+            similarity = float(self.file_table.item(row, 4).text())
+            if similarity <= thres:
+                file_ids.append(int(self.file_table.item(row, 6).text()))
             else:
-                with open(f'src/cache/files/file_{file_id}.py', 'r') as f:
-                    file_content = f.read()
-                with open(dirpath + '/' + self.info_container.get_file_name(file_id), 'w') as f:
-                    f.write(file_content)
-        
+                break
+
+        if not file_ids:
+            QMessageBox.warning(self, 'Warning', 'No files to export.', QMessageBox.Ok)
+            return
+        file_name = f"{time.time()}.zip"
+        # dirpath = QFileDialog.getExistingDirectory(self, "Export Files", "./", QFileDialog.ShowDirsOnly)
+        packpath, _ = QFileDialog.getSaveFileName(self, "Export Files", f"./{file_name}", "Zip (*.zip)")
+        if not packpath:
+            return
+        _, pack_content = self.api_client.download_multiple_files(file_ids)
+        if _ != ErrorCode.SUCCESS:
+            QMessageBox.critical(self, 'Error', f'{ErrorCode.get_error_message(_)}')
+        with open(packpath, 'wb') as f:
+            f.write(pack_content)
 
     def select_current_file(self, row, col):
-        self.compare_file = self.file_table.item(row, 3).text()
         self.compare_file_input.setText(self.file_table.item(row, 0).text())
+        self.compare_report = int(self.file_table.item(row, 7).text())
 
     def start_compare(self):
-        if self.compare_file is None:
+        if self.compare_report is None:
             QMessageBox.warning(self, 'Warning', 'Please select a file to compare first.', QMessageBox.Ok)
         else:
-            print(self.compare_file)
+            self.comparison_page.setup(self.compare_report)
+            self.comparison_page.show()
 
 
 if __name__ == "__main__":

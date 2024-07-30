@@ -1,7 +1,7 @@
 import networkx as nx
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QMouseEvent, QPainter, QColor, QPen
-from PyQt5.QtCore import Qt, QPointF, QRectF, pyqtSignal, QObject
+from PyQt5.QtCore import Qt, QPointF, QRectF, pyqtSignal, QObject, QSize
 from random import randint
 
 
@@ -50,9 +50,9 @@ class GraphWidget(QWidget):
                 if clusters and not clusters[j] in used_clusters:
                     continue
                 if distance_matrix[i][j] <= threshold:
-                    self.graph.add_edge(i, j, weight=distance_matrix[i][j])
+                    self.graph.add_edge(i, j, weight=distance_matrix[i][j], one_minus_weight=1 - distance_matrix[i][j])
         
-        self.pos = nx.spring_layout(self.graph, seed=self.seed, weight='weight', k=1.6)
+        self.pos = nx.spring_layout(self.graph, seed=self.seed, weight='one_minus_weight', k=1.6)
         self._normalize()
         self.update()
 
@@ -92,9 +92,6 @@ class GraphWidget(QWidget):
             elif e == self.highlighted_edge:
                 painter.setPen(QPen(Qt.green, 3))
             else:
-                # normally the weight would be within the range [0, self.threshold]
-                # weight = self.graph[e[0]][e[1]]['weight']
-                # from 0 to 0.5 red -> yellow, from 0.5 to 1 yellow -> green
                 weight = self.graph[e[0]][e[1]]['weight']
                 if weight < 0.5:
                     color = QColor.fromRgbF(1, 2*weight, 0)
@@ -114,7 +111,7 @@ class GraphWidget(QWidget):
             painter.drawEllipse(QPointF(x, y), 6, 6)
 
             if self.labels:
-                painter.drawText(int(x + 10), int(y + 5), self.labels[v])
+                painter.drawText(int(x + 10), int(y + 5), str(self.labels[v]))
                 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -158,6 +155,11 @@ class GraphWidget(QWidget):
         if len(triggerd_edges) > 0:
             return triggerd_edges[0]
         return None
+
+    def sizeHint(self):
+        return QSize(600, 400).expandedTo(super().sizeHint())
+
+
              
 class EdgeSelectedSignal(QObject):
     edgeClicked = pyqtSignal(tuple)

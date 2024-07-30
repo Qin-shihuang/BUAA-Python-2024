@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-// python -m grpc_tools.protoc -I. --python_out=generated/ --grpc_python_out=generated/ plagiarism_detection.proto
+// python -m grpc_tools.protoc -Isrc/ --python_out=src/generated/ --grpc_python_out=src/generated/ plagiarism_detection.proto
 
 package plagiarism_detection;
 
@@ -113,6 +113,7 @@ message FileInfo {
     string file_path = 2;
     int32 size = 3;
     string uploaded_at = 4;
+    bool deleted = 5;
 }
 
 message DownloadFileRequest {

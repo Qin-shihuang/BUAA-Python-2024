@@ -8,6 +8,7 @@ from PyQt5.QtCore import Qt, QDateTime
 from ui.welcome import WelcomePage
 from ui.history import HistoryPage
 from ui.login import LoginWindow
+from utils.api_client import ApiClient
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -16,6 +17,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Welcome")
         self.resize(900, 600)
         self.center()
+        self.api_client = ApiClient()
 
         self.setStyleSheet("""
             QWidget {
@@ -64,7 +66,7 @@ class MainWindow(QMainWindow):
         layout.addLayout(logout_layout)
 
         self.stacked_widget = QStackedWidget()
-        self.welcome_page = WelcomePage()
+        self.welcome_page = WelcomePage(self)
         self.history_page = HistoryPage()
         self.stacked_widget.addWidget(self.welcome_page)
         self.stacked_widget.addWidget(self.history_page)
@@ -82,10 +84,16 @@ class MainWindow(QMainWindow):
 
     def show(self, username):
         super().show()
-        now = self.get_current_time()
-        self.statusBar().showMessage(f'Login time: {now}')
+        _, last_login_time = self.api_client.get_login_history()
+        if len(last_login_time) < 2:
+            self.statusBar().showMessage("Last login time: First login!")
+        else:
+            self.statusBar().showMessage(f'Last login time: {last_login_time[1][0]}')
         self.user_info_label.setText(f"Welcome, {username} ")
         self.welcome_page.get_uploaded_files()
+
+    def show_for_api(self):
+        super().show()
     
     def get_current_time(self):
         datetime = QDateTime.currentDateTime()
