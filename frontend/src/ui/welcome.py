@@ -329,13 +329,15 @@ class WelcomePage(QWidget):
         y = self.sender().parentWidget().frameGeometry().y()
         row = self.file_table.indexAt(QPoint(x, y)).row()
         file_id = int(self.file_table.item(row, 5).text())
-        self.open_file(file_id)
+        file_name = self.file_table.item(row, 0).text()
+        self.open_file(file_id, file_name)
 
     def open_file_click(self, row, col):
         file_id = int(self.file_table.item(row, 5).text())
-        self.open_file(file_id)
+        file_name = self.file_table.item(row, 0).text()
+        self.open_file(file_id, file_name)
     
-    def open_file(self, file_id):
+    def open_file(self, file_id, file_name):
         if not os.path.exists(f'cache/files/file_{file_id}.py'):
             _, file_content = self.api_client.download_file(file_id)
             if _ == ErrorCode.SUCCESS:
@@ -346,6 +348,7 @@ class WelcomePage(QWidget):
         with open(f'cache/files/file_{file_id}.py', 'r', encoding='utf-8') as f:
             content = f.read()
         self.code_editor.set_text(content)
+        self.code_editor.setWindowTitle(file_name)
         self.code_editor.show()
 
     def delete_file(self):
