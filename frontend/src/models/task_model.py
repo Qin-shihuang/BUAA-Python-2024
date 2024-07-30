@@ -7,7 +7,8 @@ class TaskModel:
         taskType,
         mainFileId=None,
         fileIds=[],
-        reportIds=[]
+        reportIds=[],
+        clusters=[]
     ):
         self.taskId = taskId
         # 0: oneToMany, 1: manyToMany
@@ -17,7 +18,8 @@ class TaskModel:
         self.mainFileId = mainFileId
         self.fileIds = fileIds
         self.reportIds = reportIds
-        self.clusters = {}
+        if taskType == 1:
+            self.clusters = clusters
         
     def toJson(self):
         return json.dumps(

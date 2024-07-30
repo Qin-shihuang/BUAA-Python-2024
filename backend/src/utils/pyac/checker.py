@@ -52,223 +52,228 @@ def test_two_files(sub1, sub2, snippet_test=True):
 
     if not snippet_test or distance > 0.6:
         return distance, []
-    
-    content1 = sub1.content.replace('\t', '    ').replace('\r', '')
-    content2 = sub2.content.replace('\t', '    ').replace('\r', '')
+    try:
+        content1 = sub1.content.replace('\t', '    ').replace('\r', '')
+        content2 = sub2.content.replace('\t', '    ').replace('\r', '')
 
-    c1_lines = [s for s in content1.split('\n')]
-    c2_lines = [s for s in content2.split('\n')]
+        c1_lines = [s for s in content1.split('\n')]
+        c2_lines = [s for s in content2.split('\n')]
 
-    # round1 : classes
-    i = 0
-    r1_seg1 = []
-    r2_seg1 = []
-    r3_seg1 = []
-    r4_seg1 = []
-    try_seg1 = []
-    while i < len(c1_lines):
-        snippet = ''
-        if c1_lines[i].startswith('class'):
-            start = i
-            snippet += c1_lines[i] + '\n'
-            i += 1
-            while i < len(c1_lines) and (c1_lines[i].startswith('    ') or c1_lines[i].strip() == ''):
+        # round1 : classes
+        i = 0
+        r1_seg1 = []
+        r2_seg1 = []
+        r3_seg1 = []
+        r4_seg1 = []
+        try_seg1 = []
+        while i < len(c1_lines):
+            snippet = ''
+            if c1_lines[i].startswith('class'):
+                start = i
                 snippet += c1_lines[i] + '\n'
                 i += 1
-            r1_seg1.append((start, snippet))
-        elif c1_lines[i].startswith('def'):
-            start = i
-            snippet += c1_lines[i] + '\n'
-            i += 1
-            while i < len(c1_lines) and (c1_lines[i].startswith('    ') or c1_lines[i].strip() == ''):
-                snippet += c1_lines[i] + '\n'
-                i += 1
-            r2_seg1.append((start, snippet))
-        elif c1_lines[i].startswith('while') or c1_lines[i].startswith('for') or c1_lines[i].startswith('if'):
-            start = i
-            snippet += c1_lines[i] + '\n'
-            i += 1
-            while i < len(c1_lines) and (c1_lines[i].startswith('    ') or c1_lines[i].strip() == ''):
-                snippet += c1_lines[i] + '\n'
-                i += 1
-            r3_seg1.append((start, snippet))
-        elif c1_lines[i].startswith('try'):
-            start = i
-            snippet += c1_lines[i] + '\n'
-            i += 1
-            before_except = True
-            while i < len(c1_lines) and (c1_lines[i].startswith('    ') or c1_lines[i].strip() == '') or c1_lines[i].startswith('except') or c1_lines[i].startswith('finally'):
-                if c1_lines[i].startswith('except') or c1_lines[i].startswith('finally'):
-                    before_except = False
-                if before_except:
+                while i < len(c1_lines) and (c1_lines[i].startswith('    ') or c1_lines[i].strip() == ''):
                     snippet += c1_lines[i] + '\n'
+                    i += 1
+                r1_seg1.append((start, snippet))
+            elif c1_lines[i].startswith('def'):
+                start = i
+                snippet += c1_lines[i] + '\n'
                 i += 1
-            try_seg1.append((start, snippet))
-        else:
-            if c1_lines[i].strip() != '':
-                r4_seg1.append((i, c1_lines[i]))
-            i += 1
-            
-    i = 0
-    r1_seg2 = []
-    r2_seg2 = []
-    r3_seg2 = []
-    r4_seg2 = []
-    try_seg2 = []
-    while i < len(c2_lines):
-        snippet = ''
-        if c2_lines[i].startswith('class'):
-            start = i
-            snippet += c2_lines[i] + '\n'
-            i += 1
-            while i < len(c2_lines) and (c2_lines[i].startswith('    ') or c2_lines[i].strip() == ''):
-                snippet += c2_lines[i] + '\n'
-                i += 1
-            r1_seg2.append((start, snippet))
-        elif c2_lines[i].startswith('def'):
-            start = i
-            snippet += c2_lines[i] + '\n'
-            i += 1
-            while i < len(c2_lines) and (c2_lines[i].startswith('    ') or c2_lines[i].strip() == ''):
-                snippet += c2_lines[i] + '\n'
-                i += 1
-            r2_seg2.append((start, snippet))  
-        elif c2_lines[i].startswith('while') or c2_lines[i].startswith('for') or c2_lines[i].startswith('if'):
-            start = i
-            snippet += c2_lines[i] + '\n'
-            i += 1
-            while i < len(c2_lines) and (c2_lines[i].startswith('    ') or c2_lines[i].strip() == ''):
-                snippet += c2_lines[i] + '\n'
-                i += 1
-            r3_seg2.append((start, snippet))
-        elif c2_lines[i].startswith('try'):
-            start = i
-            snippet += c2_lines[i] + '\n'
-            i += 1
-            before_except = True
-            while i < len(c2_lines) and (c2_lines[i].startswith('    ') or c2_lines[i].strip() == '') or c2_lines[i].startswith('except') or c2_lines[i].startswith('finally'):
-                if c2_lines[i].startswith('except') or c2_lines[i].startswith('finally'):
-                    before_except = False
-                if before_except:
-                    snippet += c2_lines[i] + '\n'
-                i += 1
-            try_seg2.append((start, snippet)) 
-        else:
-            if c2_lines[i].strip() != '':
-                r4_seg2.append((i, c2_lines[i]))
-            i += 1 
-    r1_match, r1_seg1_unmatched, r1_seg2_unmatched = test_two_lists(r1_seg1, r1_seg2)
-    # round2 : functions, in class and top level
-    for i in range(len(r1_seg1_unmatched)):
-        j = 0
-        lines = r1_seg1_unmatched[i][1].split('\n')
-        while j < len(lines):
-            snippet = ''
-            if lines[j].startswith('    def') :
-                start = j + r1_seg1_unmatched[i][0]
-                snippet += lines[j][4:] + '\n'
-                j += 1
-                while j < len(lines) and (lines[j].startswith('        ') or lines[j].strip() == ''):
-                    snippet += lines[j][4:] + '\n'
-                    j += 1
+                while i < len(c1_lines) and (c1_lines[i].startswith('    ') or c1_lines[i].strip() == ''):
+                    snippet += c1_lines[i] + '\n'
+                    i += 1
                 r2_seg1.append((start, snippet))
-            else:
-                j += 1
-    for i in range(len(r1_seg2_unmatched)):
-        j = 0
-        lines = r1_seg2_unmatched[i][1].split('\n')
-        while j < len(lines):
-            snippet = ''
-            if lines[j].startswith('    def'):
-                start = j + r1_seg2_unmatched[i][0]
-                snippet += lines[j][4:] + '\n'
-                j += 1
-                while j < len(lines) and (lines[j].startswith('        ') or lines[j].strip() == ''):
-                    snippet += lines[j][4:] + '\n'
-                    j += 1
-                r2_seg2.append((start, snippet))
-            else:
-                j += 1
-    r2_match, r2_seg1_unmatched, r2_seg2_unmatched = test_two_lists(r2_seg1, r2_seg2)
-    # round3: while, for, if, in function and top level and in try block
-    for i in range(len(r2_seg1_unmatched)):
-        j = 0
-        lines = r2_seg1_unmatched[i][1].split('\n')
-        while j < len(lines):
-            snippet = ''
-            if lines[j].startswith('    while') or lines[j].startswith('    for') or lines[j].startswith('    if'):
-                start = j + r2_seg1_unmatched[i][0]
-                snippet += lines[j][4:] + '\n'
-                j += 1
-                while j < len(lines) and (lines[j].startswith('        ') or lines[j].strip() == ''):
-                    snippet += lines[j][4:] + '\n'
-                    j += 1
+            elif c1_lines[i].startswith('while') or c1_lines[i].startswith('for') or c1_lines[i].startswith('if'):
+                start = i
+                snippet += c1_lines[i] + '\n'
+                i += 1
+                while i < len(c1_lines) and (c1_lines[i].startswith('    ') or c1_lines[i].strip() == ''):
+                    snippet += c1_lines[i] + '\n'
+                    i += 1
                 r3_seg1.append((start, snippet))
+            elif c1_lines[i].startswith('try'):
+                start = i
+                snippet += c1_lines[i] + '\n'
+                i += 1
+                before_except = True
+                while i < len(c1_lines) and (c1_lines[i].startswith('    ') or c1_lines[i].strip() == '' or c1_lines[i].startswith('except') or c1_lines[i].startswith('finally')):
+                    if c1_lines[i].startswith('except') or c1_lines[i].startswith('finally'):
+                        before_except = False
+                    if before_except:
+                        snippet += c1_lines[i] + '\n'
+                    i += 1
+                try_seg1.append((start, snippet))
             else:
-                j += 1
-    for i in range(len(try_seg1)):
-        j = 0
-        lines = try_seg1[i][1].split('\n')
-        while j < len(lines):
+                if c1_lines[i].strip() != '':
+                    r4_seg1.append((i, c1_lines[i]))
+                i += 1
+
+        i = 0
+        r1_seg2 = []
+        r2_seg2 = []
+        r3_seg2 = []
+        r4_seg2 = []
+        try_seg2 = []
+        while i < len(c2_lines):
             snippet = ''
-            if lines[j].startswith('    while') or lines[j].startswith('    for') or lines[j].startswith('    if'):
-                start = j + try_seg1[i][0]
-                snippet += lines[j][4:] + '\n'
-                j += 1
-                while j < len(lines) and (lines[j].startswith('        ') or lines[j].strip() == ''):
+            if c2_lines[i].startswith('class'):
+                start = i
+                snippet += c2_lines[i] + '\n'
+                i += 1
+                while i < len(c2_lines) and (c2_lines[i].startswith('    ') or c2_lines[i].strip() == ''):
+                    snippet += c2_lines[i] + '\n'
+                    i += 1
+                r1_seg2.append((start, snippet))
+            elif c2_lines[i].startswith('def'):
+                start = i
+                snippet += c2_lines[i] + '\n'
+                i += 1
+                while i < len(c2_lines) and (c2_lines[i].startswith('    ') or c2_lines[i].strip() == ''):
+                    snippet += c2_lines[i] + '\n'
+                    i += 1
+                r2_seg2.append((start, snippet))  
+            elif c2_lines[i].startswith('while') or c2_lines[i].startswith('for') or c2_lines[i].startswith('if'):
+                start = i
+                snippet += c2_lines[i] + '\n'
+                i += 1
+                while i < len(c2_lines) and (c2_lines[i].startswith('    ') or c2_lines[i].strip() == ''):
+                    snippet += c2_lines[i] + '\n'
+                    i += 1
+                r3_seg2.append((start, snippet))
+            elif c2_lines[i].startswith('try'):
+                start = i
+                snippet += c2_lines[i] + '\n'
+                i += 1
+                before_except = True
+                while i < len(c2_lines) and (c2_lines[i].startswith('    ') or c2_lines[i].strip() == '' or c2_lines[i].startswith('except') or c2_lines[i].startswith('finally')):
+                    if c2_lines[i].startswith('except') or c2_lines[i].startswith('finally'):
+                        before_except = False
+                    if before_except:
+                        snippet += c2_lines[i] + '\n'
+                    i += 1
+                try_seg2.append((start, snippet)) 
+            else:
+                if c2_lines[i].strip() != '':
+                    r4_seg2.append((i, c2_lines[i]))
+                i += 1 
+        r1_match, r1_seg1_unmatched, r1_seg2_unmatched = test_two_lists(r1_seg1, r1_seg2)
+        # round2 : functions, in class and top level
+        for i in range(len(r1_seg1_unmatched)):
+            j = 0
+            lines = r1_seg1_unmatched[i][1].split('\n')
+            while j < len(lines):
+                snippet = ''
+                if lines[j].startswith('    def') :
+                    start = j + r1_seg1_unmatched[i][0]
                     snippet += lines[j][4:] + '\n'
                     j += 1
-                r3_seg1.append((start, snippet))
-            else:
-                start = j + try_seg1[i][0]
-                if lines[j].strip() != '':
-                    r4_seg1.append((start, lines[j]))
-                j += 1
-    for i in range(len(r2_seg2_unmatched)):
-        j = 0
-        lines = r2_seg2_unmatched[i][1].split('\n')
-        while j < len(lines):
-            snippet = ''
-            if lines[j].startswith('    while') or lines[j].startswith('    for') or lines[j].startswith('    if'):
-                start = j + r2_seg2_unmatched[i][0]
-                snippet += lines[j][4:] + '\n'
-                j += 1
-                while j < len(lines) and (lines[j].startswith('        ') or lines[j].strip() == ''):
-                    snippet += lines[j][8:] + '\n'
+                    while j < len(lines) and (lines[j].startswith('        ') or lines[j].strip() == ''):
+                        snippet += lines[j][4:] + '\n'
+                        j += 1
+                    r2_seg1.append((start, snippet))
+                else:
                     j += 1
-                r3_seg2.append((start, snippet))
-            else:
-                j += 1
-    for i in range(len(try_seg2)):
-        j = 0
-        lines = try_seg2[i][1].split('\n')
-        while j < len(lines):
-            snippet = ''
-            if lines[j].startswith('    while') or lines[j].startswith('    for') or lines[j].startswith('    if'):
-                start = j + try_seg2[i][0]
-                snippet += lines[j][4:] + '\n'
-                j += 1
-                while j < len(lines) and (lines[j].startswith('        ') or lines[j].strip() == ''):
+        for i in range(len(r1_seg2_unmatched)):
+            j = 0
+            lines = r1_seg2_unmatched[i][1].split('\n')
+            while j < len(lines):
+                snippet = ''
+                if lines[j].startswith('    def'):
+                    start = j + r1_seg2_unmatched[i][0]
                     snippet += lines[j][4:] + '\n'
                     j += 1
-                r3_seg2.append((start, snippet))
-            else:
-                start = j + try_seg2[i][0]
-                if lines[j].strip() != '':
-                    r4_seg2.append((start, lines[j]))
-                j += 1
-    r3_match, _, _ = test_two_lists(r3_seg1, r3_seg2)
-    r4_match, _, _ = test_two_lists(r4_seg1, r4_seg2)
+                    while j < len(lines) and (lines[j].startswith('        ') or lines[j].strip() == ''):
+                        snippet += lines[j][4:] + '\n'
+                        j += 1
+                    r2_seg2.append((start, snippet))
+                else:
+                    j += 1
+        r2_match, r2_seg1_unmatched, r2_seg2_unmatched = test_two_lists(r2_seg1, r2_seg2)
+        # round3: while, for, if, in function and top level and in try block
+        for i in range(len(r2_seg1_unmatched)):
+            j = 0
+            lines = r2_seg1_unmatched[i][1].split('\n')
+            while j < len(lines):
+                snippet = ''
+                if lines[j].startswith('    while') or lines[j].startswith('    for') or lines[j].startswith('    if'):
+                    start = j + r2_seg1_unmatched[i][0]
+                    snippet += lines[j][4:] + '\n'
+                    j += 1
+                    while j < len(lines) and (lines[j].startswith('        ') or lines[j].strip() == ''):
+                        snippet += lines[j][4:] + '\n'
+                        j += 1
+                    r3_seg1.append((start, snippet))
+                else:
+                    j += 1
+        for i in range(len(try_seg1)):
+            j = 0
+            lines = try_seg1[i][1].split('\n')
+            while j < len(lines):
+                snippet = ''
+                if lines[j].startswith('    while') or lines[j].startswith('    for') or lines[j].startswith('    if'):
+                    start = j + try_seg1[i][0]
+                    snippet += lines[j][4:] + '\n'
+                    j += 1
+                    while j < len(lines) and (lines[j].startswith('        ') or lines[j].strip() == ''):
+                        snippet += lines[j][4:] + '\n'
+                        j += 1
+                    r3_seg1.append((start, snippet))
+                else:
+                    start = j + try_seg1[i][0]
+                    if lines[j].strip() != '':
+                        r4_seg1.append((start, lines[j]))
+                    j += 1
+        for i in range(len(r2_seg2_unmatched)):
+            j = 0
+            lines = r2_seg2_unmatched[i][1].split('\n')
+            while j < len(lines):
+                snippet = ''
+                if lines[j].startswith('    while') or lines[j].startswith('    for') or lines[j].startswith('    if'):
+                    start = j + r2_seg2_unmatched[i][0]
+                    snippet += lines[j][4:] + '\n'
+                    j += 1
+                    while j < len(lines) and (lines[j].startswith('        ') or lines[j].strip() == ''):
+                        snippet += lines[j][8:] + '\n'
+                        j += 1
+                    r3_seg2.append((start, snippet))
+                else:
+                    j += 1
+        for i in range(len(try_seg2)):
+            j = 0
+            lines = try_seg2[i][1].split('\n')
+            while j < len(lines):
+                snippet = ''
+                if lines[j].startswith('    while') or lines[j].startswith('    for') or lines[j].startswith('    if'):
+                    start = j + try_seg2[i][0]
+                    snippet += lines[j][4:] + '\n'
+                    j += 1
+                    while j < len(lines) and (lines[j].startswith('        ') or lines[j].strip() == ''):
+                        snippet += lines[j][4:] + '\n'
+                        j += 1
+                    r3_seg2.append((start, snippet))
+                else:
+                    start = j + try_seg2[i][0]
+                    if lines[j].strip() != '':
+                        r4_seg2.append((start, lines[j]))
+                    j += 1
+        r3_match, _, _ = test_two_lists(r3_seg1, r3_seg2)
+        
+        r4_seg1 = [r4_seg1[i] for i in range(len(r4_seg1)) if r4_seg1[i][1].strip() != '' and len(r4_seg1[i][1]) > 15]
+        r4_seg2 = [r4_seg2[i] for i in range(len(r4_seg2)) if r4_seg2[i][1].strip() != '' and len(r4_seg2[i][1]) > 15]
+        r4_match, _, _ = test_two_lists(r4_seg1, r4_seg2)
 
-    match = r1_match + r2_match + r3_match + r4_match
-    match.sort(key=lambda x: x[1][0])
+        match = r1_match + r2_match + r3_match + r4_match
+        match.sort(key=lambda x: x[1][0])
 
-    match_lines = []
-    for m in match:
-        s1_line_start = m[1][0] + 1
-        s2_line_start = m[2][0] + 1
-        s1_line_count = m[1][1].rstrip().count('\n') + 1
-        s2_line_count = m[2][1].rstrip().count('\n') + 1
-        match_lines.append((s1_line_start, s1_line_start + s1_line_count, s2_line_start, s2_line_start + s2_line_count))
+        match_lines = []
+        for m in match:
+            s1_line_start = m[1][0] + 1
+            s2_line_start = m[2][0] + 1
+            s1_line_count = m[1][1].rstrip().count('\n') + 1
+            s2_line_count = m[2][1].rstrip().count('\n') + 1
+            match_lines.append((s1_line_start, s1_line_start + s1_line_count, s2_line_start, s2_line_start + s2_line_count))
 
-    return distance, match_lines
+        return distance, match_lines
+    except Exception as e:
+        return distance, []
