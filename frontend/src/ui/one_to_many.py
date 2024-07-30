@@ -295,8 +295,9 @@ class OneToManyPage(QWidget):
                 size_str = f"{size / 1024:.2f} KB"
             else:
                 size_str = f"{size / 1024 / 1024:.2f} MB"
-
-            self.file_table.setItem(row, 1, QTableWidgetItem(size_str))
+            size_item = QTableWidgetItem(size_str)
+            size_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            self.file_table.setItem(row, 1, size_item)
             self.file_table.setItem(row, 2, QTableWidgetItem(file_info[3]))
             self.file_table.setItem(row, 3, QTableWidgetItem(file_info[2]))
             self.file_table.setItem(row, 6, QTableWidgetItem(str(file_id)))
