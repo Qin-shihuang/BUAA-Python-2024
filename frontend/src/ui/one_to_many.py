@@ -123,6 +123,9 @@ class OneToManyPage(QWidget):
         self.target_file_input.setReadOnly(True)
         self.target_file_input.setFont(QFont('Arial', 10, QFont.Bold))
 
+        self.target_file_export_button = QPushButton('Export')
+        self.target_file_export_button.clicked.connect(self.export_target_file)
+
         self.compare_file_label = QLabel('Compared File')
         self.compare_file_label.setFont(QFont('Arial', 13, QFont.Bold))
         self.compare_file_input = QLineEdit()
@@ -133,6 +136,7 @@ class OneToManyPage(QWidget):
         target_file_layout = QHBoxLayout()
         target_file_layout.addWidget(self.target_file_label)
         target_file_layout.addWidget(self.target_file_input)
+        target_file_layout.addWidget(self.target_file_export_button)
         target_file_layout.addWidget(self.compare_file_label)
         target_file_layout.addWidget(self.compare_file_input)
 
@@ -273,6 +277,7 @@ class OneToManyPage(QWidget):
             self.file_table.setCellWidget(row, 5, widget)
     
     def init_task(self, task_name, task):
+        self.main_file_id = task.mainFileId
         self.task_name_input.setText(task_name)
         self.target_file_input.setText(self.info_container.get_file_name(task.mainFileId))
         for report_id in task.reportIds:
@@ -325,6 +330,26 @@ class OneToManyPage(QWidget):
         # self.file_table.sortItems(4, Qt.DescendingOrder)
         self.file_table.sortItems(4, Qt.AscendingOrder)
         # need to reload op...
+
+    def export_target_file(self):
+        file_id = self.main_file_id
+        file_name = self.target_file_input.text()
+        filepath, _ = QFileDialog.getSaveFileName(self, "Export Files", f"./{file_name}", "Python (*.py)")
+
+        if not filepath:
+            return
+        if not os.path.exists(f'cache/files/file_{file_id}.py'):
+            _, file_content = self.api_client.download_file(file_id)
+            if _ == ErrorCode.SUCCESS:
+                with open(filepath, 'wb') as f:
+                    f.write(file_content)
+            else:
+                QMessageBox.critical(self, 'Error', f'Failed to get file: {ErrorCode.get_error_message(_)}')
+        else:
+            with open(f'cache/files/file_{file_id}.py', 'r', encoding='utf-8') as f:
+                file_content = f.read()
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(file_content)
 
     def export_file(self):
         x = self.sender().parentWidget().frameGeometry().x()
