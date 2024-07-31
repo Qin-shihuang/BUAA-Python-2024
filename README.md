@@ -1,2 +1,4 @@
 # Plagiarism Detection
-2024-python-project
+Yet another project for 2024 Summer BUAA Python Course.
+
+Striving not to write spaghetti code.
