@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButto
     QFileDialog, QRadioButton, QTableWidget, QAbstractItemView, \
     QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QMenu, QMessageBox
 from models.task_model import TaskModel
+from ui.login_history import LoginHistoryWidget
 from ui.many_to_many import ManyToManyPage
 from ui.one_to_many import OneToManyPage
 from ui.widgets.code_editor_widget import CodeEditor
@@ -156,6 +157,11 @@ class WelcomePage(QWidget):
         self.file_table.cellClicked.connect(self.clear_target_file)
 
         start_layout = QHBoxLayout()
+        login_history_button = QPushButton('Login History')
+        self.login_history_widget = LoginHistoryWidget()
+        login_history_button.clicked.connect(self.login_history_widget.show)
+        start_layout.addWidget(login_history_button)
+        
         self.error_label = QLabel()
         self.error_label.setObjectName("error_label")
         self.error_label.setStyleSheet("color: red")
