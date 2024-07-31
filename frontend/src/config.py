@@ -1,1 +1,1 @@
-grpc_server_address = "localhost:11451"
+grpc_server_address = "117.50.163.143:11451"

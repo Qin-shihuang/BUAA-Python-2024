@@ -303,7 +303,7 @@ class OneToManyPage(QWidget):
             self.file_table.setItem(row, 6, QTableWidgetItem(str(file_id)))
             self.file_table.setItem(row, 7, QTableWidgetItem(str(report_id)))
 
-            sim_item = QTableWidgetItem(f'{report.distance}')
+            sim_item = QTableWidgetItem(f'{report.distance:.2f}')
             sim_item.setTextAlignment(Qt.AlignCenter)
             self.file_table.setItem(row, 4, sim_item)
 

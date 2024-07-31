@@ -20,7 +20,6 @@ class LoginWindow(QWidget):
         self.login_controller = LoginController()
         self.login_callback = loginCallback
         
-        self.setAttribute(Qt.WA_QuitOnClose, False)
         self.setWindowTitle("Login/Register")
         self.setFixedSize(400,500)
         self.center()
