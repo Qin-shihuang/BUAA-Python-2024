@@ -1,13 +1,12 @@
 import os
 import sys
 import time
-from PyQt5.QtCore import Qt, QDateTime, QFileInfo, pyqtSignal, QRect, QSize, QPoint, QTimer
-from PyQt5.QtGui import QFont, QIcon, QPixmap, QCursor, QColor
+from PyQt5.QtCore import Qt, QSize, QPoint, QTimer
+from PyQt5.QtGui import QFont, QIcon
 import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
-    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox, QSpinBox, \
-    QDoubleSpinBox, QProgressBar, QFrame, QScrollArea, QScrollBar, QSizePolicy, QAbstractScrollArea, QSlider
+    QFileDialog, QTableWidget, QAbstractItemView, \
+    QTableWidgetItem, QHeaderView, QMessageBox, QSlider
 
 from models.report_model import ReportModel
 from ui.comparison_page import ComparisonPage

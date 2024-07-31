@@ -7,7 +7,6 @@ Description: Entry point of the application
 
 import sys
 
-import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
 

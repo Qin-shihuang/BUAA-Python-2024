@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt5.QtWidgets import QLabel
-from PyQt5.QtCore import Qt
 
 from utils.api_client import ApiClient
 from utils.error_codes import ErrorCode

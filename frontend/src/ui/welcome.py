@@ -2,16 +2,16 @@ from datetime import datetime
 import os
 import sys
 from PyQt5.QtCore import Qt, QDateTime, QFileInfo, pyqtSignal, QRect, QSize, QPoint
-from PyQt5.QtGui import QFont, QIcon, QPixmap, QCursor
+from PyQt5.QtGui import QFont, QIcon, QCursor
 import PyQt5.QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
-    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
+    QFileDialog, QRadioButton, QTableWidget, QAbstractItemView, \
+    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QMenu, QMessageBox
 from models.task_model import TaskModel
 from ui.many_to_many import ManyToManyPage
 from ui.one_to_many import OneToManyPage
 from ui.widgets.code_editor_widget import CodeEditor
-from ui.widgets.progress_widget import ProgressSignal, ProgressWidget, start_progress_widget
+from ui.widgets.progress_widget import start_progress_widget
 from utils.error_codes import ErrorCode
 from utils.api_client import ApiClient
 from utils.info_container import InfoContainer

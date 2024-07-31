@@ -1,11 +1,10 @@
 import os
 import sys
-from PyQt5.QtCore import Qt, QDateTime, QFileInfo, pyqtSignal, QRect, QSize, QPoint
-from PyQt5.QtGui import QFont, QIcon, QPixmap, QCursor
+from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtGui import QFont
 import PyQt5.QtWidgets
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QFileDialog, QCheckBox, QStackedWidget, QRadioButton, QListWidget, QTableWidget, QAbstractItemView, \
-    QTableWidgetItem, QHeaderView, QStyleOptionButton, QStyle, QComboBox, QMenu, QAction, QMessageBox
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QTableWidget, QAbstractItemView, \
+    QTableWidgetItem, QHeaderView, QMessageBox
 from models.task_model import TaskModel
 from ui.many_to_many import ManyToManyPage
 from ui.one_to_many import OneToManyPage

@@ -1,9 +1,8 @@
 import sys
 import PyQt5.QtWidgets
-from PyQt5.QtGui import QFont, QIcon, QPixmap, QCursor
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, \
-    QHBoxLayout, QFileDialog, \
-    QCheckBox, QStackedWidget
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QVBoxLayout, \
+    QHBoxLayout, QStackedWidget
 from PyQt5.QtCore import Qt, QDateTime
 from ui.welcome import WelcomePage
 from ui.history import HistoryPage
